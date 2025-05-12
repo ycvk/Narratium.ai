@@ -1010,7 +1010,7 @@ export function getStatusPromptZh(info: string) {
 3. 模版段落可能未标明标签，但常以“状态栏”、“状态展示”、“示例状态”、“信息面板”等词汇引导，并且在语言结构上显著不同于普通叙述段落。
 4. 你需要提取该类模版段落的原文全部内容，一字不增、一字不删。
 5. 若文本中存在多个类似段落，仅提取最完整、信息最丰富、结构最明显的一段。
-6. 禁止你对其进行任何补写、续写、生成式加工或风格重写，你的任务是“提取”而非“创作”。
+6. **如果在提供的内容中确实无法找到符合上述要求的模版段落，你可以基于现有信息，综合整理并总结一个符合拟人化系统设定的状态模版段落。该总结必须保持客观、结构清晰，严禁出现续写、虚构、剧情引导或主观描写，仅限于信息整理。**
 7. 输出内容必须完整闭合（如模版边框、分隔线对称），否则视为无效提取。
 
 ⚠️ **你不能补充任何新字段，不能添加多余标点，也不能用“……”等形式表示省略或续写。**
@@ -1029,7 +1029,7 @@ Please strictly follow these requirements:
 3. The template paragraph might not be explicitly labeled but is often introduced with phrases like "Status Bar," "Status Display," "Sample Status," "Information Panel," and its language structure is significantly different from ordinary narrative paragraphs.
 4. You must extract the entire original content of the template paragraph exactly as it appears, without adding or removing any characters.
 5. If there are multiple similar paragraphs in the text, only extract the most complete, information-rich, and structurally obvious one.
-6. You are strictly prohibited from adding, continuing, generating, or rewriting the content. Your task is "extraction," not "creation."
+6. **If in the provided content you cannot find a paragraph that meets the above requirements, you can summarize and organize the existing information to create a template paragraph that aligns with the anthropomorphic system setting. This summary must be objective and structured,严禁出现续写、虚构、剧情引导或主观描写，仅限于信息整理。**
 7. The output must be fully closed and symmetrical (e.g., template borders, separators). Any incomplete extraction will be considered invalid.
 
 ⚠️ **You must not add any new fields, extra punctuation, or use ellipses ("...") to indicate omissions or continuations.**
