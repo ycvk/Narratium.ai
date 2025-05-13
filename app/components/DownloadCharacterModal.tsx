@@ -65,19 +65,14 @@ export default function DownloadCharacterModal({ isOpen, onClose, onImport }: Do
   };
 
   const extractCharacterInfo = (fileName: string): CharacterInfo => {
-    // Remove .png extension
     const nameWithoutExt = fileName.replace(/\.png$/, "");
-    
-    // Try to extract author from parentheses
     const authorMatch = nameWithoutExt.match(/\(([^)]+)\)$/);
     
     if (authorMatch) {
-      // Author found in parentheses
       const author = authorMatch[1].length > 5 ? authorMatch[1].substring(0, 5) : authorMatch[1];
       const displayName = nameWithoutExt.replace(/\([^)]+\)$/, "").trim();
       return { displayName, author };
     } else {
-      // No author found
       return { 
         displayName: nameWithoutExt, 
         author: t("downloadModal.unknownAuthor") 
