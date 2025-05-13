@@ -315,7 +315,9 @@ export default function ModelSidebar({ isOpen, toggleSidebar }: ModelSidebarProp
               </div>
               <div className="mb-2">
                 <span className="text-[#8a8a8a] text-xs">{t("modelSettings.baseUrl") || "Base URL"}:</span>
-                <span className="ml-2 text-[#f4e8c1] text-sm break-all">{baseUrl}</span>
+                <span className="ml-2 text-[#f4e8c1] text-xs break-all">
+                  {baseUrl.includes("://") ? "http://api-server/v1" : baseUrl}
+                </span>
               </div>
               {llmType === "openai" && (
                 <div className="mb-2">

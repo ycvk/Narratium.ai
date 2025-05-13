@@ -75,7 +75,7 @@ export default function DownloadCharacterModal({ isOpen, onClose, onImport }: Do
     } else {
       return { 
         displayName: nameWithoutExt, 
-        author: t("downloadModal.unknownAuthor") 
+        author: t("downloadModal.unknownAuthor"), 
       };
     }
   };  
