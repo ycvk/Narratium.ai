@@ -113,4 +113,9 @@ Narratium 让讲故事变得简单又强大：
 
 感谢 SillyTavern 社区和无数角色卡贡献值，在演示版本中，Narratium 使用了 SillyTavern 的角色卡数据，请联系我加入贡献者行列：\[[qianzhang.happyfox@gmail.com](mailto:qianzhang.happyfox@gmail.com)]
 
+## ⭐ Star Growth
+
+[![Star History Chart](https://starchart.cc/Narratium/Narratium.ai.svg)](https://starchart.cc/Narratium/Narratium.ai)
+
+
 

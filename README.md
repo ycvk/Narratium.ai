@@ -111,3 +111,7 @@ This project is licensed under **Creative Commons Attribution-NonCommercial 4.0 
 * QQ & Discord community (coming soon)
 
 Special thanks to the SillyTavern community and countless character card contributors.If you'd like to join the contributor list, please contact: [qianzhang.happyfox@gmail.com](mailto:qianzhang.happyfox@gmail.com)
+
+## ⭐ Star Growth
+
+[![Star History Chart](https://starchart.cc/Narratium/Narratium.ai.svg)](https://starchart.cc/Narratium/Narratium.ai)

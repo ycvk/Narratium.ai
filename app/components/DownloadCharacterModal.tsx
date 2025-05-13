@@ -66,11 +66,11 @@ export default function DownloadCharacterModal({ isOpen, onClose, onImport }: Do
 
   const extractCharacterInfo = (fileName: string): CharacterInfo => {
     const nameWithoutExt = fileName.replace(/\.png$/, "");
-    const authorMatch = nameWithoutExt.match(/\(([^)]+)\)$/);
+    const parts = nameWithoutExt.split(/--/);
     
-    if (authorMatch) {
-      const author = authorMatch[1].length > 5 ? authorMatch[1].substring(0, 5) : authorMatch[1];
-      const displayName = nameWithoutExt.replace(/\([^)]+\)$/, "").trim();
+    if (parts.length === 2) {
+      const displayName = parts[0].trim();
+      const author = parts[1].trim().length > 5 ? parts[1].trim().substring(0, 5) : parts[1].trim();
       return { displayName, author };
     } else {
       return { 
@@ -78,7 +78,7 @@ export default function DownloadCharacterModal({ isOpen, onClose, onImport }: Do
         author: t("downloadModal.unknownAuthor") 
       };
     }
-  };
+  };  
 
   if (!isOpen) return null;
 
