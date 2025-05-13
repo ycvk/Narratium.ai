@@ -31,7 +31,7 @@
     "language": "输出语言",
     "chinese": "中文",
     "english": "英文",
-    "saveSettings": "保存设置",
+    "saveSettings": "点击启用",
     "settingsSaved": "设置已保存",
     "commonModels": "常用模型推荐:",
     "configurations": "API 配置",
@@ -209,7 +209,7 @@
     "edit": "编辑",
     "chat": "聊天",
     "recentlyCreated": "最近创建",
-    "downloadCharacter": "社区下载分区"
+    "downloadCharacter": "社区下载角色"
   },
   "editCharacterModal": {
     "title": "编辑角色",
@@ -225,10 +225,10 @@
   },
   "importCharacterModal": {
     "title": "导入角色",
-    "description": "选择或拖放 PNG 格式的角色卡文件进行导入",
+    "description": "选择或拖放 SillyTavern 格式的 PNG 角色卡文件进行导入",
     "dragOrClick": "拖放文件到此处或点击选择",
-    "pngFormat": "仅支持 PNG 格式的角色卡文件",
-    "pngOnly": "请选择 PNG 格式的文件",
+    "pngFormat": "仅支持 SillyTavern 格式的 PNG 角色卡文件",
+    "pngOnly": "请选择 SillyTavern 格式的 PNG 文件",
     "noFileSelected": "请先选择文件",
     "uploadFailed": "上传失败，请重试",
     "import": "导入",
@@ -333,6 +333,8 @@
       "downloadFailed": "下载失败",
       "importFailed": "导入失败",
       "importing": "导入中…",
-      "downloadAndImport": "下载并导入"
+      "downloadAndImport": "下载并导入",
+      "by": "作者：",
+      "unknownAuthor": "佚名"
   }
 }

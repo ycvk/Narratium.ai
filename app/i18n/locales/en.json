@@ -31,7 +31,7 @@
     "language": "Output Language",
     "chinese": "Chinese",
     "english": "English",
-    "saveSettings": "Save Settings",
+    "saveSettings": "Click to enable",
     "settingsSaved": "Settings Saved",
     "commonModels": "Common Models:",
     "configurations": "API Configurations",
@@ -206,7 +206,7 @@
     "edit": "Edit",
     "chat": "Chat",
     "recentlyCreated": "Recently Created",
-    "downloadCharacter": "Community Download Partition"
+    "downloadCharacter": "Community Download Character"
   },
   "editCharacterModal": {
     "title": "Edit Character",
@@ -222,10 +222,10 @@
   },
   "importCharacterModal": {
     "title": "Import Character",
-    "description": "Select or drag and drop a PNG character card file to import",
+    "description": "Select or drag and drop a SillyTavern PNG character card file to import",
     "dragOrClick": "Drag file here or click to select",
-    "pngFormat": "Only PNG character card files are supported",
-    "pngOnly": "Please select a PNG file",
+    "pngFormat": "Only SillyTavern PNG character card files are supported",
+    "pngOnly": "Please select a SillyTavern PNG file",
     "noFileSelected": "Please select a file first",
     "uploadFailed": "Upload failed, please try again",
     "import": "Import",
@@ -327,6 +327,8 @@
       "downloadFailed": "Download failed",
       "importFailed": "Import failed",
       "importing": "Importing...",
-      "downloadAndImport": "Download and Import"
+      "downloadAndImport": "Download and Import",
+      "by": "By",
+      "unknownAuthor": "Unknown Author"
   }
 }

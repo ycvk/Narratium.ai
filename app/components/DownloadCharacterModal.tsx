@@ -17,6 +17,11 @@ interface GithubFile {
   download_url: string;
 }
 
+interface CharacterInfo {
+  displayName: string;
+  author: string;
+}
+
 export default function DownloadCharacterModal({ isOpen, onClose, onImport }: DownloadCharacterModalProps) {
   const { t, fontClass, serifFontClass } = useLanguage();
   const [characterFiles, setCharacterFiles] = useState<GithubFile[]>([]);
@@ -59,6 +64,27 @@ export default function DownloadCharacterModal({ isOpen, onClose, onImport }: Do
     }
   };
 
+  const extractCharacterInfo = (fileName: string): CharacterInfo => {
+    // Remove .png extension
+    const nameWithoutExt = fileName.replace(/\.png$/, "");
+    
+    // Try to extract author from parentheses
+    const authorMatch = nameWithoutExt.match(/\(([^)]+)\)$/);
+    
+    if (authorMatch) {
+      // Author found in parentheses
+      const author = authorMatch[1].length > 5 ? authorMatch[1].substring(0, 5) : authorMatch[1];
+      const displayName = nameWithoutExt.replace(/\([^)]+\)$/, "").trim();
+      return { displayName, author };
+    } else {
+      // No author found
+      return { 
+        displayName: nameWithoutExt, 
+        author: t("downloadModal.unknownAuthor") 
+      };
+    }
+  };
+
   if (!isOpen) return null;
 
   return (
@@ -81,20 +107,24 @@ export default function DownloadCharacterModal({ isOpen, onClose, onImport }: Do
           <div className={`text-red-400 py-8 text-center ${fontClass}`}>{error}</div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-h-96 overflow-y-auto">
-            {characterFiles.map((file) => (
-              <div key={file.name} className="bg-[#252220] rounded-lg p-3 flex flex-col items-center">
-                <img src={RAW_BASE_URL + file.name} alt={file.name} className="w-32 h-32 object-cover rounded mb-2 border border-[#534741]" />
-                <div className={`text-[#eae6db] text-sm mb-2 line-clamp-1 ${fontClass}`}>{file.name.replace(/\.png$/, "")}</div>
-                <button
-                  disabled={!!importing}
-                  className={`px-2 py-0.5 text-xs rounded bg-[#e0cfa0] text-[#534741] hover:bg-[#ffd475] border border-[#c0a480] ${fontClass} shadow-sm transition-all duration-150 ${importing === file.name ? "opacity-60 cursor-wait" : ""}`}
-                  style={{ minWidth: 0, minHeight: 0, lineHeight: "1.1", fontWeight: 500, letterSpacing: "0.01em" }}
-                  onClick={() => handleDownloadAndImport(file)}
-                >
-                  {importing === file.name ? t("downloadModal.importing") : t("downloadModal.downloadAndImport")}
-                </button>
-              </div>
-            ))}
+            {characterFiles.map((file) => {
+              const { displayName, author } = extractCharacterInfo(file.name);
+              return (
+                <div key={file.name} className="bg-[#252220] rounded-lg p-3 flex flex-col items-center">
+                  <img src={RAW_BASE_URL + file.name} alt={file.name} className="w-32 h-32 object-cover rounded mb-2 border border-[#534741]" />
+                  <div className={`text-[#eae6db] text-sm mb-1 line-clamp-1 ${fontClass}`}>{displayName}</div>
+                  <div className={`text-[#c0a480] text-xs mb-2 ${fontClass}`}>{t("downloadModal.by")} {author}</div>
+                  <button
+                    disabled={!!importing}
+                    className={`px-2 py-0.5 text-xs rounded bg-[#e0cfa0] text-[#534741] hover:bg-[#ffd475] border border-[#c0a480] ${fontClass} shadow-sm transition-all duration-150 ${importing === file.name ? "opacity-60 cursor-wait" : ""}`}
+                    style={{ minWidth: 0, minHeight: 0, lineHeight: "1.1", fontWeight: 500, letterSpacing: "0.01em" }}
+                    onClick={() => handleDownloadAndImport(file)}
+                  >
+                    {importing === file.name ? t("downloadModal.importing") : t("downloadModal.downloadAndImport")}
+                  </button>
+                </div>
+              );
+            })}
           </div>
         )}
       </motion.div>
