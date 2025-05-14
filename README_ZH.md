@@ -115,7 +115,7 @@ Narratium 让讲故事变得简单又强大：
 
 ## ⭐ Star Growth
 
-[![Star History Chart](https://starchart.cc/Narratium/Narratium.ai.svg)](https://starchart.cc/Narratium/Narratium.ai)
+[![Stargazers over time](https://starchart.cc/Narratium/Narratium.ai.svg?variant=dark)](https://starchart.cc/Narratium/Narratium.ai)
 
 
 

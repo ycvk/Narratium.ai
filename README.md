@@ -114,4 +114,4 @@ Special thanks to the SillyTavern community and countless character card contrib
 
 ## ⭐ Star Growth
 
-[![Star History Chart](https://starchart.cc/Narratium/Narratium.ai.svg)](https://starchart.cc/Narratium/Narratium.ai)
+[![Stargazers over time](https://starchart.cc/Narratium/Narratium.ai.svg?variant=dark)](https://starchart.cc/Narratium/Narratium.ai)
