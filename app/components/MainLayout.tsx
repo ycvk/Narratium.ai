@@ -12,9 +12,20 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
   const [modelSidebarOpen, setModelSidebarOpen] = useState(false);
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
     setMounted(true);
+    
+    const checkIfMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+
+    checkIfMobile();
+    
+    window.addEventListener("resize", checkIfMobile);
+    
+    return () => window.removeEventListener("resize", checkIfMobile);
   }, []);
 
   const toggleSidebar = () => {
@@ -43,8 +54,12 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
         />
       </div>
       <main
-        className={`flex-1 overflow-auto transition-all duration-300 ${sidebarOpen ? "ml-72" : "ml-16"
-        } ${modelSidebarOpen ? "mr-64" : "mr-0"
+        className={`flex-1 overflow-auto transition-all duration-300 ${
+          isMobile 
+            ? "ml-0" 
+            : (sidebarOpen ? "ml-72" : "ml-0")
+        } ${
+          modelSidebarOpen ? "mr-64" : "mr-0"
         }`}
       >
         <div className="h-full relative">
