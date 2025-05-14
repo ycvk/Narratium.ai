@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import "../styles/fantasy-ui.css";
+import "@/app/styles/fantasy-ui.css";
 import { useLanguage } from "../i18n";
 import { trackButtonClick } from "../lib/utils/analytics";
 
@@ -20,6 +20,15 @@ interface APIConfig {
   model: string;
   apiKey?: string;
 }
+
+const DEFAULT_DEEPSEEK_CONFIG: APIConfig = {
+  id: "deepseek_default",
+  name: "【1】deepseek-v3",
+  type: "openai",
+  baseUrl: "https://narratiumshop.com/v1/",
+  model: "deepseek-v3",
+  apiKey: "sk-zuEnBKaKlNEkk9a038F9892e1a0f474c83E6Ab309fBe57B6",
+};
 
 export default function ModelSidebar({ isOpen, toggleSidebar }: ModelSidebarProps) {
   const { t, fontClass, serifFontClass } = useLanguage();
@@ -51,10 +60,10 @@ export default function ModelSidebar({ isOpen, toggleSidebar }: ModelSidebarProp
 
   useEffect(() => {
     if (typeof window === "undefined") return;
-
+  
     const savedConfigsStr = localStorage.getItem("apiConfigs");
     let mergedConfigs: APIConfig[] = [];
-
+  
     if (savedConfigsStr) {
       try {
         mergedConfigs = JSON.parse(savedConfigsStr) as APIConfig[];
@@ -62,16 +71,46 @@ export default function ModelSidebar({ isOpen, toggleSidebar }: ModelSidebarProp
         console.error("Error parsing saved API configs", e);
       }
     }
-
+  
+    let hasDeepSeek = mergedConfigs.some((c) => c.id === DEFAULT_DEEPSEEK_CONFIG.id);
+    let firstInit = false;
+    
+    if (!hasDeepSeek) {
+      mergedConfigs = [...mergedConfigs, DEFAULT_DEEPSEEK_CONFIG];
+      firstInit = true;
+    }
+    
+    if (firstInit) {
+      localStorage.setItem("apiConfigs", JSON.stringify(mergedConfigs));
+    }
+  
     const storedActiveId = localStorage.getItem("activeConfigId");
     const activeIdCandidate = storedActiveId && mergedConfigs.some((c) => c.id === storedActiveId)
       ? storedActiveId
-      : (mergedConfigs[0]?.id || "");
-
+      : DEFAULT_DEEPSEEK_CONFIG.id;
+  
     setConfigs(mergedConfigs);
     setActiveConfigId(activeIdCandidate);
 
-    if (mergedConfigs.length > 0) {
+    if (firstInit || !storedActiveId) {
+      localStorage.setItem("activeConfigId", DEFAULT_DEEPSEEK_CONFIG.id);
+      localStorage.setItem("llmType", DEFAULT_DEEPSEEK_CONFIG.type);
+      localStorage.setItem(
+        DEFAULT_DEEPSEEK_CONFIG.type === "openai" ? "openaiBaseUrl" : "ollamaBaseUrl",
+        DEFAULT_DEEPSEEK_CONFIG.baseUrl,
+      );
+      localStorage.setItem(
+        DEFAULT_DEEPSEEK_CONFIG.type === "openai" ? "openaiModel" : "ollamaModel",
+        DEFAULT_DEEPSEEK_CONFIG.model,
+      );
+      if (DEFAULT_DEEPSEEK_CONFIG.type === "openai") {
+        localStorage.setItem("openaiApiKey", DEFAULT_DEEPSEEK_CONFIG.apiKey || "");
+        localStorage.setItem("apiKey", DEFAULT_DEEPSEEK_CONFIG.apiKey || "");
+      }
+      localStorage.setItem("modelBaseUrl", DEFAULT_DEEPSEEK_CONFIG.baseUrl);
+      localStorage.setItem("modelName", DEFAULT_DEEPSEEK_CONFIG.model);
+      loadConfigToForm(DEFAULT_DEEPSEEK_CONFIG);
+    } else {
       loadConfigToForm(mergedConfigs.find((c) => c.id === activeIdCandidate)!);
     }
   }, []);
@@ -215,25 +254,28 @@ export default function ModelSidebar({ isOpen, toggleSidebar }: ModelSidebarProp
   };
 
   const handleDeleteConfig = (id: string) => {
-    if (configs.length <= 1) {
-      alert(t("modelSettings.cannotDeleteLastConfig") || "Cannot delete the last configuration");
-      return;
-    }
-
     const confirmDelete = window.confirm(t("modelSettings.confirmDelete") || "Are you sure you want to delete this configuration?");
     if (!confirmDelete) return;
 
     const updatedConfigs = configs.filter(config => config.id !== id);
     setConfigs(updatedConfigs);
 
-    if (id === activeConfigId && updatedConfigs.length > 0) {
-      setActiveConfigId(updatedConfigs[0].id);
-      loadConfigToForm(updatedConfigs[0]);
+    if (id === activeConfigId) {
+      if (updatedConfigs.length > 0) {
+        setActiveConfigId(updatedConfigs[0].id);
+        loadConfigToForm(updatedConfigs[0]);
+      } else {
+        setActiveConfigId("");
+        setLlmType("openai");
+        setBaseUrl("");
+        setModel("");
+        setApiKey("");
+      }
     }
 
     localStorage.setItem("apiConfigs", JSON.stringify(updatedConfigs));
     if (id === activeConfigId) {
-      localStorage.setItem("activeConfigId", updatedConfigs[0]?.id || "");
+      localStorage.setItem("activeConfigId", updatedConfigs.length > 0 ? updatedConfigs[0].id : "");
     }
   };
 
@@ -293,14 +335,12 @@ export default function ModelSidebar({ isOpen, toggleSidebar }: ModelSidebarProp
                       <span className="text-sm">{config.name}</span>
                       <span className="ml-2 text-xs text-[#8a8a8a]">{config.type}</span>
                     </div>
-                    {configs.length > 1 && (
-                      <button 
-                        onClick={(e) => { trackButtonClick("ModelSidebar", "删除配置"); e.stopPropagation(); handleDeleteConfig(config.id); }}
-                        className="text-red-400 hover:text-red-300 text-sm p-1"
-                      >
-                        ×
-                      </button>
-                    )}
+                    <button 
+                      onClick={(e) => { trackButtonClick("ModelSidebar", "删除配置"); e.stopPropagation(); handleDeleteConfig(config.id); }}
+                      className="text-red-400 hover:text-red-300 text-sm p-1"
+                    >
+                      ×
+                    </button>
                   </div>
                 ))}
               </div>
@@ -429,7 +469,7 @@ export default function ModelSidebar({ isOpen, toggleSidebar }: ModelSidebarProp
             <div className="relative">
               <button
                 onClick={(e) => {trackButtonClick("ModelSidebar", "保存配置"); e.stopPropagation(); handleSave();}}
-                className={`bg-[#3e3a3a] hover:bg-[#534741] text-[#f4e8c1] font-medium py-2 px-4 rounded border border-[#d1a35c] w-full transition-colors magical-text ${fontClass}`}
+                className={`bg-[#3e3a3a] hover:bg-[#534741] text-[#f4e8c1] font-normal py-1.5 px-3 text-sm rounded-md border border-[#d1a35c] w-full transition-colors magical-text ${fontClass}`}
               >
                 {t("modelSettings.saveSettings") || "Save Settings"}
               </button>
@@ -450,11 +490,13 @@ export default function ModelSidebar({ isOpen, toggleSidebar }: ModelSidebarProp
           )}
 
           {configs.length === 0 && !showNewConfigForm && (
-            <div className="text-center py-8">
-              <p className="text-[#8a8a8a] mb-4">{t("modelSettings.noConfigs") || "No API configurations yet"}</p>
+            <div className="text-center py-4">
+              <p className="text-[#8a8a8a] mb-3 text-sm">
+                {t("modelSettings.noConfigs") || "No API configurations yet"}
+              </p>
               <button
-                onClick={(e) => {trackButtonClick("ModelSidebar", "创建第一个配置"); e.stopPropagation(); handleCreateConfig();}}
-                className={`bg-[#3e3a3a] hover:bg-[#534741] text-[#f4e8c1] font-medium py-2 px-4 rounded border border-[#d1a35c] transition-colors ${fontClass}`}
+                onClick={(e) => { trackButtonClick("ModelSidebar", "创建第一个配置"); e.stopPropagation(); handleCreateConfig(); }}
+                className={`bg-[#3e3a3a] hover:bg-[#534741] text-[#f4e8c1] font-normal py-1.5 px-3 text-sm rounded border border-[#d1a35c] transition-colors ${fontClass}`}
               >
                 {t("modelSettings.createFirstConfig") || "Create Your First Configuration"}
               </button>
