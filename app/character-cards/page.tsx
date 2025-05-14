@@ -166,7 +166,7 @@ export default function CharacterCards() {
                   <div className="relative session-card h-full transition-all duration-300 hover:translate-y-[-4px]">
                     <div className="absolute top-2 right-2 flex space-x-1 z-10">
                       <Link
-                        href={`/character/${character.id}`}
+                        href={`/character?id=${character.id}`}
                         onClick={(e) => e.stopPropagation()}
                         className="p-1.5 bg-[#252220] hover:bg-[#3a2a2a] rounded-full text-[#c0a480] hover:text-[#ffd475] transition-colors"
                         title={t("characterCardsPage.chat")}

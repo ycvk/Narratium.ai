@@ -569,7 +569,7 @@ export default function CharacterPage() {
       />
 
       <div
-        className={`${sidebarCollapsed ? "w-full" : "w-3/4"} fantasy-bg h-full transition-all duration-300 ease-in-out flex flex-col`}
+        className={`${sidebarCollapsed ? "w-full" : "w-3/4 md:w-3/4"} fantasy-bg h-full transition-all duration-300 ease-in-out flex flex-col`}
       >
         <div className="bg-[#1a1816] border-b border-[#534741] p-4 flex items-center justify-between">
           <div className="flex items-center">
