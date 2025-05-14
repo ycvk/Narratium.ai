@@ -112,6 +112,10 @@ This project is licensed under **Creative Commons Attribution-NonCommercial 4.0 
 
 Special thanks to the SillyTavern community and countless character card contributors.If you'd like to join the contributor list, please contact: [qianzhang.happyfox@gmail.com](mailto:qianzhang.happyfox@gmail.com)
 
+## 🙌 Contributer
+
+[![Contributors](https://contrib.rocks/image?repo=Narratium/Character-Card)](https://github.com/Narratium/Narratium.ai/graphs/contributors)
+
 ## ⭐ Star Growth
 
 [![Stargazers over time](https://starchart.cc/Narratium/Narratium.ai.svg?variant=dark)](https://starchart.cc/Narratium/Narratium.ai)
