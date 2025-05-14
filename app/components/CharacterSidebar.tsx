@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useLanguage } from "@/app/i18n";
 import Link from "next/link";
 import PromptEditor from "@/app/components/PromptEditor";
@@ -47,6 +47,7 @@ const CharacterSidebar: React.FC<CharacterSidebarProps> = ({
   const [currentResponseLength, setCurrentResponseLength] = useState<number>(responseLength);
   const [showPromptEditor, setShowPromptEditor] = useState(false);
   const [showDialogueTreeModal, setShowDialogueTreeModal] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   const [customPrompts, setCustomPrompts] = useState({
     prefixPrompt: "",
     chainOfThoughtPrompt: "",
@@ -138,11 +139,25 @@ const CharacterSidebar: React.FC<CharacterSidebarProps> = ({
     }
   };
 
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+  
+    handleResize();
+    window.addEventListener("resize", handleResize);
+  
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);  
+
   return (
     <>
       <button
-        onClick={(e) => {trackButtonClick("CharacterSidebar", "切换角色侧边栏");toggleSidebar();}}
-        className={`absolute ${isCollapsed ? "left-2" : "left-[23%]"} top-1/2 -translate-y-1/2 z-10 toggle-button bg-[#1e1c1b] hover:bg-[#2a2825] text-[#c0a480] hover:text-[#f4e8c1] p-1 rounded-full transition-all duration-300 ease-in-out opacity-60 hover:opacity-100`}
+        onClick={(e) => {
+          trackButtonClick("CharacterSidebar", "切换角色侧边栏");
+          toggleSidebar();
+        }}
+        className={`absolute ${isMobile ? "left-2" : (isCollapsed ? "left-2" : "left-[23%]")} top-1/2 -translate-y-1/2 z-20 toggle-button bg-[#1e1c1b] hover:bg-[#2a2825] text-[#c0a480] hover:text-[#f4e8c1] p-1 rounded-full transition-all duration-300 ease-in-out opacity-60 hover:opacity-100`}
         aria-label={isCollapsed ? t("characterChat.expandSidebar") : t("characterChat.collapseSidebar")}
       >
         {isCollapsed ? (
@@ -157,7 +172,7 @@ const CharacterSidebar: React.FC<CharacterSidebarProps> = ({
       </button>
       
       <div
-        className={`${isCollapsed ? "w-0 p-0 opacity-0" : "w-1/4 p-0 opacity-100"} fantasy-bg border-r border-[#534741] h-full overflow-y-auto fantasy-scrollbar transition-all duration-300 ease-in-out magic-border flex flex-col`}
+        className={`${isCollapsed ? "w-0 p-0 opacity-0" : (isMobile ? "w-full text-[12px] leading-tight" : "w-1/4 text-[14px] leading-normal")} fantasy-bg border-r border-[#534741] h-full overflow-y-auto fantasy-scrollbar transition-all duration-300 ease-in-out magic-border flex flex-col absolute left-0 top-0 z-10`}
       >
 
         <div className="px-2 py-1 flex justify-between items-center text-xs text-[#8a8a8a] uppercase tracking-wider font-medium text-[10px] transition-all duration-300 ease-in-out overflow-hidden mt-4 mx-4" style={{ opacity: isCollapsed ? 0 : 1 }}>
@@ -171,7 +186,7 @@ const CharacterSidebar: React.FC<CharacterSidebarProps> = ({
                 href="/character-cards"
                 className={"menu-item flex items-center p-2 rounded-md hover:bg-[#252525] overflow-hidden transition-all duration-300 group"}
               >
-                <div className="w-8 h-8 flex items-center justify-center flex-shrink-0 text-[#f4e8c1] bg-[#1c1c1c] rounded-lg border border-[#333333] shadow-inner transition-all duration-300 group-hover:border-[#444444] group-hover:text-amber-400 group-hover:shadow-[0_0_8px_rgba(251,146,60,0.4)]">
+                <div className={"w-6 h-6 flex items-center justify-center flex-shrink-0 text-[#f4e8c1] bg-[#1c1c1c] rounded-lg border border-[#333333] shadow-inner transition-all duration-300 group-hover:border-[#444444] group-hover:text-amber-400 group-hover:shadow-[0_0_8px_rgba(251,146,60,0.4)]"}>
                   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M19 12H5" />
                     <polyline points="12 19 5 12 12 5" />
@@ -188,7 +203,7 @@ const CharacterSidebar: React.FC<CharacterSidebarProps> = ({
                 href="/character-cards"
                 className="menu-item flex justify-center p-2 rounded-md cursor-pointer hover:bg-[#252525] transition-all duration-300"
               >
-                <div className="w-8 h-8 flex items-center justify-center text-[#f4e8c1] bg-[#1c1c1c] rounded-lg border border-[#333333] shadow-inner transition-all duration-300 group-hover:border-[#444444] hover:text-amber-400 hover:border-[#444444] hover:shadow-[0_0_8px_rgba(251,146,60,0.4)]">
+                <div className={"w-6 h-6 flex items-center justify-center text-[#f4e8c1] bg-[#1c1c1c] rounded-lg border border-[#333333] shadow-inner transition-all duration-300 group-hover:border-[#444444] hover:text-amber-400 hover:border-[#444444] hover:shadow-[0_0_8px_rgba(251,146,60,0.4)]"}>
                   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M19 12H5" />
                     <polyline points="12 19 5 12 12 5" />
@@ -245,7 +260,7 @@ const CharacterSidebar: React.FC<CharacterSidebarProps> = ({
         </div>
 
         <div className="mx-4 menu-divider my-2"></div>
-        <div className="px-2 py-1 flex justify-between items-center text-xs text-[#8a8a8a] uppercase tracking-wider font-medium text-[10px] transition-all duration-300 ease-in-out overflow-hidden mx-4 " style={{ opacity: isCollapsed ? 0 : 1 }}>
+        <div className="px-2 py-1 flex justify-between items-center text-xs text-[#8a8a8a] uppercase tracking-wider font-medium text-[10px] transition-all duration-300 ease-in-out overflow-hidden mx-4" style={{ opacity: isCollapsed ? 0 : 1 }}>
           <span>{t("characterChat.actions")}</span>
         </div>
 
@@ -256,7 +271,7 @@ const CharacterSidebar: React.FC<CharacterSidebarProps> = ({
                 className={"menu-item flex items-center p-2 rounded-md hover:bg-[#252525] cursor-pointer overflow-hidden transition-all duration-300 group"}
                 onClick={() => setShowDialogueTreeModal(true)}
               >
-                <div className="w-8 h-8 flex items-center justify-center flex-shrink-0 text-[#f4e8c1] bg-[#1c1c1c] rounded-lg border border-[#333333] shadow-inner transition-all duration-300 group-hover:border-[#444444] group-hover:text-amber-400 group-hover:shadow-[0_0_8px_rgba(251,146,60,0.4)]">
+                <div className={"w-6 h-6 flex items-center justify-center flex-shrink-0 text-[#f4e8c1] bg-[#1c1c1c] rounded-lg border border-[#333333] shadow-inner transition-all duration-300 group-hover:border-[#444444] group-hover:text-amber-400 group-hover:shadow-[0_0_8px_rgba(251,146,60,0.4)]"}>
                   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
                   </svg>
@@ -272,7 +287,7 @@ const CharacterSidebar: React.FC<CharacterSidebarProps> = ({
                 className={"menu-item flex justify-center p-2 rounded-md cursor-pointer hover:bg-[#252525] transition-all duration-300"}
                 onClick={() => setShowDialogueTreeModal(true)}
               >
-                <div className="w-8 h-8 flex items-center justify-center text-[#f4e8c1] bg-[#1c1c1c] rounded-lg border border-[#333333] shadow-inner transition-all duration-300 group-hover:border-[#444444] hover:text-amber-400 hover:border-[#444444] hover:shadow-[0_0_8px_rgba(251,146,60,0.4)]">
+                <div className={"w-6 h-6 flex items-center justify-center text-[#f4e8c1] bg-[#1c1c1c] rounded-lg border border-[#333333] shadow-inner transition-all duration-300 group-hover:border-[#444444] hover:text-amber-400 hover:border-[#444444] hover:shadow-[0_0_8px_rgba(251,146,60,0.4)]"}>
                   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
                   </svg>
@@ -297,7 +312,7 @@ const CharacterSidebar: React.FC<CharacterSidebarProps> = ({
                   onClick={() => setShowPromptDropdown(!showPromptDropdown)}
                 >
                   <div
-                    className={"w-8 h-8 flex items-center justify-center flex-shrink-0 text-[#f4e8c1] bg-[#1c1c1c] rounded-lg border border-[#333333] shadow-inner transition-all duration-300 group-hover:border-[#444444] group-hover:text-amber-400 group-hover:shadow-[0_0_8px_rgba(251,146,60,0.4)]"}
+                    className={`${isMobile ? "w-6 h-6" : "w-8 h-8"} flex items-center justify-center flex-shrink-0 text-[#f4e8c1] bg-[#1c1c1c] rounded-lg border border-[#333333] shadow-inner transition-all duration-300 group-hover:border-[#444444] group-hover:text-amber-400 group-hover:shadow-[0_0_8px_rgba(251,146,60,0.4)]`}
                   >
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
@@ -376,7 +391,7 @@ const CharacterSidebar: React.FC<CharacterSidebarProps> = ({
             className="menu-item flex items-center p-2 mx-6 rounded-md hover:bg-[#252525] cursor-pointer overflow-hidden transition-all duration-300 group"
             onClick={handleOpenPromptEditor}
           >
-            <div className="w-8 h-8 flex items-center justify-center flex-shrink-0 text-[#f4e8c1] bg-[#1c1c1c] rounded-lg border border-[#333333] shadow-inner transition-all duration-300 group-hover:border-[#444444] group-hover:text-amber-400 group-hover:shadow-[0_0_8px_rgba(251,146,60,0.4)]">
+            <div className={`${isMobile ? "w-6 h-6" : "w-8 h-8"} flex items-center justify-center flex-shrink-0 text-[#f4e8c1] bg-[#1c1c1c] rounded-lg border border-[#333333] shadow-inner transition-all duration-300 group-hover:border-[#444444] group-hover:text-amber-400 group-hover:shadow-[0_0_8px_rgba(251,146,60,0.4)]`}>
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M12 20h9"></path>
                 <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
