@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import "./styles/local-fonts.css";
 import "./styles/fonts.css";
-import MainLayout from "./components/MainLayout";
+import MainLayout from "@/app/components/MainLayout";
 import { LanguageProvider } from "./i18n/LanguageProvider";
 import { SoundProvider } from "./contexts/SoundContext";
 import GoogleAnalytics from "./components/GoogleAnalytics";
