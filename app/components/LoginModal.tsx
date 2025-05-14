@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { useLanguage } from "../i18n";
+import { useLanguage } from "@/app/i18n";
 
 interface LoginModalProps {
   isOpen: boolean;

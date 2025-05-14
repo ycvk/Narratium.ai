@@ -17,7 +17,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import gsap from "gsap";
-import { useSoundContext } from "../contexts/SoundContext";
+import { useSoundContext } from "@/app/contexts/SoundContext";
 
 interface LoadingTransitionProps {
   onAnimationComplete?: () => void;

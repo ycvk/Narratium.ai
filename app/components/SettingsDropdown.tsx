@@ -1,9 +1,9 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { useLanguage } from "../i18n";
-import { useSoundContext } from "../contexts/SoundContext";
-import LLMSettingsModal from "./LLMSettingsModal";
+import { useLanguage } from "@/app/i18n";
+import { useSoundContext } from "@/app/contexts/SoundContext";
+import LLMSettingsModal from "@/app/components/LLMSettingsModal";
 
 interface SettingsDropdownProps {
   toggleModelSidebar: () => void;

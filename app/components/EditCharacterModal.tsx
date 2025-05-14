@@ -3,7 +3,7 @@ import { useLanguage } from "@/app/i18n";
 import { motion, AnimatePresence } from "framer-motion";
 import { trackButtonClick } from "@/app/lib/utils/analytics";
 import { updateCharacter } from "@/app/function/dialogue/update";
-import { CharacterAvatarBackground } from "./CharacterAvatarBackground";
+import { CharacterAvatarBackground } from "@/app/components/CharacterAvatarBackground";
 interface EditCharacterModalProps {
   isOpen: boolean;
   onClose: () => void;

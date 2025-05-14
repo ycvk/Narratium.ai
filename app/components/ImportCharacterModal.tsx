@@ -2,9 +2,9 @@
 
 import { useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { useLanguage } from "../i18n";
-import { trackButtonClick } from "../lib/utils/analytics";
-import { handleCharacterUpload } from "../function/character/import";
+import { useLanguage } from "@/app/i18n";
+import { trackButtonClick } from "@/app/lib/utils/analytics";
+import { handleCharacterUpload } from "@/app/function/character/import";
 
 interface ImportCharacterModalProps {
   isOpen: boolean;

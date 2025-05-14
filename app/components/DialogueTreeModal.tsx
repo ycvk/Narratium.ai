@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef, useMemo } from "react";
-import { useLanguage } from "../i18n";
+import { useLanguage } from "@/app/i18n";
 import ReactFlow, {
   MiniMap,
   Background,
