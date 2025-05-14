@@ -39,15 +39,34 @@ const PromptEditor: React.FC<PromptEditorProps> = ({
   const [isDragging, setIsDragging] = useState(false);
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const [startPosition, setStartPosition] = useState({ x: 0, y: 0 });
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   useEffect(() => {
     if (isOpen) {
-      setPosition({
-        x: Math.max(window.innerWidth / 2 - 250, 0),
-        y: Math.max(window.innerHeight / 2 - 200, 0),
-      });
+      if (isMobile) {
+        setPosition({
+          x: Math.max(window.innerWidth / 2 - (window.innerWidth * 0.45), 0),
+          y: Math.max(window.innerHeight / 2 - (window.innerHeight * 0.35), 0),
+        });
+      } else {
+        setPosition({
+          x: Math.max(window.innerWidth / 2 - 250, 0),
+          y: Math.max(window.innerHeight / 2 - 200, 0),
+        });
+      }
     }
-  }, [isOpen]);
+  }, [isOpen, isMobile]);
 
   const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
     setIsDragging(true);
@@ -92,10 +111,11 @@ const PromptEditor: React.FC<PromptEditorProps> = ({
       <div 
         className="absolute fantasy-bg border border-[#534741] rounded-lg shadow-lg overflow-hidden backdrop-filter backdrop-blur-sm"
         style={{
-          width: "500px",
-          height: "400px",
-          left: `${position.x}px`,
-          top: `${position.y}px`,
+          width: isMobile ? "90%" : "500px",
+          height: isMobile ? "90%" : "400px",
+          maxHeight: isMobile ? "50vh" : "80vh",
+          left: isMobile ? "5%" : `${position.x}px`,
+          top: isMobile ? "25%" : `${position.y}px`,
         }}
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
@@ -127,28 +147,28 @@ const PromptEditor: React.FC<PromptEditorProps> = ({
           </button>
         </div>
 
-        <div className="flex border-b border-[#534741]">
+        <div className="flex border-b border-[#534741] overflow-x-auto">
           <button
-            className={`px-4 py-2 ${fontClass} text-sm ${activeTab === "prefix" ? "bg-[#252525] text-amber-400 border-b-2 border-amber-400" : "text-[#8a8a8a] hover:text-[#f4e8c1]"}`}
+            className={`px-2 py-2 ${fontClass} ${isMobile ? "text-xs" : "text-sm"} ${activeTab === "prefix" ? "bg-[#252525] text-amber-400 border-b-2 border-amber-400" : "text-[#8a8a8a] hover:text-[#f4e8c1]"}`}
             onClick={() => {trackButtonClick("PromptEditor", "前缀"); setActiveTab("prefix");}}
           >
             {t("characterChat.prefixPrompt")}
           </button>
           <button
-            className={`px-4 py-2 ${fontClass} text-sm ${activeTab === "chain" ? "bg-[#252525] text-amber-400 border-b-2 border-amber-400" : "text-[#8a8a8a] hover:text-[#f4e8c1]"}`}
+            className={`px-2 py-2 ${fontClass} ${isMobile ? "text-xs" : "text-sm"} ${activeTab === "chain" ? "bg-[#252525] text-amber-400 border-b-2 border-amber-400" : "text-[#8a8a8a] hover:text-[#f4e8c1]"}`}
             onClick={() => {trackButtonClick("PromptEditor", "链式思维"); setActiveTab("chain");}}
           >
             {t("characterChat.chainOfThoughtPrompt")}
           </button>
           <button
-            className={`px-4 py-2 ${fontClass} text-sm ${activeTab === "suffix" ? "bg-[#252525] text-amber-400 border-b-2 border-amber-400" : "text-[#8a8a8a] hover:text-[#f4e8c1]"}`}
+            className={`px-2 py-2 ${fontClass} ${isMobile ? "text-xs" : "text-sm"} ${activeTab === "suffix" ? "bg-[#252525] text-amber-400 border-b-2 border-amber-400" : "text-[#8a8a8a] hover:text-[#f4e8c1]"}`}
             onClick={() => {trackButtonClick("PromptEditor", "后缀"); setActiveTab("suffix");}}
           >
             {t("characterChat.suffixPrompt")}
           </button>
         </div>
 
-        <div className="p-4 h-[260px] overflow-auto fantasy-scrollbar">
+        <div className={`p-4 ${isMobile ? "h-[calc(100%-140px)]" : "h-[260px]"} overflow-auto fantasy-scrollbar`}>
           {activeTab === "prefix" && (
             <div className="space-y-2">
               <p className={`text-xs text-[#8a8a8a] ${fontClass}`}>
@@ -157,7 +177,7 @@ const PromptEditor: React.FC<PromptEditorProps> = ({
               <textarea
                 value={prefixPrompt}
                 onChange={(e) => setPrefixPrompt(e.target.value)}
-                className="w-full h-[200px] bg-[#1c1c1c] border border-[#534741] rounded p-3 text-[#f4e8c1] text-sm focus:outline-none focus:border-amber-400 fantasy-scrollbar"
+                className={`w-full ${isMobile ? "h-[calc(100vh-300px)]" : "h-[200px]"} bg-[#1c1c1c] border border-[#534741] rounded p-3 text-[#f4e8c1] ${isMobile ? "text-xs" : "text-sm"} focus:outline-none focus:border-amber-400 fantasy-scrollbar`}
                 placeholder={t("characterChat.prefixPromptPlaceholder") as string}
               />
             </div>
@@ -171,7 +191,7 @@ const PromptEditor: React.FC<PromptEditorProps> = ({
               <textarea
                 value={chainOfThoughtPrompt}
                 onChange={(e) => setChainOfThoughtPrompt(e.target.value)}
-                className="w-full h-[200px] bg-[#1c1c1c] border border-[#534741] rounded p-3 text-[#f4e8c1] text-sm focus:outline-none focus:border-amber-400 fantasy-scrollbar"
+                className={`w-full ${isMobile ? "h-[calc(100vh-300px)]" : "h-[200px]"} bg-[#1c1c1c] border border-[#534741] rounded p-3 text-[#f4e8c1] ${isMobile ? "text-xs" : "text-sm"} focus:outline-none focus:border-amber-400 fantasy-scrollbar`}
                 placeholder={t("characterChat.chainOfThoughtPromptPlaceholder") as string}
               />
             </div>
@@ -185,7 +205,7 @@ const PromptEditor: React.FC<PromptEditorProps> = ({
               <textarea
                 value={suffixPrompt}
                 onChange={(e) => setSuffixPrompt(e.target.value)}
-                className="w-full h-[200px] bg-[#1c1c1c] border border-[#534741] rounded p-3 text-[#f4e8c1] text-sm focus:outline-none focus:border-amber-400 fantasy-scrollbar"
+                className={`w-full ${isMobile ? "h-[calc(100vh-300px)]" : "h-[200px]"} bg-[#1c1c1c] border border-[#534741] rounded p-3 text-[#f4e8c1] ${isMobile ? "text-xs" : "text-sm"} focus:outline-none focus:border-amber-400 fantasy-scrollbar`}
                 placeholder={t("characterChat.suffixPromptPlaceholder") as string}
               />
             </div>
