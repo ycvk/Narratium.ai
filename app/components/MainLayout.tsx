@@ -1,11 +1,11 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import Sidebar from "./Sidebar";
-import ModelSidebar from "./ModelSidebar";
-import SettingsDropdown from "./SettingsDropdown";
-import LoginModal from "./LoginModal";
-import "../styles/fantasy-ui.css";
+import Sidebar from "@/app/components/Sidebar";
+import ModelSidebar from "@/app/components/ModelSidebar";
+import SettingsDropdown from "@/app/components/SettingsDropdown";
+import LoginModal from "@/app/components/LoginModal";
+import "@/app/styles/fantasy-ui.css";
 
 export default function MainLayout({ children }: { children: React.ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(true);
