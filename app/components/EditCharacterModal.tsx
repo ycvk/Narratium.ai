@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from "react";
-import { useLanguage } from "../i18n";
+import { useLanguage } from "@/app/i18n";
 import { motion, AnimatePresence } from "framer-motion";
-import { trackButtonClick } from "../lib/utils/analytics";
-import { updateCharacter } from "../function/dialogue/update";
+import { trackButtonClick } from "@/app/lib/utils/analytics";
+import { updateCharacter } from "@/app/function/dialogue/update";
+import { CharacterAvatarBackground } from "./CharacterAvatarBackground";
 interface EditCharacterModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -122,10 +123,7 @@ const EditCharacterModal: React.FC<EditCharacterModalProps> = ({
               <div className="md:w-2/5 lg:w-1/3 relative">
                 <div className="h-full">
                   {characterData.avatar_path ? (
-                    <div 
-                      className="w-full h-full bg-cover bg-center" 
-                      style={{ backgroundImage: `url(${characterData.avatar_path})`, minHeight: "500px" }}
-                    />
+                    <CharacterAvatarBackground avatarPath={characterData.avatar_path} />
                   ) : (
                     <div className="w-full h-full min-h-[500px] flex items-center justify-center bg-[#252220]">
                       <svg xmlns="http://www.w3.org/2000/svg" className="h-32 w-32 text-[#534741]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
