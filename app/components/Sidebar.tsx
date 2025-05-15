@@ -4,8 +4,8 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { useLanguage } from "../i18n";
-import "../styles/fantasy-ui.css";
+import { useLanguage } from "@/app/i18n";
+import "@/app/styles/fantasy-ui.css";
 
 interface SidebarProps {
   isOpen: boolean;
