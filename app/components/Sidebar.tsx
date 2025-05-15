@@ -55,7 +55,6 @@ export default function Sidebar({ isOpen, toggleSidebar, openLoginModal }: Sideb
     return () => window.removeEventListener("resize", checkIfMobile);
   }, []);
 
-  // 如果是移动设备，直接返回空内容
   if (isMobile) {
     return null;
   }
@@ -226,16 +225,16 @@ export default function Sidebar({ isOpen, toggleSidebar, openLoginModal }: Sideb
           </li>
         </ul>
       </nav>
-      <div className={"mt-auto px-2 mb-3 transition-all duration-300 overflow-hidden"}>
+      <div className="mt-auto px-2 mb-3 transition-all duration-300 overflow-hidden">
         <div>
           {!isOpen ? (
             <a 
               href="https://github.com/Narratium/Narratium.ai" 
               target="_blank" 
               rel="noopener noreferrer"
-              className={"focus:outline-none focus:ring-0 focus:border-transparent menu-item flex justify-center p-2 rounded-md cursor-pointer hover:bg-[#1c1c1c] maxWidth: 220px"}
+              className="focus:outline-none focus:ring-0 focus:border-transparent menu-item flex justify-center p-2 rounded-md cursor-pointer hover:bg-[#1c1c1c] maxWidth: 220px"
             >
-              <div className={"flex items-center justify-center text-[#f4e8c1] bg-[#1c1c1c] rounded-lg border border-[#333333] shadow-inner w-8 h-8"}>
+              <div className="w-8 h-8 flex items-center justify-center text-[#f4e8c1] bg-[#1c1c1c] rounded-lg border border-[#333333] shadow-inner">
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
                   <path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 
             3.438 9.8 8.205 11.387.6.113.82-.258.82-.577 
@@ -257,11 +256,11 @@ export default function Sidebar({ isOpen, toggleSidebar, openLoginModal }: Sideb
               href="https://github.com/Narratium/Narratium.ai"
               target="_blank"
               rel="noopener noreferrer"
-              className={"focus:outline-none focus:ring-0 focus:border-transparent menu-item flex items-center py-1.5 px-3 rounded-md overflow-hidden transition-all duration-300 mx-auto max-w-xs"}
+              className="focus:outline-none focus:ring-0 focus:border-transparent menu-item flex items-center justify-center py-1.5 px-3 rounded-md overflow-hidden transition-all duration-300 mx-auto max-w-xs"
               style={{ minWidth: 0 }}
             >
               <div className="flex items-center justify-center transition-all duration-300">
-                <div className={"w-5 h-5 flex items-center justify-center text-[#f4e8c1] w-5 h-5"}>
+                <div className="w-5 h-5 flex items-center justify-center flex-shrink-0 text-[#f4e8c1]">
                   <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
                     <path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 
               3.438 9.8 8.205 11.387.6.113.82-.258.82-.577 
@@ -277,7 +276,7 @@ export default function Sidebar({ isOpen, toggleSidebar, openLoginModal }: Sideb
               C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/>
                   </svg>
                 </div>
-                <div className={"ml-2 transition-all duration-300 ease-in-out overflow-hidden"} style={{ transitionDelay: isOpen ? "50ms" : "0ms", opacity: isOpen ? 1 : 0 }}>
+                <div className="ml-2 transition-all duration-300 ease-in-out overflow-hidden" style={{ transitionDelay: isOpen ? "50ms" : "0ms", opacity: isOpen ? 1 : 0 }}>
                   <span className={`magical-text whitespace-nowrap block text-xs font-medium ${fontClass}`}>
                     {isOpen && "Star us on GitHub".split("").map((char, index) => (
                       <span 
