@@ -93,18 +93,14 @@ Narratium 让讲故事变得简单又强大：
 
 持续沉浸：专注连贯故事、世界逻辑、角色一致性，让每一次冒险都是有温度、可回溯的个人传奇。
 
-## 许可证
+## 📜 许可概览
 
-本项目遵循 **Creative Commons Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)** 协议。
+本项目包含两个部分，分别适用独立的许可协议：
 
-* ✅ 允许 Fork、复制、分发、改造、二次开发
-* ✅ 允许个人、非商业社区项目使用、衍生
-* ✅ 鼓励提交回开源社区、促进共建
+- ✅ 代码：MIT 许可 — 允许商业和非商业使用，需保留署名。
+- 🔒 内容：CC BY-NC-SA 4.0 — 仅限非商业使用，需署名并采用相同许可协议分发。
 
-> 商业授权请联系作者：\[[qianzhang.happyfox@gmail.com](mailto:qianzhang.happyfox@gmail.com)]
-> 协议全文参见：[CC BY-NC 4.0](https://creativecommons.org/licenses/by-nc/4.0/deed.zh)
-
----
+> 详细许可条款请参见 [LICENSE.txt](./LICENSE.txt)。
 
 ## 📬 联系与支持
 

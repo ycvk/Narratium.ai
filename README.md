@@ -94,16 +94,14 @@ We aim to make storytelling both simple and powerful:
 * **Open & Extensible**: Open-source with support for any LLM, expandable characters, worlds, and memories.
 * **Immersive & Consistent**: Focused on coherent storytelling, world logic, and character consistency, making every adventure a warm, personal, and traceable epic.
 
-## 📜 License
+## 📜 License Overview
 
-This project is licensed under **Creative Commons Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)**.
+This project consists of two distinct parts with independent licenses:
 
-* ✅ Fork, copy, distribute, modify, and develop derivatives allowed.
-* ✅ Free for personal and non-commercial community projects.
-* ✅ Contributions back to the open-source community are encouraged.
+- ✅ Code: MIT License — open for commercial and non-commercial use with attribution.
+- 🔒 Content: CC BY-NC-SA 4.0 — non-commercial use only, with attribution and same-license sharing required.
 
-> For commercial licensing, please contact the author: [qianzhang.happyfox@gmail.com](mailto:qianzhang.happyfox@gmail.com)
-> Full license: [CC BY-NC 4.0](https://creativecommons.org/licenses/by-nc/4.0/deed.en)
+> For full license details, please refer to the [LICENSE.txt](./LICENSE.txt).
 
 ## 📬 Contact & Support
 
