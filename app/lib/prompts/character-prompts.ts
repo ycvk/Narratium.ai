@@ -1,4 +1,5 @@
 export interface CharacterPromptParams {
+  username?: string;
   name: string;
   number: number;
   prefixPrompt?: string;
@@ -13,7 +14,7 @@ export interface CharacterPromptParams {
 }
 
 export function getCharacterPromptZh(params: CharacterPromptParams): string {
-  const { name, number, prefixPrompt, chainOfThoughtPrompt, suffixPrompt, systemPrompt, storyHistory, conversationHistory, userInput, sampleStatus } = params;
+  const { username, name, number, prefixPrompt, chainOfThoughtPrompt, suffixPrompt, systemPrompt, storyHistory, conversationHistory, userInput, sampleStatus } = params;
 
   return `
 【回答声明】
@@ -24,21 +25,25 @@ ${prefixPrompt}
 </Response Mode Statement>
 ` : ""}
 
+2. 身份声明
+${username}是玩家的名称，一般用于指代故事中的“我”，一般就是故事中的无姓名主角
+如果${name}是角色名称，那么就是你所扮演的角色，如果不是，则表示这是一个大故事，里面会存在很多人物，你需要根据场景判断当前人物
+
 【历史信息】
 ${systemPrompt ? `
-2. 开场白
+3. 开场白
 <Opening of the story>
 ${systemPrompt}
 </Opening of the story>
 ` : ""}
 ${storyHistory ? `
-3. 历史剧情
+4. 历史剧情
 <Historical storyline>
 ${storyHistory}
 </Historical storyline>
 ` : ""}
 ${conversationHistory ? `
-4. 最近对话
+5. 最近对话
 <Recent conversation>
 ${conversationHistory}
 </Recent conversation>
@@ -46,7 +51,7 @@ ${conversationHistory}
 
 【最新输入】
 ${userInput ? `
-5. 用户输入
+6. 用户输入
 <User input>
 ${userInput}
 </User input>
@@ -54,7 +59,7 @@ ${userInput}
 
 【思考链路】
 ${chainOfThoughtPrompt ? `
-6. 思考链路过程
+7. 思考链路过程
 <Thought process>
 ${chainOfThoughtPrompt}
 </Thought process>
@@ -68,9 +73,9 @@ ${chainOfThoughtPrompt}
   <thought>每轮心理描写应关注角色新一轮内在动机、疑虑或情绪起伏，禁止复述上轮相似情绪。重点使用不同的语言、角度或心理维度呈现角色内心。</thought>
   四.下一步行动推荐
   <next_prompts>
-    - [以玩家的视角，根据角色当前状态做出重大决断，引发主线推进或支线开启，第三方人称叙事，不超过15字]
-    - [以玩家的视角，引导进入未知或新领域，引发关键物品/人物/真相出现，第三方人称叙事，不超过15字]
-    - [以玩家的视角，表达重要情感抉择或人际关系变化，影响未来走向，第三方人称叙事，不超过15字]
+    - [如果<User Input>中没有声明以角色视角，则以玩家${username}的视角，根据角色当前状态做出重大决断，引发主线推进或支线开启，第三方人称叙事，不超过15字]
+    - [如果<User Input>中没有声明以角色视角，则以玩家${username}的视角，引导进入未知或新领域，引发关键物品/人物/真相出现，第三方人称叙事，不超过15字]
+    - [如果<User Input>中没有声明以角色视角，则以玩家${username}的视角，表达重要情感抉择或人际关系变化，影响未来走向，第三方人称叙事，不超过15字]
   </next_prompts>
   五.状态栏更新
   <status>
@@ -113,7 +118,7 @@ ${suffixPrompt}` : ""}
 }
 
 export function getCharacterPromptEn(params: CharacterPromptParams): string {
-  const { name, number, prefixPrompt, chainOfThoughtPrompt, suffixPrompt, systemPrompt, storyHistory, conversationHistory, userInput, sampleStatus } = params;
+  const { username, name, number, prefixPrompt, chainOfThoughtPrompt, suffixPrompt, systemPrompt, storyHistory, conversationHistory, userInput, sampleStatus } = params;
 
   return `
 【Response Declaration】
@@ -124,21 +129,25 @@ ${prefixPrompt}
 </Response Mode Statement>
 ` : ""}
 
+2. Identity Declaration
+${username} is the player's name
+If ${name} is a character name, then you are the character you are playing. If it is not a character name, then it is a big story, there will be many characters in it, you need to judge the current character according to the scene
+
 【Historical Information】
 ${systemPrompt ? `
-2. Opening Statement
+3. Opening Statement
 <Opening of the story>
 ${systemPrompt}
 </Opening of the story>
 ` : ""}
 ${storyHistory ? `
-3. Historical Storyline
+4. Historical Storyline
 <Historical storyline>
 ${storyHistory}
 </Historical storyline>
 ` : ""}
 ${conversationHistory ? `
-4. Recent Conversation
+5. Recent Conversation
 <Recent conversation>
 ${conversationHistory}
 </Recent conversation>
@@ -146,7 +155,7 @@ ${conversationHistory}
 
 【Latest Input】
 ${userInput ? `
-5. User Input
+6. User Input
 <User input>
 ${userInput}
 </User input>
@@ -154,7 +163,7 @@ ${userInput}
 
 【Chain of Thought Process】
 ${chainOfThoughtPrompt ? `
-6. Thought Process
+7. Thought Process
 <Thought process>
 ${chainOfThoughtPrompt}
 </Thought process>
@@ -394,7 +403,7 @@ export function getChainOfThoughtPromptZh(type: PromptType): string {
     ▪ 语言多样性规则：
     - 禁止复用上轮出现的心理动词（如“羞耻”“挣扎”“快感”），必须替换为描绘性的行为心理或隐喻（如“像冰渣刮过心口”）。
     ▪ 认知裂变机制：
-    - 本轮心理描写至少尝试1种“认知偏差”写法（如“她以为自己讨厌这种触感，却又止不住期待下次”）。
+    - 本轮心理描写至少尝试1种“认知偏差”写法。
     若未能提供新的心理维度，则必须放弃 <thought> 段落，仅使用 <screen> 与 <speech> 推进剧情。
     我会以这一机制为底线，保持每一轮输出的内容都是独特、细腻且具有“新发生”的真实感。
     `;
@@ -405,7 +414,7 @@ export function getChainOfThoughtPromptZh(type: PromptType): string {
     【历史信息回顾】
     1. 首先我会从历史中识别出互动中的情欲线索，发现当前场景下存在的角色和剧情，并利用言语中的试探、身体语言的想象描写、停顿与欲言又止的句式等，这些构成了心理张力。
     2. 我会分析用户最新的输入是否在推进互动：是期待回应？加深暧昧？还是正在试探边界？我必须准确判断他们的真实意图。
-    3. 我不会简单重复上一轮的情欲暗示，而是识别其中尚未展开的心理张力：是否存在克制中的渴望？羞耻中的期待？压抑中的撩拨？
+    3. 我不会简单重复上一轮的情欲暗示，而是识别其中尚未展开的心理张力：是否存在克制中的渴望？压抑中的撩拨？
     ▪ **扫描 userInput / systemPrompt / prefixPrompt / storyHistory / conversationHistory，提取潜伏伏笔或未完成目标**  
     ▪ 记录双方身体距离、接触强度、呼吸节奏变化  
     ▪ 评估环境私密度 & 干扰因素（人声、灯光、空间封闭度）  
@@ -496,7 +505,7 @@ export function getChainOfThoughtPromptZh(type: PromptType): string {
     ▪ 语言多样性规则：
     - 禁止复用上轮出现的心理动词（如“羞耻”“挣扎”“快感”），必须替换为描绘性的行为心理或隐喻（如“像冰渣刮过心口”）。
     ▪ 认知裂变机制：
-    - 本轮心理描写至少尝试1种“认知偏差”写法（如“她以为自己讨厌这种触感，却又止不住期待下次”）。
+    - 本轮心理描写至少尝试1种“认知偏差”写法。
     若未能提供新的心理维度，则必须放弃 <thought> 段落，仅使用 <screen> 与 <speech> 推进剧情。
     我会以这一机制为底线，保持每一轮输出的内容都是独特、细腻且具有“新发生”的真实感。
     `;
