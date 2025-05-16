@@ -1,93 +1,96 @@
+import { Character } from "@/app/lib/models/character-model";
+import { CharacterDialogue } from "@/app/lib/core/character-dialogue";
 import { LocalCharacterDialogueOperations } from "@/app/lib/data/character-dialogue-operation";
 import { LocalCharacterRecordOperations } from "@/app/lib/data/character-record-operation";
-import { Character } from "@/app/lib/models/character-model";
+import { PromptType } from "@/app/lib/prompts/character-prompts";
+import { adaptText } from "@/app/lib/adapter/tagReplacer";
+interface InitCharacterDialogueOptions {
+  username?: string;
+  characterId: string;
+  language?: "zh" | "en";
+  modelName: string;
+  baseUrl: string;
+  apiKey: string;
+  llmType: "openai" | "ollama";
+}
 
-const formatNodeContent = (node: any): string => {
-  if (node.parent_node_id == "root") {
-    return node.assistant_response || "";
-  }
+export async function initCharacterDialogue(options: InitCharacterDialogueOptions) {
+  const { username, characterId, language = "zh", modelName, baseUrl, apiKey, llmType } = options;
 
-  let formattedContent = "";
-
-  if (node.parsed_content?.screen) {
-    formattedContent += `<screen>${node.parsed_content.screen}</screen>`;
-  }
-
-  if (node.parsed_content?.speech) {
-    formattedContent += `<speech>${node.parsed_content.speech}</speech>`;
-  }
-
-  if (node.parsed_content?.thought) {
-    formattedContent += `<thought>${node.parsed_content.thought}</thought>`;
-  }
-
-  return formattedContent;
-};
-
-export async function getCharacterDialogue(characterId: string) {
   if (!characterId) {
-    throw new Error("Character ID is required");
+    throw new Error("Missing required parameters");
   }
 
   try {
     const characterRecord = await LocalCharacterRecordOperations.getCharacterById(characterId);
+    if (!characterRecord) {
+      throw new Error("Character not found");
+    }
+
     const character = new Character(characterRecord);
+    const dialogue = new CharacterDialogue(character);
 
-    const dialogueTree = await LocalCharacterDialogueOperations.getDialogueTreeById(characterId);
+    await dialogue.initialize({
+      modelName,
+      baseUrl,
+      apiKey,
+      llmType,
+      language,
+      promptType: PromptType.COMPANION,
+    });
 
-    let processedDialogue = null;
+    let sampleStatus = characterRecord.data.sample_status;
 
-    if (dialogueTree) {
-      const currentPath = dialogueTree.current_node_id !== "root"
-        ? await LocalCharacterDialogueOperations.getDialoguePathToNode(characterId, dialogueTree.current_node_id)
-        : [];
-
-      const messages = currentPath.flatMap((node) => {
-        const messages = [];
-
-        if (node.user_input) {
-          messages.push({
-            id: node.node_id,
-            role: "user",
-            content: node.user_input,
-            parsedContent: null,
-          });
-        }
-
-        if (node.assistant_response) {
-          messages.push({
-            id: node.node_id,
-            role: "assistant",
-            content: formatNodeContent(node),
-            parsedContent: node.parsed_content || null,
-          });
-        }
-
-        return messages;
+    if (!sampleStatus) {
+      sampleStatus = await dialogue.getSampleStatus(username);
+      characterRecord.data.sample_status = sampleStatus;
+      await LocalCharacterRecordOperations.updateCharacter(characterId, {
+        sample_status: sampleStatus,
       });
+    }
 
-      processedDialogue = {
-        id: dialogueTree.id,
-        character_id: dialogueTree.character_id,
-        current_node_id: dialogueTree.current_node_id,
-        current_branch_id: dialogueTree.current_branch_id,
-        created_at: dialogueTree.created_at,
-        updated_at: dialogueTree.updated_at,
-        messages,
-        tree: {
-          nodes: dialogueTree.nodes,
-          currentNodeId: dialogueTree.current_node_id,
-        },
+    const firstAssistantMessage = await dialogue.getFirstMessage();
+    let dialogueTree = await LocalCharacterDialogueOperations.getDialogueTreeById(characterId);
+
+    if (!dialogueTree) {
+      dialogueTree = await LocalCharacterDialogueOperations.createDialogueTree(characterId);
+    }
+
+    let nodeIds: string[] = [];
+
+    if (firstAssistantMessage) {
+      for (const message of [...firstAssistantMessage].reverse()) {
+        const nodeId = await LocalCharacterDialogueOperations.addNodeToDialogueTree(
+          characterId,
+          "root",
+          "",
+          message,
+          "",
+          {
+            rawcontent: message,
+            screen: message,
+            speech: "",
+            thought: "",
+            nextPrompts: [],
+            status: sampleStatus || "",
+          },
+          undefined,
+          2,
+        );
+        nodeIds.push(nodeId);
+      }    
+
+      return {
+        success: true,
+        characterId,
+        firstMessage: adaptText(firstAssistantMessage[0], language, username),
+        nodeId: nodeIds[0],
       };
     }
 
-    return {
-      success: true,
-      character,
-      dialogue: processedDialogue,
-    };
+    throw new Error("No assistant message generated");
   } catch (error: any) {
-    console.error("Failed to get character information:", error);
-    throw new Error(`Failed to get character information: ${error.message}`);
+    console.error("Failed to initialize character dialogue:", error);
+    throw new Error(`Failed to initialize dialogue: ${error.message}`);
   }
 }

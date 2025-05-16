@@ -7,6 +7,7 @@ import { parseEvent } from "@/app/lib/utils/response-parser";
 import { LocalCharacterRecordOperations } from "@/app/lib/data/character-record-operation";
 
 export async function handleCharacterChatRequest(payload: {
+  username?: string;
   characterId: string;
   message: string;
   modelName: string;
@@ -21,6 +22,7 @@ export async function handleCharacterChatRequest(payload: {
 }): Promise<Response> {
   try {
     const {
+      username,
       characterId,
       message,
       modelName,
@@ -99,7 +101,7 @@ export async function handleCharacterChatRequest(payload: {
         try {
           controller.enqueue(JSON.stringify({ type: "start", success: true }) + "\n");
 
-          const response = await dialogue.sendMessage(number, message);
+          const response = await dialogue.sendMessage(number, message,username);
           if (!response.stream) throw new Error("No stream returned from LLM");
 
           let fullResponse = "", chunkIndex = 0, processedLength = 0;
@@ -151,7 +153,7 @@ export async function handleCharacterChatRequest(payload: {
             }
           }
 
-          await processPostResponseAsync({ characterId, message, fullResponse, dialogue, nextPrompts, nodeId })
+          await processPostResponseAsync({ characterId, message, fullResponse, nextPrompts, nodeId })
             .catch((e) => console.error("Post-processing error:", e));
 
           controller.enqueue(JSON.stringify({
@@ -191,14 +193,12 @@ async function processPostResponseAsync({
   characterId,
   message,
   fullResponse,
-  dialogue,
   nextPrompts,
   nodeId,
 }: {
   characterId: string;
   message: string;
   fullResponse: string;
-  dialogue: CharacterDialogue;
   nextPrompts: string[];
   nodeId: string;
 }) {

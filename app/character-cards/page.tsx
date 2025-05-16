@@ -35,8 +35,10 @@ export default function CharacterCards() {
 
   const fetchCharacters = async () => {
     setIsLoading(true);
+    const username = localStorage.getItem("username") || "";
+    const language = localStorage.getItem("language") || "zh";
     try {
-      const response = await getAllCharacters();
+      const response = await getAllCharacters(language as "zh" | "en", username);
 
       if (!response) {
         setCharacters([]);

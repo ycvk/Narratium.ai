@@ -78,7 +78,6 @@ const formatTaggedContent = (content: string): string => {
   );
 
   formattedContent = formattedContent.replace(/\n{3,}/g, "\n\n");
-  console.log(formattedContent);
   
   return formattedContent;
 };
@@ -220,7 +219,9 @@ export default function CharacterPage() {
     if (!characterId) return;
 
     try {
-      const response = await getCharacterDialogue(characterId);
+      const username = localStorage.getItem("username") || undefined;
+      const currentLanguage = localStorage.getItem("language") as "en" | "zh" || "zh";
+      const response = await getCharacterDialogue(characterId, currentLanguage, username);
       if (!response.success) {
         throw new Error(`Failed to load dialogue: ${response}`);
       }
@@ -252,7 +253,9 @@ export default function CharacterPage() {
       setError("");
       
       try {
-        const response = await getCharacterDialogue(characterId);
+        const username = localStorage.getItem("username") || undefined;
+        const currentLanguage = localStorage.getItem("language") as "en" | "zh" || "zh";
+        const response = await getCharacterDialogue(characterId, currentLanguage, username);
         if (!response.success) {
           throw new Error(`Failed to load character: ${response}`);
         }
@@ -296,12 +299,14 @@ export default function CharacterPage() {
   const initializeNewDialogue = async (charId: string) => {
     try {
       setIsInitializing(true);
+      const username = localStorage.getItem("username") || "";
       const language = localStorage.getItem("language") || "zh";
       const llmType = localStorage.getItem("llmType") || "openai";
       const modelName = localStorage.getItem(llmType === "openai" ? "openaiModel" : "ollamaModel") || "";
       const baseUrl = localStorage.getItem(llmType === "openai" ? "openaiBaseUrl" : "ollamaBaseUrl") || "";
       const apiKey = llmType === "openai" ? (localStorage.getItem("openaiApiKey") || "") : "";
       const initData = await initCharacterDialogue({
+        username,
         characterId: charId,
         modelName,
         baseUrl,
@@ -422,11 +427,12 @@ export default function CharacterPage() {
       const apiKey = llmType === "openai" ? (localStorage.getItem("openaiApiKey") || "") : "";
       const promptType = localStorage.getItem("promptType");
       const storedNumber = localStorage.getItem("responseLength");
+      const username = localStorage.getItem("username") || "";
       const responseLength = storedNumber ? parseInt(storedNumber) : 200;
       const nodeId = uuidv4();
       setNumber(responseLength);
-      console.log("api key", apiKey);
       const response = await handleCharacterChatRequest({
+        username,
         characterId: character.id,
         message,
         modelName,
