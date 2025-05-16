@@ -58,8 +58,8 @@ export class CharacterDialogue {
     }
   }
 
-  async getFirstMessage(language: "en" | "zh" = "zh"): Promise<string[]> {
-    const firstMessage = await this.character.getFirstMessage(language);
+  async getFirstMessage(): Promise<string[]> {
+    const firstMessage = await this.character.getFirstMessage();
     return firstMessage;
   }
 
@@ -104,7 +104,6 @@ export class CharacterDialogue {
       if (typeof window !== "undefined" && window.localStorage) {
         const savedSettings = localStorage.getItem("llmSettings");
         if (savedSettings) {
-          console.log("Saved settings:", savedSettings);  
           llmSettings = {
             temperature: 0.9,
             maxTokens: undefined,
@@ -173,14 +172,15 @@ export class CharacterDialogue {
       .pipe(new StringOutputParser());
   }
 
-  async sendMessage(number: number, _userMessage: string): Promise<{ stream?: AsyncIterable<string>, parsedResponse?: ParsedResponse }> {
+  async sendMessage(number: number, _userMessage: string,username?: string): Promise<{ stream?: AsyncIterable<string>, parsedResponse?: ParsedResponse }> {
     if (!this.dialogueChain || !this.llm) {
       throw new Error("Dialogue chain not initialized");
     }
 
     try {
-      const userMessage = this.prepareSystemMessage(number, _userMessage);
-      const systemMessage = this.character.getSystemPrompt(this.language);
+      const userMessage = this.prepareSystemMessage(number, _userMessage, username);
+      const systemMessage = this.character.getSystemPrompt(this.language, username);
+      console.log("userMessage",userMessage);
       const stream = await this.dialogueChain.stream({
         system_message: systemMessage,
         user_message: userMessage,
@@ -192,18 +192,27 @@ export class CharacterDialogue {
     }
   }
 
-  prepareSystemMessage(number: number, userMessage: string): string {
+  prepareSystemMessage(number: number, userMessage: string,username?: string): string {
     let prefixPrompt = "";
     let chainOfThoughtPrompt = "";
     let suffixPrompt = "";
 
     if (this.promptType === PromptType.CUSTOM) {
       try {
-        const characterData = this.character.getData();
+        const characterData = this.character.getData(this.language, username);
         if ((characterData as any).custom_prompts) {
           prefixPrompt = (characterData as any).custom_prompts.prefixPrompt || "";
+          if (prefixPrompt.trim() == "") {
+            prefixPrompt = getPrefixPrompt(PromptType.COMPANION, this.language);
+          }
           chainOfThoughtPrompt = (characterData as any).custom_prompts.chainOfThoughtPrompt || "";
+          if (chainOfThoughtPrompt.trim() == "") {
+            chainOfThoughtPrompt = getChainOfThoughtPrompt(PromptType.COMPANION, this.language);
+          }
           suffixPrompt = (characterData as any).custom_prompts.suffixPrompt || "";
+          if (suffixPrompt.trim() == "") {
+            suffixPrompt = getSuffixPrompt(PromptType.COMPANION, this.language);
+          }
         }
       } catch (error) {
         console.error("Error getting custom prompts:", error);
@@ -215,7 +224,8 @@ export class CharacterDialogue {
     }
     
     const characterPromptParams = {
-      name: this.character.getData().name,
+      username,
+      name: this.character.getData(this.language,username).name,
       number: number,
       prefixPrompt,
       chainOfThoughtPrompt,
@@ -227,6 +237,7 @@ export class CharacterDialogue {
       userInput: userMessage,
       sampleStatus: this.history.getSampleStatus(),
     };
+
     const characterSystemPrompt = this.language === "zh" 
       ? getCharacterPromptZh(characterPromptParams)
       : getCharacterPromptEn(characterPromptParams);
@@ -267,8 +278,8 @@ export class CharacterDialogue {
     }
   }
 
-  async getSampleStatus(): Promise<string> {
-    const info = this.character.getSampleStatus().replace(/{/g, "{{").replace(/}/g, "}}");
+  async getSampleStatus(username?: string): Promise<string> {
+    const info = this.character.getSampleStatus(this.language, username).replace(/{/g, "{{").replace(/}/g, "}}");
     if (!this.llm) {
       throw new Error("LLM not initialized");
     }

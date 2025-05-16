@@ -3,8 +3,9 @@ import { CharacterDialogue } from "@/app/lib/core/character-dialogue";
 import { LocalCharacterDialogueOperations } from "@/app/lib/data/character-dialogue-operation";
 import { LocalCharacterRecordOperations } from "@/app/lib/data/character-record-operation";
 import { PromptType } from "@/app/lib/prompts/character-prompts";
-
+import { adaptText } from "@/app/lib/adapter/tagReplacer";
 interface InitCharacterDialogueOptions {
+  username?: string;
   characterId: string;
   language?: "zh" | "en";
   modelName: string;
@@ -14,7 +15,7 @@ interface InitCharacterDialogueOptions {
 }
 
 export async function initCharacterDialogue(options: InitCharacterDialogueOptions) {
-  const { characterId, language = "zh", modelName, baseUrl, apiKey, llmType } = options;
+  const { username, characterId, language = "zh", modelName, baseUrl, apiKey, llmType } = options;
 
   if (!characterId) {
     throw new Error("Missing required parameters");
@@ -41,14 +42,14 @@ export async function initCharacterDialogue(options: InitCharacterDialogueOption
     let sampleStatus = characterRecord.data.sample_status;
 
     if (!sampleStatus) {
-      sampleStatus = await dialogue.getSampleStatus();
+      sampleStatus = await dialogue.getSampleStatus(username);
       characterRecord.data.sample_status = sampleStatus;
       await LocalCharacterRecordOperations.updateCharacter(characterId, {
         sample_status: sampleStatus,
       });
     }
 
-    const firstAssistantMessage = await dialogue.getFirstMessage(language);
+    const firstAssistantMessage = await dialogue.getFirstMessage();
     let dialogueTree = await LocalCharacterDialogueOperations.getDialogueTreeById(characterId);
 
     if (!dialogueTree) {
@@ -82,7 +83,7 @@ export async function initCharacterDialogue(options: InitCharacterDialogueOption
       return {
         success: true,
         characterId,
-        firstMessage: firstAssistantMessage[0],
+        firstMessage: adaptText(firstAssistantMessage[0], language, username),
         nodeId: nodeIds[0],
       };
     }
