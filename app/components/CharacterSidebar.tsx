@@ -414,29 +414,41 @@ const CharacterSidebar: React.FC<CharacterSidebarProps> = ({
           <div className="space-y-1 my-2"></div>
           {!isCollapsed ? (
             <div className="px-2 py-2">
-              <div className="flex items-center justify-between mb-1">
-                <span className={`text-xs ${fontClass} text-amber-400`}>{currentResponseLength}</span>
-              </div>
-              <div className="relative">
+              <div className="relative py-3 px-1">
                 <div className="absolute inset-0 flex items-center">
-                  <div className="h-[2px] w-full bg-[#333333] rounded"></div>
+                  <div className="h-1.5 w-full bg-[#2a2a2a] rounded-full"></div>
                 </div>
-                <input
-                  type="range"
-                  min="100"
-                  max="1000"
-                  step="50"
-                  value={currentResponseLength}
-                  onChange={handleResponseLengthChange}
-                  style={{
-                    background: "linear-gradient(to right, #b45309 0%, #b45309 " + ((currentResponseLength - 100) / 9) + "%, #333333 " + ((currentResponseLength - 100) / 9) + "%, #333333 100%)",
-                  }}
-                  className="relative w-full h-[2px] bg-transparent appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:h-[10px] [&::-webkit-slider-thumb]:w-[10px] [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-amber-400 [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-[#1c1c1c] [&::-webkit-slider-thumb]:cursor-pointer [&::-webkit-slider-thumb]:shadow-[0_0_5px_rgba(251,146,60,0.5)] [&::-moz-range-thumb]:h-[10px] [&::-moz-range-thumb]:w-[10px] [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-amber-400 [&::-moz-range-thumb]:border-2 [&::-moz-range-thumb]:border-[#1c1c1c] [&::-moz-range-thumb]:cursor-pointer [&::-moz-range-thumb]:shadow-[0_0_5px_rgba(251,146,60,0.5)]"
-                />
+                <div className="relative w-full h-1.5 rounded-full overflow-hidden">
+                  <div 
+                    className="absolute left-0 top-0 h-full bg-gradient-to-r from-amber-500 to-amber-400 rounded-full transition-all duration-200"
+                    style={{ width: `${((currentResponseLength - 100) / 900 * 100)}%` }}
+                  />
+                  <input
+                    type="range"
+                    min="100"
+                    max="1000"
+                    step="50"
+                    value={currentResponseLength}
+                    onChange={handleResponseLengthChange}
+                    className="absolute top-0 left-0 w-full h-full opacity-0 cursor-pointer"
+                  />
+                  <div 
+                    className="absolute top-1/2 -translate-y-1/2 h-4 w-4 rounded-full bg-amber-400 border-2 border-amber-300 shadow-[0_0_0_2px_rgba(0,0,0,0.3),0_2px_8px_rgba(251,191,36,0.4)] pointer-events-none transition-all duration-200 hover:scale-125"
+                    style={{ 
+                      left: `calc(${((currentResponseLength - 100) / 900 * 100)}% - 8px)`,
+                      transform: "translateY(-50%) scale(1)",
+                    }}
+                  />
+                </div>
               </div>
-              <div className="flex justify-between mt-1">
-                <span className={`text-[9px] ${fontClass} text-[#8a8a8a]`}>100</span>
-                <span className={`text-[9px] ${fontClass} text-[#8a8a8a]`}>1000</span>
+              <div className="flex justify-between mt-3 px-0.5">
+                <span className={`text-xs font-medium ${fontClass} text-[#9ca3af]`}>100</span>
+                <div className="flex items-center">
+                  <span className="text-xs font-medium bg-gradient-to-r from-amber-400 to-amber-300 bg-clip-text text-transparent">
+                    {currentResponseLength}
+                  </span>
+                  <span className="text-xs font-medium text-[#9ca3af] ml-1">/ 1000</span>
+                </div>
               </div>
             </div>
           ) : null}

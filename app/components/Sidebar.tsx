@@ -255,7 +255,7 @@ export default function Sidebar({ isOpen, toggleSidebar, openLoginModal }: Sideb
               onClick={openLoginModal}
               className={`focus:outline-none group relative overflow-hidden rounded-md w-full transition-all duration-300 ${!isOpen ? "p-2 flex justify-center" : "py-1.5 px-2 flex items-center justify-center"}`}
             >
-              <div className="absolute inset-0 bg-gradient-to-br from-[#242424] to-[#1a1a1a] opacity-80 group-hover:opacity-100 transition-opacity duration-300"></div>
+              <div className="absolute inset-0 bg-gradient-to-br from-[#242424]/40 to-[#1a1a1a]/40 opacity-60 group-hover:opacity-80 transition-opacity duration-300"></div>
               <div className="relative flex items-center justify-center w-full transition-all duration-300 z-10">
                 <div className={`${isOpen ? "w-6 h-6" : "w-8 h-8"} flex items-center justify-center flex-shrink-0 text-[#f8d36a] group-hover:text-[#ffc107] transition-colors duration-300`}>
                   <svg xmlns="http://www.w3.org/2000/svg" width={isOpen ? "14" : "16"} height={isOpen ? "14" : "16"} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="transition-transform duration-300 group-hover:scale-110">
@@ -293,7 +293,7 @@ export default function Sidebar({ isOpen, toggleSidebar, openLoginModal }: Sideb
               onClick={handleLogout}
               className={`focus:outline-none group relative overflow-hidden rounded-md w-full transition-all duration-300 ${!isOpen ? "p-2 flex justify-center" : "py-1.5 px-2 flex items-center justify-center"}`}
             >
-              <div className="absolute inset-0 bg-gradient-to-br from-[#242424] to-[#1a1a1a] opacity-80 group-hover:opacity-100 transition-opacity duration-300"></div>
+              <div className="absolute inset-0 bg-gradient-to-br from-[#242424]/40 to-[#1a1a1a]/40 opacity-60 group-hover:opacity-80 transition-opacity duration-300"></div>
               <div className="relative flex items-center justify-center w-full transition-all duration-300 z-10">
                 <div className={`${isOpen ? "w-6 h-6" : "w-8 h-8"} flex items-center justify-center flex-shrink-0 text-[#f8d36a] group-hover:text-[#ffc107] transition-colors duration-300`}>
                   <svg xmlns="http://www.w3.org/2000/svg" width={isOpen ? "14" : "16"} height={isOpen ? "14" : "16"} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="transition-transform duration-300 group-hover:scale-110">
@@ -356,7 +356,7 @@ export default function Sidebar({ isOpen, toggleSidebar, openLoginModal }: Sideb
             rel="noopener noreferrer"
             className={`focus:outline-none group relative overflow-hidden rounded-md w-full transition-all duration-300 ${!isOpen ? "p-2 flex justify-center" : "py-1.5 px-2 flex items-center justify-center"}`}
           >
-            <div className="absolute inset-0 bg-gradient-to-br from-[#242424] to-[#1a1a1a] opacity-80 group-hover:opacity-100 transition-opacity duration-300"></div>
+            <div className="absolute inset-0 bg-gradient-to-br from-[#242424]/40 to-[#1a1a1a]/40 opacity-60 group-hover:opacity-80 transition-opacity duration-300"></div>
             <div className="relative flex items-center justify-center transition-all duration-300 z-10">
               <div className={`${isOpen ? "w-6 h-6" : "w-8 h-8"} flex items-center justify-center flex-shrink-0 text-[#f8d36a] group-hover:text-[#ffc107] transition-colors duration-300`}>
                 <svg xmlns="http://www.w3.org/2000/svg" width={isOpen ? "14" : "16"} height={isOpen ? "14" : "16"} viewBox="0 0 24 24" fill="currentColor" className="transition-transform duration-300 group-hover:scale-110">
