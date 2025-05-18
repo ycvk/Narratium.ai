@@ -1,5 +1,5 @@
 import { CharacterRecord } from "@/app/lib/data/character-record-operation";
-import { parseCharacterIntro,replaceCharacterDataPlaceholders } from "@/app/lib/utils/character-parser";
+import { adaptCharacterData } from "@/app/lib/adapter/tagReplacer";
 export interface RawCharacterData {
   id: any;
   name: string;
@@ -78,24 +78,21 @@ export class Character {
     }; 
   }
 
-  async getFirstMessage(language: "en" | "zh" = "zh", username?: string): Promise<string[]> {
+  async getFirstMessage(): Promise<string[]> {
     if (this.data.alternate_greetings && Array.isArray(this.data.alternate_greetings) && this.data.alternate_greetings.length > 0) {
-      return this.data.alternate_greetings.map(greet =>
-        parseCharacterIntro(greet, language, username, this.data.name),
-      );
+      return this.data.alternate_greetings;
     } else {
       const rawMessage = this.data.first_mes || `你好，我是${this.data.name}。`;
-      return [parseCharacterIntro(rawMessage, language, username, this.data.name)];
+      return [rawMessage];
     }
   }
   
   getData(language: "en" | "zh" = "zh", username?: string): CharacterData {
-
-    return replaceCharacterDataPlaceholders(this.data, language, username);
+    return adaptCharacterData(this.data, language, username);
   }
 
   getSystemPrompt(language: "en" | "zh" = "zh", username?: string): string {
-    const processedData = replaceCharacterDataPlaceholders(this.data, language, username);
+    const processedData = adaptCharacterData(this.data, language, username);
     let prompt = "";
   
     if (language === "zh") {
@@ -146,7 +143,7 @@ export class Character {
   }
 
   getSampleStatus(language: "en" | "zh" = "zh", username?: string): string {
-    const processedData = replaceCharacterDataPlaceholders(this.data, language, username);
+    const processedData = adaptCharacterData(this.data, language, username);
     let info = "";
   
     if (processedData.character_book && processedData.character_book.length > 0) {
