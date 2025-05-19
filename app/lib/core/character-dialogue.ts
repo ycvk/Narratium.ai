@@ -1,31 +1,16 @@
-import { Character } from "@/app/lib/models/character-model";
+import { Character } from "@/app/lib/core/character";
 import { ChatOpenAI } from "@langchain/openai";
 import { ChatOllama } from "@langchain/ollama";
 import { ChatPromptTemplate } from "@langchain/core/prompts";
 import { StringOutputParser } from "@langchain/core/output_parsers";
+import { PromptAssembler } from "@/app/lib/core/prompt-assembler";
 import { RunnablePassthrough } from "@langchain/core/runnables";
-import { PromptType, getPrefixPrompt, getChainOfThoughtPrompt, getSuffixPrompt, getCharacterPromptZh, getCharacterPromptEn, getStatusPromptZh, getStatusPromptEn, getCharacterCompressorPromptZh, getCharacterCompressorPromptEn } from "@/app/lib/prompts/character-prompts";
-import { ParsedResponse } from "@/app/lib/utils/response-parser";
-import { CharacterHistory } from "@/app/lib/models/character-history";
-
-export interface DialogueMessage {
-  role: "user" | "assistant" | "system" | "sample";
-  content: string;
-  parsedContent?: ParsedResponse;
-  id: number;
-}
-
-export interface DialogueOptions {
-  modelName: string;
-  apiKey: string;
-  baseUrl: string;
-  llmType: "openai" | "ollama";
-  temperature?: number;
-  maxTokens?: number;
-  streaming?: boolean;
-  language?: "zh" | "en";
-  promptType?: PromptType;
-}
+import { PromptType } from "@/app/lib/models/character-prompts-model";
+import { getPrefixPrompt, getChainOfThoughtPrompt, getSuffixPrompt, getCharacterPromptZh, getCharacterPromptEn, getStatusPromptZh, getStatusPromptEn, getCharacterCompressorPromptZh, getCharacterCompressorPromptEn } from "@/app/lib/prompts/character-prompts";
+import { ParsedResponse } from "@/app/lib/models/parsed-response";
+import { CharacterHistory } from "@/app/lib/core/character-history";
+import { DialogueOptions } from "@/app/lib/models/character-dialogue-model";
+import { RegexProcessor } from "@/app/lib/core/regex-processor";
 
 export class CharacterDialogue {
   character: Character;
@@ -34,11 +19,13 @@ export class CharacterDialogue {
   dialogueChain: RunnablePassthrough | null = null;
   language: "zh" | "en" = "zh";
   promptType: PromptType = PromptType.COMPANION;
+  promptAssembler: PromptAssembler;
 
   constructor(character: Character) {
     this.character = character;
     this.history = new CharacterHistory(this.language);
     this.llm = null;
+    this.promptAssembler = new PromptAssembler({ language: this.language });
   }
 
   async initialize(options?: DialogueOptions): Promise<void> {
@@ -50,6 +37,12 @@ export class CharacterDialogue {
       if (options?.promptType) {
         this.promptType = options.promptType;
       }
+
+      this.promptAssembler = new PromptAssembler({
+        language: this.language,
+        contextWindow: options?.contextWindow || 5,
+      });
+      
       this.setupLLM(options);
       this.setupDialogueChain();
     } catch (error) {
@@ -172,27 +165,46 @@ export class CharacterDialogue {
       .pipe(new StringOutputParser());
   }
 
-  async sendMessage(number: number, _userMessage: string,username?: string): Promise<{ stream?: AsyncIterable<string>, parsedResponse?: ParsedResponse }> {
-    if (!this.dialogueChain || !this.llm) {
+  async sendMessage(number: number, _userMessage: string, username?: string): Promise<{ stream?: AsyncIterable<string>, parsedResponse?: ParsedResponse, response?: string }> {
+    if (!this.dialogueChain) {
       throw new Error("Dialogue chain not initialized");
     }
 
     try {
-      const userMessage = this.prepareSystemMessage(number, _userMessage, username);
-      const systemMessage = this.character.getSystemPrompt(this.language, username);
-      console.log("userMessage",userMessage);
-      const stream = await this.dialogueChain.stream({
+      const userMessage = this.prepareUserMessage(number, _userMessage, username);
+      const baseSystemMessage = this.character.getSystemPrompt(this.language, username);
+
+      const { systemMessage, userMessage: enhancedUserMessage } = this.promptAssembler.assemblePrompt(
+        this.character.worldBook,
+        baseSystemMessage,
+        userMessage,
+        this.history.getMessages(),
+        _userMessage,
+        username,
+      );
+
+      console.log("system_message", systemMessage);
+      console.log("user_message", enhancedUserMessage);
+      
+      const response = await this.dialogueChain.invoke({
         system_message: systemMessage,
-        user_message: userMessage,
+        user_message: enhancedUserMessage,
       });
-      return { stream };
+
+      const result = await RegexProcessor.processFullContext(response, {
+        ownerId: this.character.id,
+      });
+      
+      return { 
+        response: result.replacedText, 
+      };
     } catch (error) {
       console.error("Error in character dialogue:", error);
       throw new Error(`Failed to get character response: ${error}`);
     }
   }
 
-  prepareSystemMessage(number: number, userMessage: string,username?: string): string {
+  prepareUserMessage(number: number, userMessage: string,username?: string): string {
     let prefixPrompt = "";
     let chainOfThoughtPrompt = "";
     let suffixPrompt = "";
@@ -235,7 +247,6 @@ export class CharacterDialogue {
       storyHistory: this.history.getCompressedHistory(),
       conversationHistory: this.history.getRecentHistory(),
       userInput: userMessage,
-      sampleStatus: this.history.getSampleStatus(),
     };
 
     const characterSystemPrompt = this.language === "zh" 
@@ -275,37 +286,6 @@ export class CharacterDialogue {
     } catch (error) {
       console.error("Error compressing story:", error);
       throw new Error(`Failed to compress story: ${error}`);
-    }
-  }
-
-  async getSampleStatus(username?: string): Promise<string> {
-    const info = this.character.getSampleStatus(this.language, username).replace(/{/g, "{{").replace(/}/g, "}}");
-    if (!this.llm) {
-      throw new Error("LLM not initialized");
-    }
-    this.llm.streaming = false;
-    try {
-      let samplePrompt;
-      if (this.language === "zh") {
-        samplePrompt = ChatPromptTemplate.fromMessages([
-          ["system","" ],
-          ["user",getStatusPromptZh(info)],
-        ]);
-      } else {
-        samplePrompt = ChatPromptTemplate.fromMessages([
-          ["system","" ],
-          ["user",getStatusPromptEn(info)],
-        ]);
-      }
-      const sampleChain = samplePrompt
-        .pipe(this.llm)
-        .pipe(new StringOutputParser());
-      const sampleStatus = await sampleChain.invoke({});
-      return sampleStatus;
-
-    } catch (error) {
-      console.error("Error getting sample status:", error);
-      throw new Error(`Failed to get sample status: ${error}`);
     }
   }
 }
