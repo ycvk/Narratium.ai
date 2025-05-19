@@ -19,7 +19,7 @@
     "characterCards": "角色卡",
     "characterMarket": "角色市场",
     "login": "登录并探索更多",
-    "nologin": "测试期间无需登录",
+    "nologin": "定义 User 名称",
     "logout": "退出登录"
   },
   "modelSettings": {
@@ -97,7 +97,7 @@
     "emailPlaceholder": "在此刻下魔法邮箱...",
     "passwordPlaceholder": "输入密码",
     "codePlaceholder": "输入验证码",
-    "wizardQuestion": "✨ 勇敢的魔法师啊，请留下您的秘法通讯卷轴印记！",
+    "wizardQuestion": "✨ 勇者，请留下您的姓名",
     "spellQuestion": "🔮 请施展您的守护咒语，它将保护您的奇幻旅程！",
     "codeQuestion": "⚡ 输入星辰大海送来的神秘符文，证明您的身份！",
     "getCode": "获取验证码",

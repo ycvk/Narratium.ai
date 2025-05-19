@@ -19,7 +19,7 @@
     "characterCards": "Character Cards",
     "characterMarket": "Character Market",
     "login": "Login & Explore",
-    "nologin": "No login required during testing",
+    "nologin": "Define User Name",
     "logout": "Logout"
   },
   "modelSettings": {
@@ -41,7 +41,9 @@
     "createConfig": "Create Configuration",
     "nameRequired": "Name is required",
     "cannotDeleteLastConfig": "Cannot delete the last configuration",
-    "confirmDelete": "Are you sure you want to delete this configuration?"
+    "confirmDelete": "Are you sure you want to delete this configuration?",
+    "createFirstConfig": "Create Your First Configuration",
+    "noConfigs": "No API configurations yet"
   },
   "llmSettings": {
     "title": "Settings",
@@ -94,7 +96,7 @@
     "emailPlaceholder": "Enter your email...",
     "passwordPlaceholder": "Enter your password...",
     "codePlaceholder": "Enter the verification code...",
-    "wizardQuestion": "✨ Brave wizard, please leave your arcane communication scroll mark!",
+    "wizardQuestion": "✨ Brave adventurer, please leave your name",
     "spellQuestion": "🔮 Cast your protective spell, it will guard your fantastic journey!",
     "codeQuestion": "⚡ Enter the mysterious runes sent by the cosmic sea to prove your identity!",
     "getCode": "Get Code",
@@ -291,6 +293,9 @@
     "prefixPromptDescription": "The prefix prompt is placed at the beginning of the prompt, used to set the character's basic behavior and background.",
     "chainOfThoughtPromptDescription": "The chain of thought prompt is placed in the middle of the prompt, used to guide the character's thinking process.",
     "suffixPromptDescription": "The suffix prompt is placed at the end of the prompt, used to emphasize the character's response format and restrictions.",
+    "prefixPromptPlaceholder": "Enter prefix prompt...",
+    "chainOfThoughtPromptPlaceholder": "Enter chain of thought prompt...",
+    "suffixPromptPlaceholder": "Enter suffix prompt...",
     "autoSaveEnabled": "Auto-save enabled",
     "initializing": "Initializing character...",
     "extractingTemplate": "Extracting status template, please wait...",
