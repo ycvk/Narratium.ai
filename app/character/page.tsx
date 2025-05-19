@@ -5,82 +5,14 @@ import { useSearchParams } from "next/navigation";
 import { useLanguage } from "@/app/i18n";
 import CharacterSidebar from "@/app/components/CharacterSidebar";
 import { CharacterAvatarBackground } from "@/app/components/CharacterAvatarBackground";
-import { PromptType } from "@/app/lib/prompts/character-prompts";
+import { PromptType } from "@/app/lib/models/character-prompts-model";
 import { v4 as uuidv4 } from "uuid";
-import { trackButtonClick, trackFormSubmit } from "@/app/lib/utils/analytics";
+import { trackButtonClick, trackFormSubmit } from "@/app/lib/utils/google-analytics";
 import { initCharacterDialogue } from "@/app/function/dialogue/init";
 import { getCharacterDialogue } from "@/app/function/dialogue/info";
-import { getCharacterStatus } from "@/app/function/dialogue/status";
 import { handleCharacterChatRequest } from "@/app/function/dialogue/chat";
 import { switchDialogueBranch } from "@/app/function/dialogue/truncate";
-
-const formatTaggedContent = (content: string): string => {
-
-  const styles = {
-    screen: { color: "#f4e8c1", prefix: "", suffix: "" },           
-    speech: { color: "#8b5563", prefix: "", suffix: "" },         
-    thought: { color: "#5c6bc0", fontStyle: "italic", prefix: "(", suffix: ")" }, 
-  };
-
-  let formattedContent = content
-    .replace(/<\/screen>\s*\n+\s*<speech>/g, "</screen><speech>")
-    .replace(/<\/speech>\s*\n+\s*<thought>/g, "</speech><thought>")
-    .replace(/<screen>\s*\n+/g, "<screen>")
-    .replace(/\n+\s*<\/screen>/g, "</screen>")
-    .replace(/<speech>\s*\n+/g, "<speech>")
-    .replace(/\n+\s*<\/speech>/g, "</speech>")
-    .replace(/<thought>\s*\n+/g, "<thought>")
-    .replace(/\n+\s*<\/thought>/g, "</thought>")
-    .replace(/\n+/g, " ");
-
-  const addClosingTags = (text: string): string => {
-    let result = text;
-    
-    if ((result.match(/<screen>/g) || []).length > (result.match(/<\/screen>/g) || []).length) {
-      result += "</screen>";
-    }
-
-    if ((result.match(/<speech>/g) || []).length > (result.match(/<\/speech>/g) || []).length) {
-      result += "</speech>";
-    }
-    
-    if ((result.match(/<thought>/g) || []).length > (result.match(/<\/thought>/g) || []).length) {
-      result += "</thought>";
-    }
-    
-    return result;
-  };
-  
-  formattedContent = addClosingTags(formattedContent);
-
-  formattedContent = formattedContent.replace(
-    /<screen>([\s\S]*?)<\/screen>/g, 
-    (match, p1) => {
-      const cleanedContent = p1.trim().replace(/\n{2,}/g, " ");
-      return `<span style="color: ${styles.screen.color};">${styles.screen.prefix}${cleanedContent}${styles.screen.suffix}</span>`;
-    },
-  );
-  
-  formattedContent = formattedContent.replace(
-    /<speech>([\s\S]*?)<\/speech>/g, 
-    (match, p1) => {
-      const cleanedContent = p1.trim().replace(/\n{2,}/g, " ");
-      return `<span style="color: ${styles.speech.color};">${styles.speech.prefix}${cleanedContent.trimStart()}${styles.speech.suffix}</span>`;
-    },
-  );
-  
-  formattedContent = formattedContent.replace(
-    /<thought>([\s\S]*?)<\/thought>/g, 
-    (match, p1) => {
-      const cleanedContent = p1.trim().replace(/\n{2,}/g, " ");
-      return `<span style="color: ${styles.thought.color}; font-style: ${styles.thought.fontStyle};">${styles.thought.prefix}${cleanedContent.trimStart()}${styles.thought.suffix}</span>`;
-    },
-  );
-
-  formattedContent = formattedContent.replace(/\n{3,}/g, "\n\n");
-  
-  return formattedContent;
-};
+import ChatHtmlBubble from "@/app/components/ChatHtmlBubble";
 
 interface Character {
   id: string;
@@ -124,42 +56,6 @@ export default function CharacterPage() {
     "scene-setting": false,
   });
 
-  const toggleStatusInfo = async (nodeId?: string) => {
-    if (!nodeId || !characterId) return;
-
-    const newActiveStatusMessageIds = new Set(activeStatusMessageIds);
-    
-    if (activeStatusMessageIds.has(nodeId)) {
-      newActiveStatusMessageIds.delete(nodeId);
-      setActiveStatusMessageIds(newActiveStatusMessageIds);
-      return;
-    }
-    
-    try {
-      const response = await getCharacterStatus({ characterId, nodeId });
-      if (!response.success) {
-        console.warn(`Failed to fetch status: ${response}`);
-        return;
-      }
-        
-      if (response.success && response.status) {
-        const newStatusInfoMap = new Map(statusInfoMap);
-        newStatusInfoMap.set(nodeId, response.status);
-        setStatusInfoMap(newStatusInfoMap);
-        newActiveStatusMessageIds.add(nodeId);
-        setActiveStatusMessageIds(newActiveStatusMessageIds);
-      } else {
-        const newStatusInfoMap = new Map(statusInfoMap);
-        newStatusInfoMap.set(nodeId, t("characterChat.loading"));
-        setStatusInfoMap(newStatusInfoMap);
-        newActiveStatusMessageIds.add(nodeId);
-        setActiveStatusMessageIds(newActiveStatusMessageIds);
-      }
-    } catch (error) {
-      console.warn("Error fetching status:", error);
-    }
-  };
-
   const truncateMessagesAfter = async (nodeId: string) => {
     if (!characterId) return;
     
@@ -187,7 +83,7 @@ export default function CharacterPage() {
           const formattedMessages = dialogue.messages.map((msg: any) => ({
             id: msg.id,
             role: msg.role == "system" ? "assistant" : msg.role,
-            content: formatTaggedContent(msg.content),
+            content: msg.content,
             timestamp: msg.timestamp || new Date(dialogue.created_at).toISOString(),
           }));
 
@@ -232,7 +128,7 @@ export default function CharacterPage() {
         const formattedMessages = dialogue.messages.map((msg: any) => ({
           id: msg.id,
           role: msg.role,
-          content: formatTaggedContent(msg.content),
+          content: msg.content,
           timestamp: msg.timestamp || new Date(dialogue.created_at).toISOString(),
         }));
         setMessages(formattedMessages);
@@ -275,7 +171,7 @@ export default function CharacterPage() {
           const formattedMessages = dialogue.messages.map((msg: any) => ({
             id: msg.id,
             role: msg.role,
-            content: formatTaggedContent(msg.content),
+            content: msg.content,
             timestamp: new Date(dialogue.created_at).toISOString(),
           }));
           setMessages(formattedMessages);
@@ -322,7 +218,7 @@ export default function CharacterPage() {
         setMessages([{
           id: initData.nodeId,
           role: "assistant",
-          content: formatTaggedContent(initData.firstMessage),
+          content: initData.firstMessage,
           timestamp: new Date().toISOString(),
         },
         ]);
@@ -374,7 +270,7 @@ export default function CharacterPage() {
             switch (data.type) {
             case "chunk":
               formattedContent += data.content;
-              const processedContent = formatTaggedContent(formattedContent);
+              const processedContent = formattedContent;
               setMessages(prev => {
                 const newMessages = [...prev];
                 newMessages[newMessages.length - 1].content = processedContent;
@@ -692,16 +588,6 @@ export default function CharacterPage() {
                           {message.role === "assistant" && (
                             <>
                               <button
-                                onClick={() => {trackButtonClick("page", "查看状态"); toggleStatusInfo(message.id);}}
-                                className="ml-2 w-6 h-6 flex items-center justify-center text-[#a18d6f] hover:text-[#f4e8c1] bg-[#1c1c1c] rounded-lg border border-[#333333] shadow-inner transition-all duration-300 hover:border-[#444444] hover:text-amber-400 hover:shadow-[0_0_8px_rgba(251,146,60,0.4)]"
-                                aria-label={t("查看状态")}
-                              >
-                                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                                  <circle cx="12" cy="7" r="4"></circle>
-                                </svg>
-                              </button>
-                              <button
                                 onClick={() => {trackButtonClick("page", "跳转到此消息"); truncateMessagesAfter(message.id);}}
                                 className="ml-1 w-6 h-6 flex items-center justify-center text-[#a18d6f] hover:text-green-400 bg-[#1c1c1c] rounded-lg border border-[#333333] shadow-inner transition-all duration-300 hover:border-[#444444] hover:shadow-[0_0_8px_rgba(34,197,94,0.4)]"
                                 aria-label={t("跳转到此消息")}
@@ -717,10 +603,7 @@ export default function CharacterPage() {
                           )}
                         </div>
                       </div>
-                      
-                      <div className={`whitespace-pre-line text-[#f4e8c1] story-text ${serifFontClass} leading-relaxed magical-text`}>
-                        <div dangerouslySetInnerHTML={{ __html: message.content }}></div>
-                      </div>
+                      <ChatHtmlBubble html={message.content} />
                       
                       {activeStatusMessageIds.has(message.id) && statusInfoMap.get(message.id) && message.role === "assistant" && (
                         <div className="mt-2 bg-opacity-100 border-l-2 border-[#534741] pl-3 py-2 backdrop-blur-sm">
