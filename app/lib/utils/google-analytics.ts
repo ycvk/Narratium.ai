@@ -1,4 +1,4 @@
-export const GA_MEASUREMENT_ID = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID || "";
+export const GA_MEASUREMENT_ID = "G-KDEPSL9CJG";
 
 export const initGA = () => {
   if (!GA_MEASUREMENT_ID || typeof window === "undefined") return;
