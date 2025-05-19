@@ -1,9 +1,11 @@
-import { Character } from "@/app/lib/models/character-model";
+import { Character } from "@/app/lib/core/character";
 import { CharacterDialogue } from "@/app/lib/core/character-dialogue";
 import { LocalCharacterDialogueOperations } from "@/app/lib/data/character-dialogue-operation";
 import { LocalCharacterRecordOperations } from "@/app/lib/data/character-record-operation";
-import { PromptType } from "@/app/lib/prompts/character-prompts";
+import { PromptType } from "@/app/lib/models/character-prompts-model";
 import { adaptText } from "@/app/lib/adapter/tagReplacer";
+import { RegexProcessor } from "@/app/lib/core/regex-processor";
+
 interface InitCharacterDialogueOptions {
   username?: string;
   characterId: string;
@@ -39,16 +41,6 @@ export async function initCharacterDialogue(options: InitCharacterDialogueOption
       promptType: PromptType.COMPANION,
     });
 
-    let sampleStatus = characterRecord.data.sample_status;
-
-    if (!sampleStatus) {
-      sampleStatus = await dialogue.getSampleStatus(username);
-      characterRecord.data.sample_status = sampleStatus;
-      await LocalCharacterRecordOperations.updateCharacter(characterId, {
-        sample_status: sampleStatus,
-      });
-    }
-
     const firstAssistantMessage = await dialogue.getFirstMessage();
     let dialogueTree = await LocalCharacterDialogueOperations.getDialogueTreeById(characterId);
 
@@ -67,12 +59,8 @@ export async function initCharacterDialogue(options: InitCharacterDialogueOption
           message,
           "",
           {
-            rawcontent: message,
             screen: message,
-            speech: "",
-            thought: "",
             nextPrompts: [],
-            status: sampleStatus || "",
           },
           undefined,
           2,
@@ -80,10 +68,23 @@ export async function initCharacterDialogue(options: InitCharacterDialogueOption
         nodeIds.push(nodeId);
       }    
 
+      let processedMessage = adaptText(firstAssistantMessage[0], language, username);
+
+      const regexResult = await RegexProcessor.processFullContext(
+        processedMessage, 
+        { 
+          ownerId: characterId, 
+        },
+      );
+      
+      if (regexResult.isModified) {
+        processedMessage = regexResult.replacedText;
+      }
+      
       return {
         success: true,
         characterId,
-        firstMessage: adaptText(firstAssistantMessage[0], language, username),
+        firstMessage: processedMessage,
         nodeId: nodeIds[0],
       };
     }

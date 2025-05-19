@@ -1,6 +1,8 @@
 import { LocalCharacterDialogueOperations } from "@/app/lib/data/character-dialogue-operation";
 import { LocalCharacterRecordOperations } from "@/app/lib/data/character-record-operation";
-import { deleteBlob } from "@/app/lib/data/local-storage"; // 你需要实现 deleteBlob
+import { RegexScriptOperations } from "@/app/lib/data/regex-script-operation";
+import { WorldBookOperations } from "@/app/lib/data/world-book-operation";
+import { deleteBlob } from "@/app/lib/data/local-storage";
 
 export async function deleteCharacter(character_id: string): Promise<{ success?: boolean; error?: string }> {
   try {
@@ -19,6 +21,37 @@ export async function deleteCharacter(character_id: string): Promise<{ success?:
     }
 
     await LocalCharacterDialogueOperations.deleteDialogueTree(character_id);
+
+    try {
+      const worldBooks = await WorldBookOperations["getWorldBooks"]();
+      
+      if (worldBooks[character_id]) {
+        delete worldBooks[character_id];
+      }
+      
+      if (worldBooks[`${character_id}_settings`]) {
+        delete worldBooks[`${character_id}_settings`];
+      }
+      
+      await WorldBookOperations["saveWorldBooks"](worldBooks);
+    } catch (worldBookErr) {
+      console.warn("Failed to delete world book:", worldBookErr);
+    }
+    try {
+      const scriptStore = await RegexScriptOperations["getRegexScriptStore"]();
+      
+      if (scriptStore[character_id]) {
+        delete scriptStore[character_id];
+      }
+      
+      if (scriptStore[`${character_id}_settings`]) {
+        delete scriptStore[`${character_id}_settings`];
+      }
+      
+      await RegexScriptOperations["saveRegexScriptStore"](scriptStore);
+    } catch (regexErr) {
+      console.warn("Failed to delete regex scripts:", regexErr);
+    }
 
     const avatarPath = character.imagePath;
     if (avatarPath) {

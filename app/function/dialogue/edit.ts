@@ -1,9 +1,9 @@
 import { LocalCharacterDialogueOperations } from "@/app/lib/data/character-dialogue-operation";
 import { CharacterDialogue } from "@/app/lib/core/character-dialogue";
 import { parseEvent } from "@/app/lib/utils/response-parser";
-import { DialogueNode } from "@/app/lib/core/dialogue-node";
+import { DialogueNode } from "@/app/lib/models/node-model";
 import { LocalCharacterRecordOperations } from "@/app/lib/data/character-record-operation";
-import { Character } from "@/app/lib/models/character-model";
+import { Character } from "@/app/lib/core/character";
 
 interface EditDialogueNodeRequest {
   characterId: string;
@@ -72,8 +72,6 @@ export async function editDialaogueNodeContent(input: EditDialogueNodeRequest) {
       response_summary: summary,
       parsed_content: {
         screen: screen,
-        speech: speech,
-        thought: innerThought,
         compressedContent: summary,
       },
     };

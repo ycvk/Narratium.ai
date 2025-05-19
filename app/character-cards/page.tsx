@@ -8,7 +8,7 @@ import ImportCharacterModal from "@/app/components/ImportCharacterModal";
 import EditCharacterModal from "@/app/components/EditCharacterModal";
 import DownloadCharacterModal from "@/app/components/DownloadCharacterModal";
 import { CharacterAvatarBackground } from "@/app/components/CharacterAvatarBackground";
-import { trackButtonClick } from "@/app/lib/utils/analytics";
+import { trackButtonClick } from "@/app/lib/utils/google-analytics";
 import { getAllCharacters } from "@/app/function/character/list";
 import { deleteCharacter } from "@/app/function/character/delete";
 import "@/app/styles/fantasy-ui.css";

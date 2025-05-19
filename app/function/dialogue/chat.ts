@@ -1,8 +1,8 @@
-import { Character } from "@/app/lib/models/character-model";
+import { Character } from "@/app/lib/core/character";
 import { CharacterDialogue } from "@/app/lib/core/character-dialogue";
 import { LocalCharacterDialogueOperations } from "@/app/lib/data/character-dialogue-operation";
-import { PromptType } from "@/app/lib/prompts/character-prompts";
-import { ParsedResponse } from "@/app/lib/utils/response-parser";
+import { PromptType } from "@/app/lib/models/character-prompts-model";
+import { ParsedResponse } from "@/app/lib/models/parsed-response";
 import { parseEvent } from "@/app/lib/utils/response-parser";
 import { LocalCharacterRecordOperations } from "@/app/lib/data/character-record-operation";
 
@@ -84,14 +84,10 @@ export async function handleCharacterChatRequest(payload: {
       }
       if (node.assistant_response) {
         dialogue.history.recentDialogue.responses.push(node.assistant_response);
-        dialogue.history.recentDialogue.status.push(node.parsed_content?.status || "[]");
         dialogue.history.historyDialogue.responses.push(node.parsed_content?.compressedContent || "");
-        dialogue.history.historyDialogue.status.push(node.parsed_content?.status || "[]");
       }
     };
-
-    dialogue.history.sampleStatus = await LocalCharacterDialogueOperations.getSampleStatus(characterId);
-
+    
     if (!streaming) {
       return new Response(JSON.stringify({ error: "Streaming required for this endpoint" }), { status: 400 });
     }
@@ -101,56 +97,49 @@ export async function handleCharacterChatRequest(payload: {
         try {
           controller.enqueue(JSON.stringify({ type: "start", success: true }) + "\n");
 
-          const response = await dialogue.sendMessage(number, message,username);
-          if (!response.stream) throw new Error("No stream returned from LLM");
-
-          let fullResponse = "", chunkIndex = 0, processedLength = 0;
-          let recordingStarted = false;
-          let sentToClient = false;
-          let thoughtClosed = false;
+          const response = await dialogue.sendMessage(number, message, username);
+          
+          if (!response.response) throw new Error("No response returned from LLM");
+          
+          const fullResponse = response.response;
+          let chunkIndex = 0;
           let nextPrompts: string[] = [];
-
-          for await (const chunk of response.stream) {
-            fullResponse += chunk;
-
-            if (!recordingStarted && fullResponse.includes("<screen>")) {
-              recordingStarted = true;
-              const startIndex = fullResponse.indexOf("<screen>");
-              const toSend = fullResponse.substring(startIndex);
-              controller.enqueue(JSON.stringify({ type: "chunk", content: toSend, step: `${chunkIndex++}` }) + "\n");
-              processedLength = fullResponse.length;
-              continue;
-            }
-
-            if (!recordingStarted || sentToClient) continue;
-
-            if (!thoughtClosed) {
-              const newContent = fullResponse.substring(processedLength);
-              if (newContent.trim()) {
-                controller.enqueue(JSON.stringify({ type: "chunk", content: newContent, step: `${chunkIndex++}` }) + "\n");
+          
+          const screenMatch = fullResponse.match(/<screen>([\s\S]*?)<\/screen>/);
+          if (screenMatch) {
+            const screenContent = screenMatch[0];
+            
+            const chunkSize = 20;
+            const chunks = [];
+            
+            let i = 0;
+            while (i < screenContent.length) {
+              let end = Math.min(i + chunkSize, screenContent.length);
+              if (end < screenContent.length && screenContent[end] !== " " && screenContent[end] !== "\n") {
+                while (end > i && screenContent[end] !== " " && screenContent[end] !== "\n") {
+                  end--;
+                }
+                if (end === i) end = i + chunkSize;
               }
-
-              if (fullResponse.includes("</thought>")) {
-                thoughtClosed = true;
-                processedLength = fullResponse.indexOf("</thought>") + "</thought>".length;
-              } else {
-                processedLength = fullResponse.length;
-              }
+              
+              chunks.push(screenContent.substring(i, end));
+              i = end;
             }
-
-            if (thoughtClosed && fullResponse.includes("</next_prompts>")) {
-              sentToClient = true;
-
-              const match = fullResponse.match(/<next_prompts>([\s\S]*?)<\/next_prompts>/);
-              if (match) {
-                nextPrompts = match[1]
-                  .trim()
-                  .split("\n")
-                  .map((l) => l.trim())
-                  .filter((l) => /^[-*]/.test(l))
-                  .map((l) => l.replace(/^[-*]\s*/, "").replace(/^\[|\]$/g, "").trim());
-              }
+            
+            for (const chunk of chunks) {
+              controller.enqueue(JSON.stringify({ type: "chunk", content: chunk, step: `${chunkIndex++}` }) + "\n");
+              await new Promise(resolve => setTimeout(resolve, 50));
             }
+          }
+
+          const promptsMatch = fullResponse.match(/<next_prompts>([\s\S]*?)<\/next_prompts>/);
+          if (promptsMatch) {
+            nextPrompts = promptsMatch[1]
+              .trim()
+              .split("\n")
+              .map((l) => l.trim())
+              .filter((l) => /^[-*]/.test(l))
+              .map((l) => l.replace(/^[-*]\s*/, "").replace(/^\[|\]$/g, "").trim());
           }
 
           await processPostResponseAsync({ characterId, message, fullResponse, nextPrompts, nodeId })
@@ -204,17 +193,12 @@ async function processPostResponseAsync({
 }) {
   try {
     const screen = fullResponse.match(/<screen>([\s\S]*?)<\/screen>/)?.[1]?.trim() || "";
-    const speech = fullResponse.match(/<speech>([\s\S]*?)<\/speech>/)?.[1]?.trim() || "";
-    const thought = fullResponse.match(/<thought>([\s\S]*?)<\/thought>/)?.[1]?.trim() || "";
-    const status = fullResponse.match(/<status>([\s\S]*?)<\/status>/)?.[1]?.trim() || "";
     const event = fullResponse.match(/<event>([\s\S]*?)<\/event>/)?.[1]?.trim() || "";
+
     const parsed: ParsedResponse = {
-      rawcontent: fullResponse,
       screen,
-      speech,
-      thought,
       nextPrompts,
-      status,
+      event,
     };
 
     const dialogueTree = await LocalCharacterDialogueOperations.getDialogueTreeById(characterId);
@@ -224,7 +208,7 @@ async function processPostResponseAsync({
       characterId,
       parentNodeId,
       message,
-      screen + speech + thought,
+      screen,
       "",
       parsed,
       nodeId,
