@@ -1,7 +1,7 @@
 import { readData, writeData, CHARACTER_DIALOGUES_FILE } from "@/app/lib/data/local-storage";
-import { DialogueNode, DialogueTree } from "@/app/lib/core/dialogue-node";
+import { DialogueNode, DialogueTree } from "@/app/lib/models/node-model";
 import { v4 as uuidv4 } from "uuid";
-import { ParsedResponse } from "@/app/lib/utils/response-parser";
+import { ParsedResponse } from "@/app/lib/models/parsed-response";
 
 export class LocalCharacterDialogueOperations {
   static async createDialogueTree(characterId: string, title: string = "Untitled Conversation"): Promise<DialogueTree> {
@@ -257,22 +257,6 @@ export class LocalCharacterDialogueOperations {
       data.created_at,
       data.updated_at,
     );
-  }
-
-  static async getSampleStatus(characterId: string): Promise<string> {
-    const dialogueTree = await this.getDialogueTreeById(characterId);
-    
-    if (!dialogueTree || !dialogueTree.nodes || dialogueTree.nodes.length === 0) {
-      return "";
-    }
-    
-    const rootNode = dialogueTree.nodes.find(node => node.parent_node_id === "root");
-    
-    if (!rootNode || !rootNode.parsed_content) {
-      return "";
-    }
-    
-    return rootNode.parsed_content.status || "";
   }
 
   static async getSystemMessage(characterId: string): Promise<string> {

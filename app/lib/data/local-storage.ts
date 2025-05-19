@@ -1,9 +1,12 @@
 const DB_NAME = "CharacterAppDB";
-const DB_VERSION = 1;
+const DB_VERSION = 3; // 递增数据库版本以触发onupgradeneeded
 
 export const CHARACTERS_RECORD_FILE = "characters_record";
 export const CHARACTER_DIALOGUES_FILE = "character_dialogues";
-const CHARACTER_IMAGES_FILE = "character_images";
+export const CHARACTER_IMAGES_FILE = "character_images";
+export const WORLD_BOOK_FILE = "world_book";
+export const REGEX_SCRIPTS_FILE = "regex_scripts";
+
 function openDB(): Promise<IDBDatabase> {
   return new Promise((resolve, reject) => {
     const request = indexedDB.open(DB_NAME, DB_VERSION);
@@ -21,6 +24,12 @@ function openDB(): Promise<IDBDatabase> {
       }
       if (!db.objectStoreNames.contains(CHARACTER_IMAGES_FILE)) {
         db.createObjectStore(CHARACTER_IMAGES_FILE);
+      }
+      if (!db.objectStoreNames.contains(WORLD_BOOK_FILE)) {
+        db.createObjectStore(WORLD_BOOK_FILE);
+      }
+      if (!db.objectStoreNames.contains(REGEX_SCRIPTS_FILE)) {
+        db.createObjectStore(REGEX_SCRIPTS_FILE);
       }
     };
   });
@@ -55,7 +64,12 @@ export async function writeData(storeName: string, data: any[]): Promise<void> {
 export async function initializeDataFiles(): Promise<void> {
   const db = await openDB();
 
-  const storeNames = [CHARACTERS_RECORD_FILE, CHARACTER_DIALOGUES_FILE];
+  const storeNames = [
+    CHARACTERS_RECORD_FILE, 
+    CHARACTER_DIALOGUES_FILE, 
+    CHARACTER_IMAGES_FILE,
+    WORLD_BOOK_FILE,
+  ];
 
   await Promise.all(storeNames.map(storeName => {
     return new Promise<void>((resolve, reject) => {

@@ -1,5 +1,5 @@
 import { readData, writeData, CHARACTERS_RECORD_FILE } from "@/app/lib/data/local-storage";
-import { RawCharacterData } from "@/app/lib/models/character-model";
+import { RawCharacterData } from "@/app/lib/models/rawdata-model";
 import { LocalCharacterDialogueOperations } from "@/app/lib/data/character-dialogue-operation";
 
 export interface CharacterRecord {
