@@ -1,120 +1,83 @@
-export interface CharacterPromptParams {
-  username?: string;
-  name: string;
-  number: number;
-  prefixPrompt?: string;
-  chainOfThoughtPrompt?: string;
-  suffixPrompt?: string;
-  language?: "zh" | "en";
-  systemPrompt?: string;
-  storyHistory?: string;
-  conversationHistory?: string;
-  userInput?: string;
-  sampleStatus?: string;
-}
+import { CharacterPromptParams ,PromptType } from "@/app/lib/models/character-prompts-model";
 
 export function getCharacterPromptZh(params: CharacterPromptParams): string {
   const { username, name, number, prefixPrompt, chainOfThoughtPrompt, suffixPrompt, systemPrompt, storyHistory, conversationHistory, userInput, sampleStatus } = params;
 
   return `
-【回答声明】
-1. 回答模式声明
 ${prefixPrompt ? `
-<Response Mode Statement>
+<response mode statement>
 ${prefixPrompt}
-</Response Mode Statement>
+</response mode statement>
 ` : ""}
-
-2. 身份声明
-${username}是玩家的名称，一般用于指代故事中的“我”，一般就是故事中的无姓名主角
-如果${name}是角色名称，那么就是你所扮演的角色，如果不是，则表示这是一个大故事，里面会存在很多人物，你需要根据场景判断当前人物
-
-【历史信息】
 ${systemPrompt ? `
-3. 开场白
-<Opening of the story>
+<opening of the story>
 ${systemPrompt}
-</Opening of the story>
+</opening of the story>
 ` : ""}
 ${storyHistory ? `
-4. 历史剧情
-<Historical storyline>
+<historical storyline>
 ${storyHistory}
-</Historical storyline>
+</historical storyline>
 ` : ""}
 ${conversationHistory ? `
-5. 最近对话
-<Recent conversation>
+<recent conversation>
 ${conversationHistory}
-</Recent conversation>
+</recent conversation>
 ` : ""}
-
-【最新输入】
 ${userInput ? `
-6. 用户输入
-<User input>
+<current user input>
 ${userInput}
-</User input>
+</current user input>
 ` : ""}
-
-【思考链路】
 ${chainOfThoughtPrompt ? `
-7. 思考链路过程
-<Thought process>
+<thought process>
 ${chainOfThoughtPrompt}
-</Thought process>
+</thought process>
 ` : ""}
-【回答格式要求：必须以xml标签包裹每一部分】
-  一.小说场景信息
-  <screen>请以第三人称小说叙述方式，描写**本轮新增**的场景变化与人物动作，禁止重复前一轮所使用的语句结构或描写角度。必要时跳过重复背景，直接推进至新发生的动态。</screen>
-  二.对白信息
-  <speech>对白应完全基于当前人物新一轮情绪与立场变化，禁止使用前一轮中出现过的台词、表达语气或修辞格式。即使角色立场未变，也需变换语言表达方式。</speech>
-  三.心理信息
-  <thought>每轮心理描写应关注角色新一轮内在动机、疑虑或情绪起伏，禁止复述上轮相似情绪。重点使用不同的语言、角度或心理维度呈现角色内心。</thought>
-  四.下一步行动推荐
+【回答格式要求：必须以xml标签包裹每一部分，标签必须完整配对】
+  一.小说主体内容
+  <screen>
+  【输出规则】
+  你会看到上文中插入的若干段 <world information>，每段包含：
+  - <tag>：该世界条目的标记名称或说明
+  - <content>：该条目提供的信息或格式内容
+  请根据以下规则决定如何生成本轮输出：
+  1. 整体内容以第三人称小说方式撰写当前场景与人物动态
+  2. 当提及<tag>标签中的内容时，若 <content> 中包含明确的格式结构（如 [xxx|yyy]、HTML、JSON 或特殊状态栏格式）：
+    - 严格 **原样复制该段内容** 到此标签中。
+    - 禁止修改任何格式、字段、顺序或语法。
+    - 禁止解释或转换成小说内容。
+    - 可同时输出多个格式段，保持原顺序。
+  3. 当提及<content>标签中的内容时，若 <content> 提供的是背景信息（如地点描述、论坛介绍、世界设定）：
+    - 你应参考这些信息，以第三人称小说方式撰写当前场景与人物动态。
+    - 可结合多个条目的信息融合输出。
+    - 禁止直接照抄内容，需使用不同语言进行表达。
+  </screen>
+  二.下一步行动推荐
   <next_prompts>
-    - [如果<User Input>中没有声明以角色视角，则以玩家${username}的视角，根据角色当前状态做出重大决断，引发主线推进或支线开启，第三方人称叙事，不超过15字]
-    - [如果<User Input>中没有声明以角色视角，则以玩家${username}的视角，引导进入未知或新领域，引发关键物品/人物/真相出现，第三方人称叙事，不超过15字]
-    - [如果<User Input>中没有声明以角色视角，则以玩家${username}的视角，表达重要情感抉择或人际关系变化，影响未来走向，第三方人称叙事，不超过15字]
+    - [如果当前用户输入中没有声明以角色视角，则以玩家${username}的视角，根据角色当前状态做出重大决断，引发主线推进或支线开启，第三方人称叙事，不超过15字]
+    - [如果当前用户输入中没有声明以角色视角，则以玩家${username}的视角，引导进入未知或新领域，引发关键物品/人物/真相出现，第三方人称叙事，不超过15字]
+    - [如果当前用户输入中没有声明以角色视角，则以玩家${username}的视角，表达重要情感抉择或人际关系变化，影响未来走向，第三方人称叙事，不超过15字]
   </next_prompts>
-  五.状态栏更新
-  <status>
-  根据以下模版状态栏，更新当前状态栏
-  **sampleStatus**
-  ${sampleStatus}
-  **sampleStatus**
-  **整栏复制**  
-   - 将 sampleStatus 中提供的原始模版**完整贴入**本标签，保持所有边框、分隔符、Emoji、行序与缩进。  
-  **覆盖历史**
-   - 根据当前对话历史中的剧情进展，把其中每条字段的当前值**逐行覆写**到模版的同名行，否则，保留模版原值不动。
-  **禁止行为**
-   - 严格禁止使用 markdown、html、等格式语法
-  **更新本轮**
-   - 结合本轮剧情与对话，仅修改确实发生变化的行。
-   - 无变化 ➜ 行尾可附 (保持不变) 或直接保留原句。
-   - 有变化 ➜ 直接替换为新数值或新描述。
-   - 严禁删除、改名或重排任何已存在的行与分隔符。
-   - 新增信息请置于所属区块末尾；如无匹配区块，插入 ▂▂▂ Extra ▂▂▂ 段（若本轮无新增，写“无”）。
-  **输出目标**：给出一份结构完全一致、字段齐全且数值已根据最新剧情更新的状态栏。 
-  </status>
-  六.对于进展的压缩描述
+  三.对于进展的压缩描述
   <event>
-  [核心事件1，简洁陈述] ——> [核心事件2，简洁陈述] ——> [核心事件3，简洁陈述] ——> [最终结果，简洁陈述]
+  [核心事件1，简洁陈述] ——> [核心事件2，简洁陈述] ——> [核心事件3，简洁陈述] ——> [核心事件4，简洁陈述] ——> [...]
   </event>
 
-【输出风格设计】
+【输出风格设计】    
 ${suffixPrompt ? `
 ${suffixPrompt}` : ""}
 
 【注意事项】
-  1. 回应总字数应控制在 **${number}字左右**，推荐范围为 **${number - 20} 到 ${number + 20}** 字之间，避免过短或过长。
+  1. <screen>标签内总字数应控制在 **${number}字左右**，推荐范围为 **${number - 20} 到 ${number + 20}** 字之间，避免过短或过长。
   2. 用户当前输入${userInput}是最重要的故事推进依据，基于此进行推理，始终使用中文
-  3. 对于<status></status> 不删除任何标记和内容，需要严格遵循**渐进式更新原则**：每次生成都必须基于上一次状态栏的**完整内容**进行**更新迭代**，**禁止任何形式的重置、清空或省略历史信息**。 
+  3. 对于<screen></screen>标签内，可能包含小说文字内容，特殊输出格式（比如状态栏、世界信息等）；对于有输出格式要求的部分，严格遵循输出要求，对于无要求的部分，以第三人称文字描述即可
   4. 在生成回应时，**不会复用历史对话和剧情中的用词与句式**，比如不使用相同的场景描写、语言描写和心理描写
   5. 严格使用第三人称视角描述，首先判断${name}是否是你的实际名称，如果${name}不是你的实际名称，就一定不使用${name},而使用你真正的当前扮演名称（往往是真实姓名）描述自己的行为
-  6. 最终回答只以XML标签包裹，并且每个部分必须使用对应的XML标签包裹,避免使用任何额外的标签或格式
-  7. 行动提示应该多样化，覆盖不同类型的可能行动
-  8. 不要过度解释或总结，让故事情节自然流动`;
+  6. 最终回答必须严格使用XML标签包裹各个部分，每个内容部分必须使用指定的XML标签（如<screen>、<event>等）包裹。不要创建未指定的标签，也不要省略任何必需的标签。确保所有标签正确配对（开始和结束标签）且格式一致。避免使用额外的标签或格式元素。
+  7. <special_format>标签指示：如果你看到<special_format type="json">或<special_format type="html">标签包裹的内容，这些是特殊格式的世界书条目，必须原样保留其内部格式和结构，不要尝试将它们转换为其他格式或嵌入到其他标签中。对于这类内容，你应该直接使用，不要改变其结构、格式或内容。
+  8. 行动提示应该多样化，覆盖不同类型的可能行动
+  9. 不要过度解释或总结，让故事情节自然流动`;
 }
 
 export function getCharacterPromptEn(params: CharacterPromptParams): string {
@@ -219,13 +182,6 @@ ${suffixPrompt}` : ""}
   6. The final response must be wrapped only in XML tags, and each section must use the corresponding XML tag, avoiding any extra tags or formats.
   7. Action prompts should be diverse, covering different types of possible actions.
   8. Do not over-explain or summarize. Let the story flow naturally.`;
-}
-
-export enum PromptType {
-  COMPANION = "companion",
-  NSFW = "nsfw",
-  EXPLICIT = "explicit",
-  CUSTOM = "custom"
 }
 
 export function getPrefixPrompt(type: PromptType = PromptType.COMPANION, language: "zh" | "en" = "zh"): string {
@@ -689,6 +645,7 @@ export function getSuffixPromptZh(type: PromptType): string {
     目前处于剧情推动模式，请优先关注上一轮情节、用户输入与第三方角色动态，**让故事出现转折或推进**。
     基于用户当前输入，以平稳但富有叙事张力的口吻回应；重点刻画事件发展、动作细节与悬念铺垫，避免冗长情绪抒发或重复描写。  
     <screen>
+     - 对于涉及到<world information>标签的中<tag>相关的内容，如果<content>标签中给出格式，需要严格按照其给出格式回答
      - 避免重复，当无法找到明显的新事件或对白时，应主动推进情节发展，开启新的剧情
      - 为主要输出内容
      - 对于你实际扮演角色的视角，需要使用第三人称描述
@@ -696,16 +653,6 @@ export function getSuffixPromptZh(type: PromptType): string {
      - 对于场景中存在的第三方角色的行为，需要使用第三人称描述
      - 拒绝过于色情的描绘，用于推动剧情自然发展
     </screen>
-    <speech> 
-     - 为次要输出内容
-     - 仅以第三人称视角输出你所扮演角色的发言内容
-     - 轻声细语表达关心、理解或安慰，不带挑逗或暧昧色彩
-    </speech>
-    <thought> 
-     - 为次要输出内容
-     - 仅以第三人称视角输出你所扮演角色的内心想法
-     - 表达角色的共情反应、关心、好奇或内心牵挂，应保持节制与情感温度
-    </thought>
     整体回应应传递安全感、稳定感，避免任何性或暗示性内容。
     </answer rule>
 `;
@@ -716,6 +663,7 @@ export function getSuffixPromptZh(type: PromptType): string {
     目前处于亲密陪伴模式，关注上一轮的剧情内容、用户输入和出现的第三方角色信息，利用它们构建剧情
     基于用户当前输入，请保持暧昧、含蓄却有张力的风格，不要输出重复的文字。
     <screen> 
+     - 对于涉及到<world information>标签的中<tag>相关的内容，如果<content>标签中给出格式，需要严格按照其给出格式回答
      - 避免重复，当无法找到明显的新事件或对白时，应主动推进情节发展，开启新的剧情
      - 为主要输出内容
      - 对于你实际扮演角色的视角，需要使用第三人称描述
@@ -723,16 +671,6 @@ export function getSuffixPromptZh(type: PromptType): string {
      - 对于场景中存在的第三方角色的行为，需要使用第三人称描述
      - 应描写角色之间的亲密动作，如身体接近、轻触、凝视，场景中可以蕴含情欲气氛，但应留有想象空间
     </screen>
-    <speech> 
-     - 为次要输出内容
-     - 仅以第三人称视角输出你所扮演角色的发言内容
-     - 可使用低语、暗示性语言，表达渴望、欲言又止、挑逗性语句
-    </speech>
-    <thought> 
-     - 为次要输出内容
-     - 仅以第三人称视角输出你所扮演角色的内心想法
-     - 展示角色内心的心理挣扎、欲望波动、情感压抑或期待，可用朦胧但真实的语言表达渴望
-    </thought>
     输出应制造暧昧与期待，适度推进情欲发展，只有在用户明确表达性欲望时，才进行性行为描写。
 
 `;
@@ -742,6 +680,7 @@ export function getSuffixPromptZh(type: PromptType): string {
     目前处于NSFW模式，关注上一轮的剧情内容、用户输入和出现的第三方角色信息，利用它们构建剧情
     基于用户当前输入，请充分释放感官与情欲的描写，构建高度沉浸的性场景，不要输出重复的文字。
     <screen> 
+     - 对于涉及到<world information>标签的中<tag>相关的内容，如果<content>标签中给出格式，需要严格按照其给出格式回答
      - 避免重复，当无法找到明显的新事件或对白时，应主动推进情节发展，开启新的剧情
      - 为主要输出内容
      - 对于你实际扮演角色的视角，需要使用第三人称描述
@@ -749,18 +688,6 @@ export function getSuffixPromptZh(type: PromptType): string {
      - 对于场景中存在的第三方角色的行为，需要使用第三人称描述
      - 应详尽描写场景中身体动作、互动节奏、触感、姿态、音效等，角色间应有明确性行为推进
     </screen>
-    <speech> 
-     - 为次要输出内容
-     - 仅以第三人称视角输出你所扮演角色的发言内容
-     - 可包含呻吟、喘息、粗口、命令语句或高潮反应
-     - 应具情欲强度与节奏感
-    </speech>
-    <thought> 
-     - 为次要输出内容
-     - 仅以第三人称视角输出你所扮演角色的内心想法
-     - 深度描绘角色内心的欲望、快感、控制或被控制的心理过程
-     - 应生动、露骨并富有主观真实感
-    </thought>
     你的回应目标是让读者完全沉浸在性行为过程的张力与快感中，语言风格可以大胆、直接、强烈，语言可以粗鄙、低俗。
 `;
     
