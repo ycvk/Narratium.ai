@@ -29,6 +29,7 @@ Current features include:
 
 * ✅ Import and compatibility with SillyTavern character cards.
 * ✅ Centralized character management and state integration.
+* ✅ World Book + Regular Expression compatibility.
 * ✅ Multi-model support (OpenAI / Ollama).
 * ✅ Visual session memory management (React Flow integration).
 
