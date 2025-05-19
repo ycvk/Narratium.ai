@@ -23,7 +23,6 @@ export default function Sidebar({ isOpen, toggleSidebar, openLoginModal }: Sideb
   const [isMobile, setIsMobile] = useState(false);
   const { t, language, fontClass } = useLanguage();
   const [animationComplete, setAnimationComplete] = useState(false);
-  const [initialRender, setInitialRender] = useState(true);
 
   useEffect(() => {
     const loggedIn = localStorage.getItem("isLoggedIn") === "true";
