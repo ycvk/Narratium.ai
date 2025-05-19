@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useLanguage } from "@/app/i18n";
 import { motion, AnimatePresence } from "framer-motion";
-import { trackButtonClick } from "@/app/lib/utils/analytics";
+import { trackButtonClick } from "@/app/lib/utils/google-analytics";
 import { updateCharacter } from "@/app/function/dialogue/update";
 import { CharacterAvatarBackground } from "@/app/components/CharacterAvatarBackground";
 interface EditCharacterModalProps {

@@ -3,7 +3,7 @@ import { useLanguage } from "@/app/i18n";
 import Link from "next/link";
 import PromptEditor from "@/app/components/PromptEditor";
 import DialogueTreeModal from "@/app/components/DialogueTreeModal";
-import { trackButtonClick } from "@/app/lib/utils/analytics";
+import { trackButtonClick } from "@/app/lib/utils/google-analytics";
 import { CharacterAvatarBackground } from "@/app/components/CharacterAvatarBackground";
 import { saveCharacterPrompts } from "@/app/function/dialogue/save-prompts";
 
