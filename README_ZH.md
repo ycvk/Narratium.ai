@@ -24,6 +24,7 @@ Narratium 正处于快速迭代阶段，当前已实现以下功能：
 
 * ✅ 支持 SillyTavern 角色卡导入与兼容
 * ✅ 角色卡中心化管理、角色状态上下文整合
+* ✅ 世界书 + 正则化表达兼容
 * ✅ 多模型支持（OpenAI / Ollama）
 * ✅ 高效记忆管理（React Flow 流程图式 Session）
 
