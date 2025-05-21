@@ -303,7 +303,8 @@
     "loadingTimeHint": "首次加载时间在 5-40 秒之间，角色卡内容越大加载时间越长，如果长时间未加载，请检查 API 配置是否正确",
     "error": "错误",
     "characterNotFound": "未找到角色",
-    "loading":"加载中……正在解析状态，请稍等……"
+    "loading":"加载中……正在解析状态，请稍等……",
+    "worldBook": "世界书"
   },
   "dialogue": {
     "treeVisualization": "上下文管理",

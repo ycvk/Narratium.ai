@@ -302,7 +302,8 @@
     "loadingTimeHint": "The first load time is between 5-40 seconds, depending on the size of the character card content. If it takes a long time to load, please check if the API configuration is correct.",
     "error": "Error",
     "characterNotFound": "Character not found",
-    "loading": "Loading...Parsing status, please wait..."
+    "loading": "Loading...Parsing status, please wait...",
+    "worldBook": "World Book"
   },
   "dialogue": {
     "treeVisualization": "Context Manager",
