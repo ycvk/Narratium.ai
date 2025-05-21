@@ -35,12 +35,12 @@ export class Character {
         return characterBook.entries.map((entry: any, index: number) => ({
           comment: entry.comment || "",
           content: entry.content || "",
-          disable: entry.disable || false,
-          position: (entry.position || 0) as 0 | 1 | 2 | 3 | 4,
+          enabled: entry.enabled || true,
+          position: (entry.extensions.position || 0) as 0 | 1 | 2 | 3 | 4,
           constant: entry.constant || false,
-          key: entry.key || [],
-          order: entry.order || 0,
-          depth: entry.depth || 0,
+          keys: entry.keys || [],
+          insertion_order: entry.insertion_order || 0,
+          depth: entry.extensions.depth || 0,
         }));
       } else {
         return characterBook.entries;

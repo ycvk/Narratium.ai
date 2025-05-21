@@ -25,11 +25,14 @@ export class WorldBookManager {
     
     const fullText = `${recentMessages} ${message}`.toLowerCase();
 
+    console.log("fullText", fullText);
+
     const entries = Array.isArray(worldBook) 
       ? worldBook 
       : Object.values(worldBook);
 
     const enabledEntries = entries.filter(entry => entry.selective !== false);
+    console.log("enabledEntries", enabledEntries);
     const constantEntries = enabledEntries.filter(entry => entry.constant);
 
     const matchedEntries = enabledEntries

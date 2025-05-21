@@ -1,5 +1,5 @@
 const DB_NAME = "CharacterAppDB";
-const DB_VERSION = 3; // 递增数据库版本以触发onupgradeneeded
+const DB_VERSION = 3;
 
 export const CHARACTERS_RECORD_FILE = "characters_record";
 export const CHARACTER_DIALOGUES_FILE = "character_dialogues";

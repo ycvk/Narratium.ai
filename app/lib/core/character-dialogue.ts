@@ -7,7 +7,6 @@ import { PromptAssembler } from "@/app/lib/core/prompt-assembler";
 import { RunnablePassthrough } from "@langchain/core/runnables";
 import { PromptType } from "@/app/lib/models/character-prompts-model";
 import { getPrefixPrompt, getChainOfThoughtPrompt, getSuffixPrompt, getCharacterPromptZh, getCharacterPromptEn, getStatusPromptZh, getStatusPromptEn, getCharacterCompressorPromptZh, getCharacterCompressorPromptEn } from "@/app/lib/prompts/character-prompts";
-import { ParsedResponse } from "@/app/lib/models/parsed-response";
 import { CharacterHistory } from "@/app/lib/core/character-history";
 import { DialogueOptions } from "@/app/lib/models/character-dialogue-model";
 import { RegexProcessor } from "@/app/lib/core/regex-processor";
@@ -128,7 +127,7 @@ export class CharacterDialogue {
         topP: llmSettings.topP,
         frequencyPenalty: llmSettings.frequencyPenalty,
         presencePenalty: llmSettings.presencePenalty,
-        streaming: streaming,
+        streaming: false,
         streamUsage: false,
       });
     } else if (llmType === "ollama") {
@@ -141,7 +140,7 @@ export class CharacterDialogue {
         frequencyPenalty: llmSettings.frequencyPenalty,
         presencePenalty: llmSettings.presencePenalty,
         repeatPenalty: llmSettings.repeatPenalty,
-        streaming: streaming,
+        streaming: false,
       });
     }
   }
@@ -165,7 +164,7 @@ export class CharacterDialogue {
       .pipe(new StringOutputParser());
   }
 
-  async sendMessage(number: number, _userMessage: string, username?: string): Promise<{ stream?: AsyncIterable<string>, parsedResponse?: ParsedResponse, response?: string }> {
+  async sendMessage(number: number, _userMessage: string, username?: string): Promise<{ response: string, result: string, success: boolean }> {
     if (!this.dialogueChain) {
       throw new Error("Dialogue chain not initialized");
     }
@@ -183,20 +182,21 @@ export class CharacterDialogue {
         username,
       );
 
-      console.log("system_message", systemMessage);
-      console.log("user_message", enhancedUserMessage);
-      
       const response = await this.dialogueChain.invoke({
         system_message: systemMessage,
         user_message: enhancedUserMessage,
       });
 
+      console.log("response", response);
       const result = await RegexProcessor.processFullContext(response, {
         ownerId: this.character.id,
       });
+      console.log("result", result);
       
       return { 
-        response: result.replacedText, 
+        response: response,
+        result: result.replacedText,
+        success: result.success,
       };
     } catch (error) {
       console.error("Error in character dialogue:", error);

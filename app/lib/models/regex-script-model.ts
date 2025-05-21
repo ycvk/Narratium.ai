@@ -17,6 +17,6 @@ export enum RegexScriptOwnerType {
 export interface RegexReplacementResult {
   originalText: string;
   replacedText: string;
-  isModified: boolean;
   appliedScripts: string[];
+  success: boolean;
 }

@@ -13,7 +13,6 @@ export function adaptCharacterData(
   username?: string,
 ): any {
   const result = { ...characterData };
-  const userReplacement = username ?? (language == "zh" ? "我" : "I");
   const charReplacement = characterData.name || "";
   
   const fieldsToProcess = [

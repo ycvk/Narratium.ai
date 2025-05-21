@@ -20,9 +20,11 @@ export class RegexProcessor {
     const result: RegexReplacementResult = {
       originalText: fullContext,
       replacedText: fullContext,
-      isModified: false,
       appliedScripts: [],
+      success: false,
     };
+
+    console.log("allScripts", allScripts);
 
     const settings = await RegexScriptOperations.getRegexScriptSettings(ownerId);
     if (!settings.enabled) {
@@ -57,7 +59,7 @@ export class RegexProcessor {
               
               if (prevText !== processedText) {
                 result.appliedScripts.push(script.id);
-                result.isModified = true;
+                result.success = true;
               }
               
               continue;
@@ -100,7 +102,7 @@ export class RegexProcessor {
           
           if (prevText !== processedText) {
             result.appliedScripts.push(script.id);
-            result.isModified = true;
+            result.success = true;
           }
         }
       } catch (error: unknown) {
@@ -113,6 +115,11 @@ export class RegexProcessor {
     }
     
     result.replacedText = processedText;
+    
+    if (result.appliedScripts.length > 0) {
+      console.log(`[RegexProcessor] 已应用的脚本ID: ${result.appliedScripts.join(", ")}`);
+    }
+    
     return result;
   }
 

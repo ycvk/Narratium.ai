@@ -50,7 +50,6 @@ export class PromptAssembler {
     }
     
     const positionGroups = WorldBookManager.organizeEntriesByPosition(matchingEntries);
-    
     const { 
       systemMessage, 
       enhancedUserMessage, 
@@ -171,21 +170,6 @@ export class PromptAssembler {
     }).join("\n\n");  
   }
   
-  private isJsonContent(content: string): boolean {
-    try {
-      const trimmed = content.trim();
-      return (trimmed.startsWith("{") && trimmed.endsWith("}")) || 
-             (trimmed.startsWith("[") && trimmed.endsWith("]"));
-    } catch {
-      return false;
-    }
-  }
-  
-  private isHtmlContent(content: string): boolean {
-    const trimmed = content.trim();
-    return trimmed.startsWith("<") && trimmed.endsWith(">");
-  }
-
   private logEntriesDistribution(positionGroups: Record<number, WorldBookEntry[]>, totalCount: number): void {
     console.log("already added", totalCount, "entries", {
       position0: positionGroups[0].length,
