@@ -97,42 +97,56 @@ export async function handleCharacterChatRequest(payload: {
         try {
           controller.enqueue(JSON.stringify({ type: "start", success: true }) + "\n");
 
-          const response = await dialogue.sendMessage(number, message, username);
+          const { response, result, success } = await dialogue.sendMessage(number, message, username);
           
-          if (!response.response) throw new Error("No response returned from LLM");
+          if (!response) throw new Error("No response returned from LLM");
           
-          const fullResponse = response.response;
+          const fullResult = result;
+          const fullResponse = response;
+
           let chunkIndex = 0;
           let nextPrompts: string[] = [];
-          
-          const screenMatch = fullResponse.match(/<screen>([\s\S]*?)<\/screen>/);
+
+          const screenMatch = fullResult.match(/<screen>([\s\S]*?)<\/screen>/);
+          let screenContent = "";
           if (screenMatch) {
-            const screenContent = screenMatch[0];
-            
-            const chunkSize = 20;
-            const chunks = [];
-            
-            let i = 0;
-            while (i < screenContent.length) {
-              let end = Math.min(i + chunkSize, screenContent.length);
-              if (end < screenContent.length && screenContent[end] !== " " && screenContent[end] !== "\n") {
-                while (end > i && screenContent[end] !== " " && screenContent[end] !== "\n") {
-                  end--;
+            screenContent = screenMatch[0];
+          }
+
+          if (success) {
+            controller.enqueue(JSON.stringify({ 
+              type: "chunk", 
+              content: screenContent,
+              step: "0",
+              isRegexProcessed: true,
+            }) + "\n");
+          } else {
+            if (screenContent) {
+              const chunkSize = 20;
+              const chunks = [];
+              
+              let i = 0;
+              while (i < screenContent.length) {
+                let end = Math.min(i + chunkSize, screenContent.length);
+                if (end < screenContent.length && screenContent[end] !== " " && screenContent[end] !== "\n") {
+                  while (end > i && screenContent[end] !== " " && screenContent[end] !== "\n") {
+                    end--;
+                  }
+                  if (end === i) end = i + chunkSize;
                 }
-                if (end === i) end = i + chunkSize;
+                
+                chunks.push(screenContent.substring(i, end));
+                i = end;
               }
               
-              chunks.push(screenContent.substring(i, end));
-              i = end;
-            }
-            
-            for (const chunk of chunks) {
-              controller.enqueue(JSON.stringify({ type: "chunk", content: chunk, step: `${chunkIndex++}` }) + "\n");
-              await new Promise(resolve => setTimeout(resolve, 50));
+              for (const chunk of chunks) {
+                controller.enqueue(JSON.stringify({ type: "chunk", content: chunk, step: `${chunkIndex++}` }) + "\n");
+                await new Promise(resolve => setTimeout(resolve, 50));
+              }
             }
           }
 
-          const promptsMatch = fullResponse.match(/<next_prompts>([\s\S]*?)<\/next_prompts>/);
+          const promptsMatch = fullResult.match(/<next_prompts>([\s\S]*?)<\/next_prompts>/);
           if (promptsMatch) {
             nextPrompts = promptsMatch[1]
               .trim()
@@ -196,7 +210,7 @@ async function processPostResponseAsync({
     const event = fullResponse.match(/<event>([\s\S]*?)<\/event>/)?.[1]?.trim() || "";
 
     const parsed: ParsedResponse = {
-      screen,
+      regexResult: screen,
       nextPrompts,
       event,
     };

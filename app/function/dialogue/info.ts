@@ -1,8 +1,6 @@
 import { LocalCharacterDialogueOperations } from "@/app/lib/data/character-dialogue-operation";
 import { LocalCharacterRecordOperations } from "@/app/lib/data/character-record-operation";
 import { Character } from "@/app/lib/core/character";
-import { adaptText } from "@/app/lib/adapter/tagReplacer";
-import { RegexProcessor } from "@/app/lib/core/regex-processor";
 
 export async function getCharacterDialogue(characterId: string, language: "en" | "zh" = "zh", username?: string) {
   if (!characterId) {
@@ -22,46 +20,37 @@ export async function getCharacterDialogue(characterId: string, language: "en" |
         ? await LocalCharacterDialogueOperations.getDialoguePathToNode(characterId, dialogueTree.current_node_id)
         : [];
 
-      const messagePromises = [];
-      
+      const messages = [];
+
       for (const node of currentPath) {
-        const nodeMessages = [];
-        
         if (node.user_input) {
-          nodeMessages.push({
+          messages.push({
             id: node.node_id,
             role: "user",
             content: node.user_input,
             parsedContent: null,
           });
         }
-        
+
         if (node.assistant_response) {
-          const assistantMessagePromise = async () => {
-            const regexResult = await RegexProcessor.processFullContext(
-              adaptText(node.assistant_response, language, username),
-              {
-                ownerId: characterId,
-              },
-            );
-            
-            return {
+          if (node.parsed_content?.regexResult) {
+            messages.push({
               id: node.node_id,
               role: "assistant",
-              content: regexResult.replacedText,
+              content: node.parsed_content.regexResult,
+              parsedContent: node.parsed_content,
+            });
+          }
+          else {
+            messages.push({
+              id: node.node_id,
+              role: "assistant",
+              content: node.assistant_response,
               parsedContent: node.parsed_content || null,
-            };
-          };
-          
-          messagePromises.push(assistantMessagePromise());
-        }
-
-        for (const msg of nodeMessages) {
-          messagePromises.push(Promise.resolve(msg));
+            });
+          }
         }
       }
-      
-      const messages = await Promise.all(messagePromises);
 
       processedDialogue = {
         id: dialogueTree.id,

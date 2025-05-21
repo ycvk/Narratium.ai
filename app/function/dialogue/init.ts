@@ -49,42 +49,65 @@ export async function initCharacterDialogue(options: InitCharacterDialogueOption
     }
 
     let nodeIds: string[] = [];
-
+    const adaptedMessages: string[] = [];
+    const processedMessages: string[] = [];
     if (firstAssistantMessage) {
-      for (const message of [...firstAssistantMessage].reverse()) {
+      const messagesToProcess = [...firstAssistantMessage];
+      let firstProcessedMessage = "";
+
+      if (messagesToProcess.length > 0) {
+        const firstMessage = messagesToProcess[0];
+        const adaptedFirstMessage = adaptText(firstMessage, language, username);
+        
+        const firstRegexResult = await RegexProcessor.processFullContext(
+          adaptedFirstMessage, 
+          { 
+            ownerId: characterId, 
+          },
+        );
+        
+        firstProcessedMessage = firstRegexResult.replacedText;
+        adaptedMessages.push(adaptedFirstMessage);
+        processedMessages.push(firstProcessedMessage);
+      }
+
+      for (const message of [...messagesToProcess].reverse()) {
+        const adaptedMessage = adaptText(message, language, username);
+        
+        const regexResult = await RegexProcessor.processFullContext(
+          adaptedMessage, 
+          { 
+            ownerId: characterId, 
+          },
+        );
+        
+        const processedMessage = regexResult.replacedText;
+        
+        if (message !== messagesToProcess[0]) {
+          adaptedMessages.push(adaptedMessage);
+          processedMessages.push(processedMessage);
+        }
+
         const nodeId = await LocalCharacterDialogueOperations.addNodeToDialogueTree(
           characterId,
           "root",
           "",
-          message,
+          adaptedMessage,
           "",
           {
-            screen: message,
             nextPrompts: [],
+            regexResult: processedMessage,
           },
           undefined,
           2,
         );
         nodeIds.push(nodeId);
-      }    
-
-      let processedMessage = adaptText(firstAssistantMessage[0], language, username);
-
-      const regexResult = await RegexProcessor.processFullContext(
-        processedMessage, 
-        { 
-          ownerId: characterId, 
-        },
-      );
-      
-      if (regexResult.isModified) {
-        processedMessage = regexResult.replacedText;
       }
       
       return {
         success: true,
         characterId,
-        firstMessage: processedMessage,
+        firstMessage: firstProcessedMessage,
         nodeId: nodeIds[0],
       };
     }

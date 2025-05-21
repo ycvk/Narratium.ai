@@ -71,7 +71,6 @@ export async function editDialaogueNodeContent(input: EditDialogueNodeRequest) {
       assistant_response: screen + speech + innerThought,
       response_summary: summary,
       parsed_content: {
-        screen: screen,
         compressedContent: summary,
       },
     };
