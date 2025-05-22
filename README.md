@@ -15,7 +15,9 @@
 Narratium aims to deliver a lightweight storytelling engine combining context compression, memory systems, and graph-based knowledge retrieval (Graph-RAG) to ensure character consistency and world coherence in long-form stories, significantly enhancing the immersion and continuity of AI-generated narratives.
 
 Narratium is currently presented as a web-based interactive game:
+
 MVP 1.0 Experience Version (AI automatically processes world books, no regular expression support): [Narratium MVP 1.0](https://narratium-ltc2-hwo6gila4-0xhacker.vercel.app/)
+
 MVP 2.0 Experience Version (supports world books and regular expressions, logic refinement in progress): [Narratium MVP 2.0](https://narratium.org)
 
 ## 🖼️ Page Preview

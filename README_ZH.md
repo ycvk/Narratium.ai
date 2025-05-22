@@ -11,7 +11,9 @@ Narratium 是一个由 AI 驱动的**沉浸式交互故事创作与体验平台*
 Narratium 目标打造一套轻量化故事引擎，结合上下文压缩、记忆系统、图结构知识检索（Graph-RAG），支持在长篇故事中保持角色一致性和世界逻辑连续性，显著提升 AI 生成故事的沉浸感和连贯性。
 
 Narratium 目前以网页端交互游戏形式呈现：
+
 MVP 1.0 体验版本(AI 自动处理世界书，不支持正则)：[Narratium MVP 1.0](https://narratium-ltc2-hwo6gila4-0xhacker.vercel.app/)
+
 MVP 2.0 体验版本(支持世界书、正则，正在完善逻辑)：[Narratium MVP 2.0](https://narratium.org)
 
 ## 🖼️ 页面预览
