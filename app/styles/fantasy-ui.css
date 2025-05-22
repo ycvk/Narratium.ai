@@ -401,3 +401,28 @@
 .animate-ring-pulse {
   animation: ringPulse 6s ease-in-out infinite;
 }
+
+@keyframes backgroundBreath {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.breathing-bg {
+  background: linear-gradient(
+    135deg,
+    #12100f 0%,
+    #1a1714 35%,
+    #2a211b 70%,
+    #332820 100%
+  );
+  background-size: 300% 300%;
+  animation: backgroundBreath 12s ease-in-out infinite;
+  box-shadow: inset 0 0 26px rgba(180, 130, 70, 0.06), 0 0 14px rgba(140, 90, 40, 0.04);
+}
