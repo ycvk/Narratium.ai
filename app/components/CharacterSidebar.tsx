@@ -37,14 +37,29 @@ const CharacterSidebar: React.FC<CharacterSidebarProps> = ({
   toggleSidebar,
   promptType = PromptType.COMPANION,
   onPromptTypeChange,
-  responseLength = 200,
-  onResponseLengthChange,
   onDialogueEdit,
 }) => {
   const { t, fontClass, serifFontClass } = useLanguage();
   const [currentPromptType, setCurrentPromptType] = useState<PromptType>(promptType);
   const [showPromptDropdown, setShowPromptDropdown] = useState(false);
-  const [currentResponseLength, setCurrentResponseLength] = useState<number>(responseLength);
+  const [currentResponseLength, setCurrentResponseLength] = useState<number>(200);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const savedLength = localStorage.getItem("responseLength");
+      if (savedLength) {
+        setCurrentResponseLength(parseInt(savedLength, 10));
+      }
+      const savedPromptType = localStorage.getItem("promptType") as PromptType;
+      if (savedPromptType && Object.values(PromptType).includes(savedPromptType)) {
+        setCurrentPromptType(savedPromptType);
+        if (onPromptTypeChange) {
+          onPromptTypeChange(savedPromptType);
+        }
+      }
+    }
+  }, [onPromptTypeChange]);
+
   const [showPromptEditor, setShowPromptEditor] = useState(false);
   const [showDialogueTreeModal, setShowDialogueTreeModal] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
@@ -77,13 +92,7 @@ const CharacterSidebar: React.FC<CharacterSidebarProps> = ({
     const length = parseInt(event.target.value);
     setCurrentResponseLength(length);
     
-    if (typeof window !== "undefined") {
-      localStorage.setItem("responseLength", length.toString());
-    }
-    
-    if (onResponseLengthChange) {
-      onResponseLengthChange(length);
-    }
+    localStorage.setItem("responseLength", length.toString());
   };
   
   const handleOpenPromptEditor = () => {
@@ -153,26 +162,60 @@ const CharacterSidebar: React.FC<CharacterSidebarProps> = ({
   return (
     <>
       <button
-        onClick={(e) => {
+        onClick={() => {
           trackButtonClick("CharacterSidebar", "切换角色侧边栏");
           toggleSidebar();
         }}
-        className={`absolute ${isMobile ? "left-2" : (isCollapsed ? "left-2" : "left-[23%]")} top-1/2 -translate-y-1/2 z-20 toggle-button bg-[#1e1c1b] hover:bg-[#2a2825] text-[#c0a480] hover:text-[#f4e8c1] p-1 rounded-full transition-all duration-300 ease-in-out opacity-60 hover:opacity-100`}
+        className={`
+    absolute ${isMobile ? "left-2" : isCollapsed ? "left-4" : "left-[23%]"}
+    top-1/2 -translate-y-1/2 z-20
+    p-2 rounded-full
+    opacity-80 hover:opacity-100
+    transition-all duration-300 ease-in-out
+    ${isCollapsed
+      ? "text-[#ffb45e] hover:text-[#ffdca8] active:text-[#ffa343]"
+      : "text-[#ffdca8] hover:text-[#ffb45e] active:text-[#ffcf84]"}
+    hover:scale-105 active:scale-95
+  `}
         aria-label={isCollapsed ? t("characterChat.expandSidebar") : t("characterChat.collapseSidebar")}
       >
         {isCollapsed ? (
-          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <polyline points="9 18 15 12 9 6"></polyline>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="w-6 h-6"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2.4"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <polyline points="9 18 15 12 9 6" />
           </svg>
         ) : (
-          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <polyline points="15 18 9 12 15 6"></polyline>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="w-6 h-6"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2.4"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <polyline points="15 18 9 12 15 6" />
           </svg>
         )}
       </button>
       
       <div
-        className={`${isCollapsed ? "w-0 p-0 opacity-0" : (isMobile ? "w-full text-[12px] leading-tight" : "w-1/4 text-[14px] leading-normal")} fantasy-bg border-r border-[#534741] h-full overflow-y-auto fantasy-scrollbar transition-all duration-300 ease-in-out magic-border flex flex-col absolute left-0 top-0 z-10`}
+        className={`${isCollapsed ? "w-0 p-0 opacity-0 breathing-bg"
+          : (isMobile ? "w-full text-[12px] leading-tight breathing-bg"
+            : "w-[18rem] text-[14px] leading-normal breathing-bg") }
+          relative overflow-hidden
+          border-r border-[#42382f]
+          h-full flex flex-col
+          magic-border transition-all duration-300 ease-in-out`}
       >
 
         <div className="px-2 py-1 flex justify-between items-center text-xs text-[#8a8a8a] uppercase tracking-wider font-medium text-[10px] transition-all duration-300 ease-in-out overflow-hidden mt-4 mx-4" style={{ opacity: isCollapsed ? 0 : 1 }}>
@@ -184,30 +227,41 @@ const CharacterSidebar: React.FC<CharacterSidebarProps> = ({
             {!isCollapsed ? (
               <Link
                 href="/character-cards"
-                className={"menu-item flex items-center p-2 rounded-md hover:bg-[#252525] overflow-hidden transition-all duration-300 group"}
+                className={"menu-item group relative overflow-hidden rounded-md w-full transition-all duration-300"}
               >
-                <div className={"w-6 h-6 flex items-center justify-center flex-shrink-0 text-[#f4e8c1] bg-[#1c1c1c] rounded-lg border border-[#333333] shadow-inner transition-all duration-300 group-hover:border-[#444444] group-hover:text-amber-400 group-hover:shadow-[0_0_8px_rgba(251,146,60,0.4)]"}>
-                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M19 12H5" />
-                    <polyline points="12 19 5 12 12 5" />
-                  </svg>
-                </div>
-                <div className="ml-2 transition-all duration-300 ease-in-out overflow-hidden">
-                  <span className={`magical-text whitespace-nowrap block text-sm group-hover:text-amber-400 transition-colors duration-300 ${fontClass}`}>
-                    {t("characterChat.backToCharacters")}
-                  </span>
+                <div className="absolute inset-0 bg-gradient-to-br from-amber-500/10 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                <div className="relative flex items-center p-2 w-full transition-all duration-300 z-10">
+                  <div className="absolute inset-0 w-full h-full bg-[#333] opacity-0 group-hover:opacity-10 transition-opacity duration-300"></div>
+                  <div className="absolute bottom-0 left-0 h-[1px] bg-gradient-to-r from-transparent via-[#f8d36a] to-transparent w-0 group-hover:w-full transition-all duration-500"></div>
+              
+                  <div className={"w-6 h-6 flex items-center justify-center flex-shrink-0 text-[#f4e8c1] bg-[#1c1c1c] rounded-lg border border-[#333333] shadow-inner transition-all duration-300 group-hover:border-[#444444] group-hover:text-amber-400 group-hover:shadow-[0_0_8px_rgba(251,146,60,0.4)]"}>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M19 12H5" />
+                      <polyline points="12 19 5 12 12 5" />
+                    </svg>
+                  </div>
+                  <div className="ml-2 transition-all duration-300 ease-in-out overflow-hidden">
+                    <span className={`magical-text whitespace-nowrap block text-sm group-hover:text-amber-400 transition-colors duration-300 ${fontClass}`}>
+                      {t("characterChat.backToCharacters")}
+                    </span>
+                  </div>
                 </div>
               </Link>
             ) : (
               <Link
                 href="/character-cards"
-                className="menu-item flex justify-center p-2 rounded-md cursor-pointer hover:bg-[#252525] transition-all duration-300"
+                className="menu-item group relative overflow-hidden rounded-md w-full transition-all duration-300 flex justify-center p-2"
               >
-                <div className={"w-6 h-6 flex items-center justify-center text-[#f4e8c1] bg-[#1c1c1c] rounded-lg border border-[#333333] shadow-inner transition-all duration-300 group-hover:border-[#444444] hover:text-amber-400 hover:border-[#444444] hover:shadow-[0_0_8px_rgba(251,146,60,0.4)]"}>
-                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M19 12H5" />
-                    <polyline points="12 19 5 12 12 5" />
-                  </svg>
+                <div className="absolute inset-0 bg-gradient-to-br from-amber-500/10 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                <div className="relative flex items-center justify-center transition-all duration-300 z-10 w-full">
+                  <div className="absolute inset-0 w-full h-full bg-[#333] opacity-0 group-hover:opacity-10 transition-opacity duration-300"></div>
+                  <div className="absolute bottom-0 left-0 h-[1px] bg-gradient-to-r from-transparent via-[#f8d36a] to-transparent w-0 group-hover:w-full transition-all duration-500"></div>
+                  <div className={"w-6 h-6 flex items-center justify-center text-[#f4e8c1] bg-[#1c1c1c] rounded-lg border border-[#333333] shadow-inner transition-all duration-300 group-hover:border-[#444444] hover:text-amber-400 hover:border-[#444444] hover:shadow-[0_0_8px_rgba(251,146,60,0.4)]"}>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M19 12H5" />
+                      <polyline points="12 19 5 12 12 5" />
+                    </svg>
+                  </div>
                 </div>
               </Link>
             )}
@@ -268,18 +322,23 @@ const CharacterSidebar: React.FC<CharacterSidebarProps> = ({
           <div className="space-y-1 my-2">
             {!isCollapsed ? (
               <div 
-                className={"menu-item flex items-center p-2 rounded-md hover:bg-[#252525] cursor-pointer overflow-hidden transition-all duration-300 group"}
+                className={"menu-item group relative overflow-hidden rounded-md w-full transition-all duration-300 cursor-pointer"}
                 onClick={() => setShowDialogueTreeModal(true)}
               >
-                <div className={"w-6 h-6 flex items-center justify-center flex-shrink-0 text-[#f4e8c1] bg-[#1c1c1c] rounded-lg border border-[#333333] shadow-inner transition-all duration-300 group-hover:border-[#444444] group-hover:text-amber-400 group-hover:shadow-[0_0_8px_rgba(251,146,60,0.4)]"}>
-                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
-                  </svg>
-                </div>
-                <div className="ml-2 transition-all duration-300 ease-in-out overflow-hidden">
-                  <p className={`text-[#f4e8c1] text-sm transition-colors duration-300 ${fontClass}`}>
-                    {t("characterChat.Conversation")}
-                  </p>
+                <div className="absolute inset-0 bg-gradient-to-br from-amber-500/10 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                <div className="relative flex items-center p-2 w-full transition-all duration-300 z-10">
+                  <div className="absolute inset-0 w-full h-full bg-[#333] opacity-0 group-hover:opacity-10 transition-opacity duration-300"></div>
+                  <div className="absolute bottom-0 left-0 h-[1px] bg-gradient-to-r from-transparent via-[#f8d36a] to-transparent w-0 group-hover:w-full transition-all duration-500"></div>
+                  <div className={"w-6 h-6 flex items-center justify-center flex-shrink-0 text-[#f4e8c1] bg-[#1c1c1c] rounded-lg border border-[#333333] shadow-inner transition-all duration-300 group-hover:border-[#444444] group-hover:text-amber-400 group-hover:shadow-[0_0_8px_rgba(251,146,60,0.4)]"}>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
+                    </svg>
+                  </div>
+                  <div className="ml-2 transition-all duration-300 ease-in-out overflow-hidden">
+                    <p className={`text-[#f4e8c1] text-sm transition-colors duration-300 ${fontClass}`}>
+                      {t("characterChat.Conversation")}
+                    </p>
+                  </div>
                 </div>
               </div>
             ) : (
@@ -294,7 +353,6 @@ const CharacterSidebar: React.FC<CharacterSidebarProps> = ({
                 </div>
               </div>
             )}
-
           </div>
         </div>
         <div className="mx-4 menu-divider my-2"></div>
@@ -308,72 +366,77 @@ const CharacterSidebar: React.FC<CharacterSidebarProps> = ({
             {!isCollapsed ? (
               <div className="relative">
                 <div 
-                  className={`menu-item flex items-center p-2 rounded-md hover:bg-[#252525] cursor-pointer overflow-hidden transition-all duration-300 group ${showPromptDropdown ? "bg-[#252525]" : ""}`}
+                  className="group relative overflow-hidden rounded-md w-full transition-all duration-300 cursor-pointer"
                   onClick={() => setShowPromptDropdown(!showPromptDropdown)}
                 >
-                  <div
-                    className={`${isMobile ? "w-6 h-6" : "w-8 h-8"} flex items-center justify-center flex-shrink-0 text-[#f4e8c1] bg-[#1c1c1c] rounded-lg border border-[#333333] shadow-inner transition-all duration-300 group-hover:border-[#444444] group-hover:text-amber-400 group-hover:shadow-[0_0_8px_rgba(251,146,60,0.4)]`}
-                  >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="16"
-                      height="16"
-                      viewBox="0 0 24 24"
-                      fill={
-                        currentPromptType === PromptType.NSFW ? "#ec4899" : 
-                          currentPromptType === PromptType.EXPLICIT ? "#ff0000" :
-                            "none"
-                      }
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
+                  <div className="absolute inset-0 bg-gradient-to-br from-amber-500/10 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                  <div className={`relative flex items-center p-2 w-full transition-all duration-300 z-10 ${showPromptDropdown ? "bg-[#252525]" : ""}`}>
+                    <div className="absolute inset-0 w-full h-full bg-[#333] opacity-0 group-hover:opacity-10 transition-opacity duration-300"></div>
+                    <div className="absolute bottom-0 left-0 h-[1px] bg-gradient-to-r from-transparent via-[#f8d36a] to-transparent w-0 group-hover:w-full transition-all duration-500"></div>
+                    <div
+                      className={`${isMobile ? "w-6 h-6" : "w-8 h-8"} flex items-center justify-center flex-shrink-0 text-[#f4e8c1] bg-[#1c1c1c] rounded-lg border border-[#333333] shadow-inner transition-all duration-300 group-hover:border-[#444444] group-hover:text-amber-400 group-hover:shadow-[0_0_8px_rgba(251,146,60,0.4)]`}
                     >
-                      <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
-                    </svg>
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="16"
+                        height="16"
+                        viewBox="0 0 24 24"
+                        fill={
+                          currentPromptType === PromptType.NSFW ? "#ec4899" : 
+                            currentPromptType === PromptType.EXPLICIT ? "#ff0000" :
+                              "none"
+                        }
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
+                        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+                      </svg>
 
+                    </div>
+
+                    <div className="ml-2 flex-grow transition-all duration-300 ease-in-out overflow-hidden">
+                      <p className={`text-[#f4e8c1] text-sm transition-colors duration-300 ${fontClass}`}>
+                        {getCurrentPromptTypeName()}
+                      </p>
+                    </div>
+                    <div className="flex items-center justify-center ml-2">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={`transition-transform duration-300 ${showPromptDropdown ? "rotate-180" : ""}`}>
+                        <polyline points="6 9 12 15 18 9" />
+                      </svg>
+                    </div>
                   </div>
 
-                  <div className="ml-2 flex-grow transition-all duration-300 ease-in-out overflow-hidden">
-                    <p className={`text-[#f4e8c1] text-sm transition-colors duration-300 ${fontClass}`}>
-                      {getCurrentPromptTypeName()}
-                    </p>
-                  </div>
-                  <div className="flex items-center justify-center ml-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={`transition-transform duration-300 ${showPromptDropdown ? "rotate-180" : ""}`}>
-                      <polyline points="6 9 12 15 18 9" />
-                    </svg>
-                  </div>
+                  {showPromptDropdown && (
+                    <div className="absolute left-0 right-0 mt-1 bg-[#1c1c1c] border border-[#333333] rounded-md shadow-lg z-10 overflow-hidden">
+                      <div 
+                        className={`p-2 hover:bg-[#252525] cursor-pointer ${currentPromptType === PromptType.COMPANION ? "bg-[#252525] text-amber-300" : "text-[#f4e8c1]"}`}
+                        onClick={() => handlePromptTypeChange(PromptType.COMPANION)}
+                      >
+                        <span className={`text-xs ${fontClass}`}>{t("characterChat.companionMode")}</span>
+                      </div>
+                      <div 
+                        className={`p-2 hover:bg-[#252525] cursor-pointer ${currentPromptType === PromptType.NSFW ? "bg-[#252525] text-yellow-300" : "text-[#f4e8c1]"}`}
+                        onClick={() => handlePromptTypeChange(PromptType.NSFW)}
+                      >
+                        <span className={`text-xs ${fontClass}`}>{t("characterChat.nsfwMode")}</span>
+                      </div>
+                      <div 
+                        className={`p-2 hover:bg-[#252525] cursor-pointer ${currentPromptType === PromptType.EXPLICIT ? "bg-[#252525] text-amber-400" : "text-[#f4e8c1]"}`}
+                        onClick={() => handlePromptTypeChange(PromptType.EXPLICIT)}
+                      >
+                        <span className={`text-xs ${fontClass}`}>{t("characterChat.explicitMode")}</span>
+                      </div>
+                      <div 
+                        className={`p-2 hover:bg-[#252525] cursor-pointer ${currentPromptType === PromptType.CUSTOM ? "bg-[#252525] text-amber-300" : "text-[#f4e8c1]"}`}
+                        onClick={() => handlePromptTypeChange(PromptType.CUSTOM)}
+                      >
+                        <span className={`text-xs ${fontClass}`}>{t("characterChat.customMode") || "自定义模式"}</span>
+                      </div>
+                    </div>
+                  )}
                 </div>
-
-                {showPromptDropdown && (
-                  <div className="absolute left-0 right-0 mt-1 bg-[#1c1c1c] border border-[#333333] rounded-md shadow-lg z-10 overflow-hidden">
-                    <div 
-                      className={`p-2 hover:bg-[#252525] cursor-pointer ${currentPromptType === PromptType.COMPANION ? "bg-[#252525] text-amber-300" : "text-[#f4e8c1]"}`}
-                      onClick={() => handlePromptTypeChange(PromptType.COMPANION)}
-                    >
-                      <span className={`text-xs ${fontClass}`}>{t("characterChat.companionMode")}</span>
-                    </div>
-                    <div 
-                      className={`p-2 hover:bg-[#252525] cursor-pointer ${currentPromptType === PromptType.NSFW ? "bg-[#252525] text-yellow-300" : "text-[#f4e8c1]"}`}
-                      onClick={() => handlePromptTypeChange(PromptType.NSFW)}
-                    >
-                      <span className={`text-xs ${fontClass}`}>{t("characterChat.nsfwMode")}</span>
-                    </div>
-                    <div 
-                      className={`p-2 hover:bg-[#252525] cursor-pointer ${currentPromptType === PromptType.EXPLICIT ? "bg-[#252525] text-amber-400" : "text-[#f4e8c1]"}`}
-                      onClick={() => handlePromptTypeChange(PromptType.EXPLICIT)}
-                    >
-                      <span className={`text-xs ${fontClass}`}>{t("characterChat.explicitMode")}</span>
-                    </div>
-                    <div 
-                      className={`p-2 hover:bg-[#252525] cursor-pointer ${currentPromptType === PromptType.CUSTOM ? "bg-[#252525] text-amber-300" : "text-[#f4e8c1]"}`}
-                      onClick={() => handlePromptTypeChange(PromptType.CUSTOM)}
-                    >
-                      <span className={`text-xs ${fontClass}`}>{t("characterChat.customMode") || "自定义模式"}</span>
-                    </div>
-                  </div>
-                )}
               </div>
             ) : (
               <div 
@@ -388,29 +451,37 @@ const CharacterSidebar: React.FC<CharacterSidebarProps> = ({
             
         {!isCollapsed && (
           <div 
-            className="menu-item flex items-center p-2 mx-6 rounded-md hover:bg-[#252525] cursor-pointer overflow-hidden transition-all duration-300 group"
+            className="menu-item group relative overflow-hidden mx-4 rounded-md transition-all duration-300"
             onClick={handleOpenPromptEditor}
           >
-            <div className={`${isMobile ? "w-6 h-6" : "w-8 h-8"} flex items-center justify-center flex-shrink-0 text-[#f4e8c1] bg-[#1c1c1c] rounded-lg border border-[#333333] shadow-inner transition-all duration-300 group-hover:border-[#444444] group-hover:text-amber-400 group-hover:shadow-[0_0_8px_rgba(251,146,60,0.4)]`}>
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M12 20h9"></path>
-                <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
-              </svg>
+            <div className="absolute inset-0 bg-gradient-to-br from-amber-500/10 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+            <div className="relative flex items-center p-2 cursor-pointer z-10">
+              <div className={`${isMobile ? "w-6 h-6" : "w-8 h-8"} flex items-center justify-center flex-shrink-0 text-[#f4e8c1] bg-[#1c1c1c] rounded-lg border border-[#333333] shadow-inner transition-all duration-300 group-hover:border-[#444444] group-hover:text-amber-400 group-hover:shadow-[0_0_8px_rgba(251,146,60,0.4)]`}>
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M12 20h9"></path>
+                  <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+                </svg>
+              </div>
+              <div className="ml-2 transition-all duration-300 ease-in-out overflow-hidden">
+                <span className={`magical-text whitespace-nowrap block text-sm group-hover:text-amber-400 transition-colors duration-300 ${fontClass}`}>
+                  {t("characterChat.customPrompt")}
+                </span>
+              </div>
             </div>
-            <div className="ml-2 transition-all duration-300 ease-in-out overflow-hidden">
-              <span className={`magical-text whitespace-nowrap block text-sm group-hover:text-amber-400 transition-colors duration-300 ${fontClass}`}>
-                {t("characterChat.customPrompt")}
-              </span>
-            </div>
+            <div className="absolute bottom-0 left-0 h-[1px] bg-gradient-to-r from-transparent via-[#f8d36a] to-transparent w-0 group-hover:w-full transition-all duration-500"></div>
           </div>
         )}
             
         <div className="mx-4 menu-divider my-2"></div>
             
-        <div className="px-2 py-1 flex justify-between items-center text-xs text-[#8a8a8a] uppercase tracking-wider font-medium text-[10px] transition-all duration-300 ease-in-out overflow-hidden mx-4" style={{ opacity: isCollapsed ? 0 : 1 }}>
-          <span>{t("characterChat.responseLength")}</span>
+        <div className="group relative overflow-hidden mx-4 rounded-md transition-all duration-300">
+          <div className="px-2 py-1 flex justify-between items-center text-xs text-[#8a8a8a] uppercase tracking-wider font-medium text-[10px] transition-all duration-300 ease-in-out overflow-hidden" style={{ opacity: isCollapsed ? 0 : 1 }}>
+            <span className="relative z-10">{t("characterChat.responseLength")}</span>
+          </div>
+          <div className="absolute inset-0 bg-gradient-to-br from-amber-500/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
         </div>
-        <div className="transition-all duration-300 ease-in-out px-6 max-h-[500px] opacity-100">
+        
+        <div className="transition-all duration-300 ease-in-out px-4 max-h-[500px] opacity-100 group">
           <div className="space-y-1 my-2"></div>
           {!isCollapsed ? (
             <div className="px-2 py-2">
