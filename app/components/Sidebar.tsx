@@ -19,12 +19,10 @@ export default function Sidebar({ isOpen, toggleSidebar, openLoginModal }: Sideb
   const [username, setUsername] = useState("");
   const [isHomeOpen, setIsHomeOpen] = useState(true);
   const [isCreationOpen, setIsCreationOpen] = useState(true);
-  const [isHistoryOpen, setIsHistoryOpen] = useState(true);
   const [isMobile, setIsMobile] = useState(false);
   const { t, language, fontClass } = useLanguage();
   const [animationComplete, setAnimationComplete] = useState(false);
-  const [initialRender, setInitialRender] = useState(true);
-
+  
   useEffect(() => {
     const loggedIn = localStorage.getItem("isLoggedIn") === "true";
     const storedUsername = localStorage.getItem("username");
@@ -73,8 +71,7 @@ export default function Sidebar({ isOpen, toggleSidebar, openLoginModal }: Sideb
 
   return (
     <div
-      className={`h-full magic-border text-[#d0d0d0] transition-all duration-300 ease-in-out flex flex-col ${isOpen ? "w-72" : "w-16"}`}
-      style={{ overflow: "hidden" }}
+      className={`h-full breathing-bg magic-border text-[#d0d0d0] transition-all duration-300 ease-in-out flex flex-col ${isOpen ? "w-72" : "w-16"} z-50`}
     >
       <div className="flex justify-between items-center h-16 py-3 px-4">
         <div className={`logo-magic-container transition-all duration-300 ease-in-out ${isOpen ? "opacity-100 max-w-[200px]" : "opacity-0 max-w-0"}`} style={{ overflow: "hidden", transitionDelay: isOpen ? "0ms" : "0ms" }}>
@@ -91,6 +88,10 @@ export default function Sidebar({ isOpen, toggleSidebar, openLoginModal }: Sideb
           onClick={() => {
             toggleSidebar();
             localStorage.setItem("sidebarState", isOpen ? "closed" : "open");
+            document.documentElement.style.setProperty(
+              "--app-sidebar-width",
+              isOpen ? "4rem" : "-1rem",
+            );
           }}
           className={"flex items-center justify-center text-[#f4e8c1] bg-[#1c1c1c] rounded-lg border border-[#333333] shadow-inner transition-all duration-300 hover:bg-[#252525] hover:border-[#444444] hover:text-amber-400 hover:shadow-[0_0_8px_rgba(251,146,60,0.4)] w-8 h-8"}
           aria-label={isOpen ? (language === "zh" ? "收起侧边栏" : "Collapse Sidebar") : (language === "zh" ? "展开侧边栏" : "Expand Sidebar")}
@@ -125,44 +126,52 @@ export default function Sidebar({ isOpen, toggleSidebar, openLoginModal }: Sideb
                   </button>
                 )}
               </div>
-              <div className={`overflow-hidden transition-all duration-300 ${isOpen ? (isHomeOpen ? "max-h-20 opacity-100 mb-1" : "max-h-0 opacity-0 mb-0") : "max-h-20 opacity-100 mb-1"}`}>
-                {!isOpen ? (
-                  <Link href="/" className={"menu-item flex justify-center p-2 rounded-md cursor-pointer hover:bg-[#252525] transition-all duration-300"}>
-                    <div className={"flex items-center justify-center text-[#f4e8c1] bg-[#1c1c1c] rounded-lg border border-[#333333] shadow-inner transition-all duration-300 group-hover:border-[#444444] hover:text-amber-400 hover:border-[#444444] hover:shadow-[0_0_8px_rgba(251,146,60,0.4)] w-8 h-8"}>
-                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
-                        <polyline points="9 22 9 12 15 12 15 22" />
-                      </svg>
-                    </div>
-                  </Link>
-                ) : (
-                  <Link href="/" className={"menu-item flex items-center p-2 rounded-md hover:bg-[#252525] overflow-hidden transition-all duration-300 group"}>
-                    <div className="w-8 h-8 flex items-center justify-center flex-shrink-0 text-[#f4e8c1] bg-[#1c1c1c] rounded-lg border border-[#333333] shadow-inner transition-all duration-300 group-hover:border-[#444444] group-hover:text-amber-400 group-hover:shadow-[0_0_8px_rgba(251,146,60,0.4)]">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
-                        <polyline points="9 22 9 12 15 12 15 22" />
-                      </svg>
-                    </div>
-                    <div className={"ml-2 transition-all duration-300 ease-in-out overflow-hidden"} style={{ transitionDelay: isOpen ? "50ms" : "0ms", opacity: isOpen ? 1 : 0 }}>
-                      <span className={`magical-text whitespace-nowrap block text-sm group-hover:text-amber-400 transition-colors duration-300 ${fontClass}`}>
-                        {isOpen && t("sidebar.home").split("").map((char, index) => (
-                          <span 
-                            key={index} 
-                            className="inline-block transition-all duration-300" 
-                            style={{ 
-                              opacity: animationComplete ? 1 : 0,
-                              transform: animationComplete ? "translateY(0)" : "translateY(8px)",
-                              transitionDelay: `${100 + index * 30}ms`,
-                              width: char === " " ? "0.25em" : "auto",
-                            }}
-                          >
-                            {char}
+              <div className={`overflow-hidden transition-all duration-300 ${isOpen ? (isHomeOpen ? "max-h-20 opacity-100 mb-1" : "max-h-0 opacity-0 mb-0") : "max-h-20 opacity-100 mb-1"} mx-1`}>
+                <div className="relative group">
+                  <div className="absolute inset-0 bg-gradient-to-br from-amber-500/5 to-transparent rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                  {!isOpen ? (
+                    <Link href="/" className={"menu-item flex justify-center p-2 rounded-md cursor-pointer hover:bg-[#252525] transition-all duration-300"}>
+                      <div className={"flex items-center justify-center text-[#f4e8c1] bg-[#1c1c1c] rounded-lg border border-[#333333] shadow-inner transition-all duration-300 group-hover:border-[#444444] hover:text-amber-400 hover:border-[#444444] hover:shadow-[0_0_8px_rgba(251,146,60,0.4)] w-8 h-8"}>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+                          <polyline points="9 22 9 12 15 12 15 22" />
+                        </svg>
+                      </div>
+                    </Link>
+                  ) : (
+                    <Link href="/" className="focus:outline-none group relative overflow-hidden rounded-md w-full transition-all duration-300">
+                      <div className="absolute inset-0 bg-gradient-to-br from-amber-500/10 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                      <div className="relative flex items-center p-2 w-full transition-all duration-300 z-10">
+                        <div className="absolute inset-0 w-full h-full bg-[#333] opacity-0 group-hover:opacity-10 transition-opacity duration-300"></div>
+                        <div className="absolute bottom-0 left-0 h-[1px] bg-gradient-to-r from-transparent via-[#f8d36a] to-transparent w-0 group-hover:w-full transition-all duration-500"></div>
+                        <div className="w-8 h-8 flex items-center justify-center flex-shrink-0 text-[#f4e8c1] bg-[#1c1c1c] rounded-lg border border-[#333333] shadow-inner transition-all duration-300 group-hover:border-[#444444] group-hover:text-amber-400 group-hover:shadow-[0_0_8px_rgba(251,146,60,0.4)]">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+                            <polyline points="9 22 9 12 15 12 15 22" />
+                          </svg>
+                        </div>
+                        <div className={"ml-2 transition-all duration-300 ease-in-out overflow-hidden"} style={{ transitionDelay: isOpen ? "50ms" : "0ms", opacity: isOpen ? 1 : 0 }}>
+                          <span className={`magical-text whitespace-nowrap block text-sm group-hover:text-amber-400 transition-colors duration-300 ${fontClass}`}>
+                            {isOpen && t("sidebar.home").split("").map((char, index) => (
+                              <span 
+                                key={index} 
+                                className="inline-block transition-all duration-300" 
+                                style={{ 
+                                  opacity: animationComplete ? 1 : 0,
+                                  transform: animationComplete ? "translateY(0)" : "translateY(8px)",
+                                  transitionDelay: `${100 + index * 30}ms`,
+                                  width: char === " " ? "0.25em" : "auto",
+                                }}
+                              >
+                                {char}
+                              </span>
+                            ))}
                           </span>
-                        ))}
-                      </span>
-                    </div>
-                  </Link>
-                )}
+                        </div>
+                      </div>
+                    </Link>
+                  )}
+                </div>
               </div>
             </div>
           </li>
@@ -184,44 +193,52 @@ export default function Sidebar({ isOpen, toggleSidebar, openLoginModal }: Sideb
                 )}
               </div>
 
-              <div className={`overflow-hidden transition-all duration-300 ${isOpen ? (isCreationOpen ? "max-h-20 opacity-100 mt-1" : "max-h-0 opacity-0 mt-0") : "max-h-20 opacity-100 mt-1"}`}>
-                {!isOpen ? (
-                  <Link href="/characters-cards" className={"menu-item flex justify-center p-2 rounded-md cursor-pointer hover:bg-[#252525] transition-all duration-300"}>
-                    <div className={"flex items-center justify-center text-[#f4e8c1] bg-[#1c1c1c] rounded-lg border border-[#333333] shadow-inner transition-all duration-300 group-hover:border-[#444444] hover:text-amber-400 hover:border-[#444444] hover:shadow-[0_0_8px_rgba(251,146,60,0.4)] w-8 h-8"}>
-                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="transition-transform duration-300">
-                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-                        <circle cx="12" cy="7" r="4" />
-                      </svg>
-                    </div>
-                  </Link>
-                ) : (
-                  <Link href="/character-cards" className={"menu-item flex items-center p-2 rounded-md hover:bg-[#252525] overflow-hidden transition-all duration-300 group"}>
-                    <div className="w-8 h-8 flex items-center justify-center flex-shrink-0 text-[#f4e8c1] bg-[#1c1c1c] rounded-lg border border-[#333333] shadow-inner transition-all duration-300 group-hover:border-[#444444] group-hover:text-amber-400 group-hover:shadow-[0_0_8px_rgba(251,146,60,0.4)]">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="transition-transform duration-300">
-                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-                        <circle cx="12" cy="7" r="4" />
-                      </svg>
-                    </div>
-                    <div className={"ml-2 transition-all duration-300 ease-in-out overflow-hidden"} style={{ transitionDelay: isOpen ? "50ms" : "0ms", opacity: isOpen ? 1 : 0 }}>
-                      <span className={`magical-text whitespace-nowrap block text-sm group-hover:text-amber-400 transition-colors duration-300 ${fontClass}`}>
-                        {isOpen && t("sidebar.characterCards").split("").map((char, index) => (
-                          <span 
-                            key={index} 
-                            className="inline-block transition-all duration-300" 
-                            style={{ 
-                              opacity: animationComplete ? 1 : 0,
-                              transform: animationComplete ? "translateY(0)" : "translateY(8px)",
-                              transitionDelay: `${200 + index * 30}ms`,
-                              width: char === " " ? "0.25em" : "auto",
-                            }}
-                          >
-                            {char}
+              <div className={`overflow-hidden transition-all duration-300 ${isOpen ? (isCreationOpen ? "max-h-20 opacity-100 mt-1" : "max-h-0 opacity-0 mt-0") : "max-h-20 opacity-100 mt-1"} mx-1`}>
+                <div className="relative group">
+                  <div className="absolute inset-0 bg-gradient-to-br from-amber-500/5 to-transparent rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                  {!isOpen ? (
+                    <Link href="/characters-cards" className={"menu-item flex justify-center p-2 rounded-md cursor-pointer hover:bg-[#252525] transition-all duration-300"}>
+                      <div className={"flex items-center justify-center text-[#f4e8c1] bg-[#1c1c1c] rounded-lg border border-[#333333] shadow-inner transition-all duration-300 group-hover:border-[#444444] hover:text-amber-400 hover:border-[#444444] hover:shadow-[0_0_8px_rgba(251,146,60,0.4)] w-8 h-8"}>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="transition-transform duration-300">
+                          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                          <circle cx="12" cy="7" r="4" />
+                        </svg>
+                      </div>
+                    </Link>
+                  ) : (
+                    <Link href="/character-cards" className="focus:outline-none group relative overflow-hidden rounded-md w-full transition-all duration-300">
+                      <div className="absolute inset-0 bg-gradient-to-br from-amber-500/10 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                      <div className="relative flex items-center p-2 w-full transition-all duration-300 z-10">
+                        <div className="absolute inset-0 w-full h-full bg-[#333] opacity-0 group-hover:opacity-10 transition-opacity duration-300"></div>
+                        <div className="absolute bottom-0 left-0 h-[1px] bg-gradient-to-r from-transparent via-[#f8d36a] to-transparent w-0 group-hover:w-full transition-all duration-500"></div>
+                        <div className="w-8 h-8 flex items-center justify-center flex-shrink-0 text-[#f4e8c1] bg-[#1c1c1c] rounded-lg border border-[#333333] shadow-inner transition-all duration-300 group-hover:border-[#444444] group-hover:text-amber-400 group-hover:shadow-[0_0_8px_rgba(251,146,60,0.4)]">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="transition-transform duration-300">
+                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                            <circle cx="12" cy="7" r="4" />
+                          </svg>
+                        </div>
+                        <div className={"ml-2 transition-all duration-300 ease-in-out overflow-hidden"} style={{ transitionDelay: isOpen ? "50ms" : "0ms", opacity: isOpen ? 1 : 0 }}>
+                          <span className={`magical-text whitespace-nowrap block text-sm group-hover:text-amber-400 transition-colors duration-300 ${fontClass}`}>
+                            {isOpen && t("sidebar.characterCards").split("").map((char, index) => (
+                              <span 
+                                key={index} 
+                                className="inline-block transition-all duration-300" 
+                                style={{ 
+                                  opacity: animationComplete ? 1 : 0,
+                                  transform: animationComplete ? "translateY(0)" : "translateY(8px)",
+                                  transitionDelay: `${200 + index * 30}ms`,
+                                  width: char === " " ? "0.25em" : "auto",
+                                }}
+                              >
+                                {char}
+                              </span>
+                            ))}
                           </span>
-                        ))}
-                      </span>
-                    </div>
-                  </Link>
-                )}
+                        </div>
+                      </div>
+                    </Link>
+                  )}
+                </div>
               </div>
             </div>
           </li>
@@ -403,3 +420,4 @@ export default function Sidebar({ isOpen, toggleSidebar, openLoginModal }: Sideb
     </div>
   );
 }
+
