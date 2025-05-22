@@ -41,10 +41,8 @@ export default function CharacterPage() {
   const [error, setError] = useState("");
   const [userInput, setUserInput] = useState("");
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
   const [suggestedInputs, setSuggestedInputs] = useState<string[]>([]);
   const initializationRef = useRef(false);
-  const [number, setNumber] = useState<number>(200);
   const [activeView, setActiveView] = useState<"chat" | "worldbook">("chat");
   const [activeModes, setActiveModes] = useState<Record<string, any>>({
     "story-progress": false,
@@ -106,18 +104,12 @@ export default function CharacterPage() {
     }
   };
 
-  useEffect(() => {
-    if (messagesEndRef.current) {
-      messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
-    }
-  }, [messages]);
-
   const fetchLatestDialogue = async () => {
     if (!characterId) return;
 
     try {
       const username = localStorage.getItem("username") || undefined;
-      const currentLanguage = localStorage.getItem("language") as "en" | "zh" || "zh";
+      const currentLanguage = localStorage.getItem("language") as "en" | "zh";
       const response = await getCharacterDialogue(characterId, currentLanguage, username);
       if (!response.success) {
         throw new Error(`Failed to load dialogue: ${response}`);
@@ -150,7 +142,7 @@ export default function CharacterPage() {
       
       try {
         const username = localStorage.getItem("username") || undefined;
-        const currentLanguage = localStorage.getItem("language") as "en" | "zh" || "zh";
+        const currentLanguage = localStorage.getItem("language") as "en" | "zh";
         const response = await getCharacterDialogue(characterId, currentLanguage, username);
         if (!response.success) {
           throw new Error(`Failed to load character: ${response}`);
@@ -335,7 +327,6 @@ export default function CharacterPage() {
       const username = localStorage.getItem("username") || "";
       const responseLength = storedNumber ? parseInt(storedNumber) : 200;
       const nodeId = uuidv4();
-      setNumber(responseLength);
       const response = await handleCharacterChatRequest({
         username,
         characterId: character.id,
@@ -347,7 +338,7 @@ export default function CharacterPage() {
         language: language as "zh" | "en",
         streaming: true,
         promptType: promptType as PromptType,
-        number,
+        number: responseLength,
         nodeId,
       });
 
@@ -458,23 +449,19 @@ export default function CharacterPage() {
   const toggleSidebar = () => {
     setSidebarCollapsed(!sidebarCollapsed);
   };
-  
-  const handleResponseLengthChange = (length: number) => {
-    setNumber(length);
-  };
 
   const handleSuggestedInput = (input: string) => {
     setUserInput(input);
   };
 
   return (
-    <div className="flex h-full relative fantasy-bg">
+    <div className="flex h-full relative fantasy-bg overflow-hidden" style={{ 
+      left: "var(--app-sidebar-width, 0)",
+    }}>
       <CharacterSidebar
         character={character}
         isCollapsed={sidebarCollapsed}
         toggleSidebar={toggleSidebar}
-        responseLength={number}
-        onResponseLengthChange={handleResponseLengthChange}
         onDialogueEdit={() => fetchLatestDialogue()}
       />
 
