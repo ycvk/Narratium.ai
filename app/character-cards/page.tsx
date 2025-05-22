@@ -11,7 +11,6 @@ import { CharacterAvatarBackground } from "@/app/components/CharacterAvatarBackg
 import { trackButtonClick } from "@/app/lib/utils/google-analytics";
 import { getAllCharacters } from "@/app/function/character/list";
 import { deleteCharacter } from "@/app/function/character/delete";
-import "@/app/styles/fantasy-ui.css";
 
 interface Character {
   id: string;
@@ -88,9 +87,9 @@ export default function CharacterCards() {
   }, []);
 
   return (
-    <div className="min-h-screen w-full overflow-auto login-fantasy-bg">
+    <div className="min-h-screen w-full overflow-auto login-fantasy-bg relative">
       <div
-        className="fixed inset-0 z-0 opacity-35"
+        className="absolute inset-0 z-0 opacity-35"
         style={{
           backgroundImage: "url('/background_yellow.png')",
           backgroundSize: "cover",
@@ -100,7 +99,7 @@ export default function CharacterCards() {
       />
 
       <div
-        className="fixed inset-0 z-1 opacity-45"
+        className="absolute inset-0 z-1 opacity-45"
         style={{
           backgroundImage: "url('/background_red.png')",
           backgroundSize: "cover",
