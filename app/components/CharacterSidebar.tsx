@@ -160,54 +160,7 @@ const CharacterSidebar: React.FC<CharacterSidebarProps> = ({
   }, []);  
 
   return (
-    <>
-      <button
-        onClick={() => {
-          trackButtonClick("CharacterSidebar", "切换角色侧边栏");
-          toggleSidebar();
-        }}
-        className={`
-          absolute ${isMobile ? "left-2" : isCollapsed ? "left-4" : "left-[23%]"}
-          top-1/2 -translate-y-1/2 z-20
-          p-2 rounded-full
-          opacity-80 hover:opacity-100
-          transition-all duration-300 ease-in-out
-          ${isCollapsed
-      ? "text-[#ffb45e] hover:text-[#ffdca8] active:text-[#ffa343]"
-      : "text-[#ffdca8] hover:text-[#ffb45e] active:text-[#ffcf84]"}
-          hover:scale-105 active:scale-95
-        `}
-        aria-label={isCollapsed ? t("characterChat.expandSidebar") : t("characterChat.collapseSidebar")}
-      >
-        {isCollapsed ? (
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className="w-8 h-8"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2.4"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <polyline points="9 18 15 12 9 6" />
-          </svg>
-        ) : (
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className="w-8 h-8"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2.4"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <polyline points="15 18 9 12 15 6" />
-          </svg>
-        )}
-      </button>
-      
+    <>      
       <div
         className={`${isCollapsed ? "w-0 p-0 opacity-0 breathing-bg"
           : (isMobile ? "w-full text-[12px] leading-tight breathing-bg"
@@ -225,40 +178,141 @@ const CharacterSidebar: React.FC<CharacterSidebarProps> = ({
         <div className="transition-all duration-300 ease-in-out px-6 max-h-[500px] opacity-100">
           <div className="space-y-1 my-2">
             {!isCollapsed ? (
-              <Link
-                href="/character-cards"
-                className="menu-item relative group flex items-center p-2 rounded-md hover:bg-[#252525] overflow-hidden transition-all duration-300"
-              >
-                <div className="absolute inset-0 bg-gradient-to-br from-amber-500/10 via-transparent to-transparent rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-0" />
-                <div className="absolute inset-0 w-full h-full bg-[#333] opacity-0 group-hover:opacity-10 transition-opacity duration-300 z-0" />
-                <div className="absolute bottom-0 left-0 h-[1px] bg-gradient-to-r from-transparent via-[#f8d36a] to-transparent w-0 group-hover:w-full transition-all duration-500 z-10" />
-                <div className="relative z-10 flex items-center">
-                  <div className={`${isMobile ? "w-6 h-6" : "w-8 h-8"} flex items-center justify-center flex-shrink-0 text-[#f4e8c1] bg-[#1c1c1c] rounded-lg border border-[#333333] shadow-inner transition-all duration-300 group-hover:border-[#444444] group-hover:text-amber-400 group-hover:shadow-[0_0_8px_rgba(251,146,60,0.4)]`}>
+              <>
+                <Link
+                  href="/character-cards"
+                  className="menu-item relative group flex items-center p-2 rounded-md hover:bg-[#252525] overflow-hidden transition-all duration-300"
+                >
+                  <div className="absolute inset-0 bg-gradient-to-br from-amber-500/10 via-transparent to-transparent rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-0" />
+                  <div className="absolute inset-0 w-full h-full bg-[#333] opacity-0 group-hover:opacity-10 transition-opacity duration-300 z-0" />
+                  <div className="absolute bottom-0 left-0 h-[1px] bg-gradient-to-r from-transparent via-[#f8d36a] to-transparent w-0 group-hover:w-full transition-all duration-500 z-10" />
+                  <div className="relative z-10 flex items-center">
+                    <div className={`${isMobile ? "w-6 h-6" : "w-8 h-8"} flex items-center justify-center flex-shrink-0 text-[#f4e8c1] bg-[#1c1c1c] rounded-lg border border-[#333333] shadow-inner transition-all duration-300 group-hover:border-[#444444] group-hover:text-amber-400 group-hover:shadow-[0_0_8px_rgba(251,146,60,0.4)]`}>
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 50 50">
+                        <circle
+                          cx="25"
+                          cy="25"
+                          r="20"
+                          stroke="currentColor"
+                          strokeWidth="4"
+                          fill="none"
+                          opacity="0.2"
+                        />
+                        <circle
+                          cx="25"
+                          cy="25"
+                          r="20"
+                          stroke="currentColor"
+                          strokeWidth="4"
+                          fill="none"
+                          stroke-linecap="round"
+                          stroke-dasharray="1, 150"
+                          stroke-dashoffset="0"
+                          transform="rotate(0 25 25)"
+                        >
+                          <animateTransform
+                            attributeName="transform"
+                            attributeType="XML"
+                            type="rotate"
+                            from="0 25 25"
+                            to="360 25 25"
+                            dur="1s"
+                            repeatCount="indefinite"
+                          />
+                        </circle>
+                      </svg>
+                    </div>
+                    <div className="ml-2 transition-all duration-300 ease-in-out overflow-hidden">
+                      <span className={`magical-text whitespace-nowrap block text-sm group-hover:text-amber-400 transition-colors duration-300 ${fontClass}`}>
+                        {t("characterChat.backToCharacters")}
+                      </span>
+                    </div>
+                  </div>
+                </Link>
+
+                <button
+                  onClick={() => {
+                    trackButtonClick("CharacterSidebar", "切换角色侧边栏");
+                    toggleSidebar();
+                  }}
+                  className="menu-item relative group flex items-center w-full p-2 rounded-md hover:bg-[#252525] overflow-hidden transition-all duration-300 cursor-pointer"
+                >
+                  <div className="absolute inset-0 bg-gradient-to-br from-amber-500/10 via-transparent to-transparent rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-0" />
+                  <div className="absolute inset-0 w-full h-full bg-[#333] opacity-0 group-hover:opacity-10 transition-opacity duration-300 z-0" />
+                  <div className="absolute bottom-0 left-0 h-[1px] bg-gradient-to-r from-transparent via-[#f8d36a] to-transparent w-0 group-hover:w-full transition-all duration-500 z-10" />
+                  <div className="relative z-10 flex items-center">
+                    <div className={`${isMobile ? "w-6 h-6" : "w-8 h-8"} flex items-center justify-center flex-shrink-0 text-[#f4e8c1] bg-[#1c1c1c] rounded-lg border border-[#333333] shadow-inner transition-all duration-300 group-hover:border-[#444444] group-hover:text-amber-400 group-hover:shadow-[0_0_8px_rgba(251,146,60,0.4)]`}>
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M19 12H5" />
+                        <polyline points="12 19 5 12 12 5" />
+                      </svg>
+                    </div>
+                    <div className="ml-2 transition-all duration-300 ease-in-out overflow-hidden">
+                      <span className={`magical-text whitespace-nowrap block text-sm group-hover:text-amber-400 transition-colors duration-300 ${fontClass}`}>
+                        {t("characterChat.collapseSidebar")}
+                      </span>
+                    </div>
+                  </div>
+                </button>
+              </>
+            ) : (
+              <>
+                <Link
+                  href="/character-cards"
+                  className="menu-item flex justify-center p-2 rounded-md cursor-pointer hover:bg-[#252525] transition-all duration-300"
+                >
+                  <div className={`${isMobile ? "w-6 h-6" : "w-8 h-8"} flex items-center justify-center text-[#f4e8c1] bg-[#1c1c1c] rounded-lg border border-[#333333] shadow-inner transition-all duration-300 group-hover:border-[#444444] hover:text-amber-400 hover:border-[#444444] hover:shadow-[0_0_8px_rgba(251,146,60,0.4)]`}>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 50 50">
+                      <circle
+                        cx="25"
+                        cy="25"
+                        r="20"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                        fill="none"
+                        opacity="0.2"
+                      />
+                      <circle
+                        cx="25"
+                        cy="25"
+                        r="20"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                        fill="none"
+                        stroke-linecap="round"
+                        stroke-dasharray="1, 150"
+                        stroke-dashoffset="0"
+                        transform="rotate(0 25 25)"
+                      >
+                        <animateTransform
+                          attributeName="transform"
+                          attributeType="XML"
+                          type="rotate"
+                          from="0 25 25"
+                          to="360 25 25"
+                          dur="1s"
+                          repeatCount="indefinite"
+                        />
+                      </circle>
+                    </svg>
+                  </div>
+                </Link>
+
+                <button
+                  onClick={() => {
+                    trackButtonClick("CharacterSidebar", "切换角色侧边栏");
+                    toggleSidebar();
+                  }}
+                  className="menu-item flex justify-center p-2 rounded-md cursor-pointer hover:bg-[#252525] transition-all duration-300"
+                >
+                  <div className={`${isMobile ? "w-6 h-6" : "w-8 h-8"} flex items-center justify-center text-[#f4e8c1] bg-[#1c1c1c] rounded-lg border border-[#333333] shadow-inner transition-all duration-300 group-hover:border-[#444444] hover:text-amber-400 hover:border-[#444444] hover:shadow-[0_0_8px_rgba(251,146,60,0.4)]`}>
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       <path d="M19 12H5" />
                       <polyline points="12 19 5 12 12 5" />
                     </svg>
                   </div>
-                  <div className="ml-2 transition-all duration-300 ease-in-out overflow-hidden">
-                    <span className={`magical-text whitespace-nowrap block text-sm group-hover:text-amber-400 transition-colors duration-300 ${fontClass}`}>
-                      {t("characterChat.backToCharacters")}
-                    </span>
-                  </div>
-                </div>
-              </Link>
-
-            ) : (
-              <Link
-                href="/character-cards"
-                className="menu-item flex justify-center p-2 rounded-md cursor-pointer hover:bg-[#252525] transition-all duration-300"
-              >
-                <div className={`${isMobile ? "w-6 h-6" : "w-8 h-8"} flex items-center justify-center text-[#f4e8c1] bg-[#1c1c1c] rounded-lg border border-[#333333] shadow-inner transition-all duration-300 group-hover:border-[#444444] hover:text-amber-400 hover:border-[#444444] hover:shadow-[0_0_8px_rgba(251,146,60,0.4)]`}>
-                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M19 12H5" />
-                    <polyline points="12 19 5 12 12 5" />
-                  </svg>
-                </div>
-              </Link>
+                </button>
+              </>
             )}
           </div>
         </div>
@@ -406,7 +460,7 @@ const CharacterSidebar: React.FC<CharacterSidebarProps> = ({
                 </div>
 
                 {showPromptDropdown && (
-                  <div className="absolute left-0 right-0 mt-1 bg-[#1c1c1c] border border-[#333333] rounded-md shadow-lg z-10 overflow-hidden">
+                  <div className="absolute left-0 right-0 mt-1 bg-[#1c1c1c] border border-[#333333] rounded-md shadow-lg z-10 overflow-hidden z-100">
                     <div 
                       className={`p-2 hover:bg-[#252525] cursor-pointer ${currentPromptType === PromptType.COMPANION ? "bg-[#252525] text-amber-300" : "text-[#f4e8c1]"}`}
                       onClick={() => handlePromptTypeChange(PromptType.COMPANION)}
@@ -484,8 +538,11 @@ const CharacterSidebar: React.FC<CharacterSidebarProps> = ({
                 </div>
                 <div className="relative w-full h-1.5 rounded-full overflow-hidden">
                   <div 
-                    className="absolute left-0 top-0 h-full bg-gradient-to-r from-amber-500 to-amber-400 rounded-full transition-all duration-200"
-                    style={{ width: `${((currentResponseLength - 100) / 900 * 100)}%` }}
+                    className="absolute left-0 top-0 h-full bg-gradient-to-r from-amber-500 to-amber-400 transition-all duration-200"
+                    style={{ 
+                      width: `${((currentResponseLength - 100) / 900 * 100)}%`,
+                      clipPath: "polygon(0 100%, calc(100% - 5px) 100%, 100% 0, 5px 0, 0 100%)",
+                    }}
                   />
                   <input
                     type="range"
@@ -495,13 +552,6 @@ const CharacterSidebar: React.FC<CharacterSidebarProps> = ({
                     value={currentResponseLength}
                     onChange={handleResponseLengthChange}
                     className="absolute top-0 left-0 w-full h-full opacity-0 cursor-pointer"
-                  />
-                  <div 
-                    className="absolute top-1/2 -translate-y-1/2 h-4 w-4 rounded-full bg-amber-400 border-2 border-amber-300 shadow-[0_0_0_2px_rgba(0,0,0,0.3),0_2px_8px_rgba(251,191,36,0.4)] pointer-events-none transition-all duration-200 hover:scale-125"
-                    style={{ 
-                      left: `calc(${((currentResponseLength - 100) / 900 * 100)}% - 8px)`,
-                      transform: "translateY(-50%) scale(1)",
-                    }}
                   />
                 </div>
               </div>
