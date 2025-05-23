@@ -167,22 +167,22 @@ const CharacterSidebar: React.FC<CharacterSidebarProps> = ({
           toggleSidebar();
         }}
         className={`
-    absolute ${isMobile ? "left-2" : isCollapsed ? "left-4" : "left-[23%]"}
-    top-1/2 -translate-y-1/2 z-20
-    p-2 rounded-full
-    opacity-80 hover:opacity-100
-    transition-all duration-300 ease-in-out
-    ${isCollapsed
+          absolute ${isMobile ? "left-2" : isCollapsed ? "left-4" : "left-[23%]"}
+          top-1/2 -translate-y-1/2 z-20
+          p-2 rounded-full
+          opacity-80 hover:opacity-100
+          transition-all duration-300 ease-in-out
+          ${isCollapsed
       ? "text-[#ffb45e] hover:text-[#ffdca8] active:text-[#ffa343]"
       : "text-[#ffdca8] hover:text-[#ffb45e] active:text-[#ffcf84]"}
-    hover:scale-105 active:scale-95
-  `}
+          hover:scale-105 active:scale-95
+        `}
         aria-label={isCollapsed ? t("characterChat.expandSidebar") : t("characterChat.collapseSidebar")}
       >
         {isCollapsed ? (
           <svg
             xmlns="http://www.w3.org/2000/svg"
-            className="w-6 h-6"
+            className="w-8 h-8"
             viewBox="0 0 24 24"
             fill="none"
             stroke="currentColor"
@@ -195,7 +195,7 @@ const CharacterSidebar: React.FC<CharacterSidebarProps> = ({
         ) : (
           <svg
             xmlns="http://www.w3.org/2000/svg"
-            className="w-6 h-6"
+            className="w-8 h-8"
             viewBox="0 0 24 24"
             fill="none"
             stroke="currentColor"
@@ -227,14 +227,13 @@ const CharacterSidebar: React.FC<CharacterSidebarProps> = ({
             {!isCollapsed ? (
               <Link
                 href="/character-cards"
-                className={"menu-item group relative overflow-hidden rounded-md w-full transition-all duration-300"}
+                className="menu-item relative group flex items-center p-2 rounded-md hover:bg-[#252525] overflow-hidden transition-all duration-300"
               >
-                <div className="absolute inset-0 bg-gradient-to-br from-amber-500/10 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                <div className="relative flex items-center p-2 w-full transition-all duration-300 z-10">
-                  <div className="absolute inset-0 w-full h-full bg-[#333] opacity-0 group-hover:opacity-10 transition-opacity duration-300"></div>
-                  <div className="absolute bottom-0 left-0 h-[1px] bg-gradient-to-r from-transparent via-[#f8d36a] to-transparent w-0 group-hover:w-full transition-all duration-500"></div>
-              
-                  <div className={"w-6 h-6 flex items-center justify-center flex-shrink-0 text-[#f4e8c1] bg-[#1c1c1c] rounded-lg border border-[#333333] shadow-inner transition-all duration-300 group-hover:border-[#444444] group-hover:text-amber-400 group-hover:shadow-[0_0_8px_rgba(251,146,60,0.4)]"}>
+                <div className="absolute inset-0 bg-gradient-to-br from-amber-500/10 via-transparent to-transparent rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-0" />
+                <div className="absolute inset-0 w-full h-full bg-[#333] opacity-0 group-hover:opacity-10 transition-opacity duration-300 z-0" />
+                <div className="absolute bottom-0 left-0 h-[1px] bg-gradient-to-r from-transparent via-[#f8d36a] to-transparent w-0 group-hover:w-full transition-all duration-500 z-10" />
+                <div className="relative z-10 flex items-center">
+                  <div className={`${isMobile ? "w-6 h-6" : "w-8 h-8"} flex items-center justify-center flex-shrink-0 text-[#f4e8c1] bg-[#1c1c1c] rounded-lg border border-[#333333] shadow-inner transition-all duration-300 group-hover:border-[#444444] group-hover:text-amber-400 group-hover:shadow-[0_0_8px_rgba(251,146,60,0.4)]`}>
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       <path d="M19 12H5" />
                       <polyline points="12 19 5 12 12 5" />
@@ -247,21 +246,17 @@ const CharacterSidebar: React.FC<CharacterSidebarProps> = ({
                   </div>
                 </div>
               </Link>
+
             ) : (
               <Link
                 href="/character-cards"
-                className="menu-item group relative overflow-hidden rounded-md w-full transition-all duration-300 flex justify-center p-2"
+                className="menu-item flex justify-center p-2 rounded-md cursor-pointer hover:bg-[#252525] transition-all duration-300"
               >
-                <div className="absolute inset-0 bg-gradient-to-br from-amber-500/10 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                <div className="relative flex items-center justify-center transition-all duration-300 z-10 w-full">
-                  <div className="absolute inset-0 w-full h-full bg-[#333] opacity-0 group-hover:opacity-10 transition-opacity duration-300"></div>
-                  <div className="absolute bottom-0 left-0 h-[1px] bg-gradient-to-r from-transparent via-[#f8d36a] to-transparent w-0 group-hover:w-full transition-all duration-500"></div>
-                  <div className={"w-6 h-6 flex items-center justify-center text-[#f4e8c1] bg-[#1c1c1c] rounded-lg border border-[#333333] shadow-inner transition-all duration-300 group-hover:border-[#444444] hover:text-amber-400 hover:border-[#444444] hover:shadow-[0_0_8px_rgba(251,146,60,0.4)]"}>
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M19 12H5" />
-                      <polyline points="12 19 5 12 12 5" />
-                    </svg>
-                  </div>
+                <div className={`${isMobile ? "w-6 h-6" : "w-8 h-8"} flex items-center justify-center text-[#f4e8c1] bg-[#1c1c1c] rounded-lg border border-[#333333] shadow-inner transition-all duration-300 group-hover:border-[#444444] hover:text-amber-400 hover:border-[#444444] hover:shadow-[0_0_8px_rgba(251,146,60,0.4)]`}>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M19 12H5" />
+                    <polyline points="12 19 5 12 12 5" />
+                  </svg>
                 </div>
               </Link>
             )}
@@ -322,14 +317,14 @@ const CharacterSidebar: React.FC<CharacterSidebarProps> = ({
           <div className="space-y-1 my-2">
             {!isCollapsed ? (
               <div 
-                className={"menu-item group relative overflow-hidden rounded-md w-full transition-all duration-300 cursor-pointer"}
+                className={"menu-item flex items-center p-2 rounded-md hover:bg-[#252525] cursor-pointer overflow-hidden transition-all duration-300 group"}
                 onClick={() => setShowDialogueTreeModal(true)}
               >
-                <div className="absolute inset-0 bg-gradient-to-br from-amber-500/10 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                <div className="relative flex items-center p-2 w-full transition-all duration-300 z-10">
-                  <div className="absolute inset-0 w-full h-full bg-[#333] opacity-0 group-hover:opacity-10 transition-opacity duration-300"></div>
-                  <div className="absolute bottom-0 left-0 h-[1px] bg-gradient-to-r from-transparent via-[#f8d36a] to-transparent w-0 group-hover:w-full transition-all duration-500"></div>
-                  <div className={"w-6 h-6 flex items-center justify-center flex-shrink-0 text-[#f4e8c1] bg-[#1c1c1c] rounded-lg border border-[#333333] shadow-inner transition-all duration-300 group-hover:border-[#444444] group-hover:text-amber-400 group-hover:shadow-[0_0_8px_rgba(251,146,60,0.4)]"}>
+                <div className="absolute inset-0 bg-gradient-to-br from-amber-500/10 via-transparent to-transparent rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-0" />
+                <div className="absolute inset-0 w-full h-full bg-[#333] opacity-0 group-hover:opacity-10 transition-opacity duration-300 z-0" />
+                <div className="absolute bottom-0 left-0 h-[1px] bg-gradient-to-r from-transparent via-[#f8d36a] to-transparent w-0 group-hover:w-full transition-all duration-500 z-10" />
+                <div className="relative z-10 flex items-center">
+                  <div className={`${isMobile ? "w-6 h-6" : "w-8 h-8"} flex items-center justify-center flex-shrink-0 text-[#f4e8c1] bg-[#1c1c1c] rounded-lg border border-[#333333] shadow-inner transition-all duration-300 group-hover:border-[#444444] group-hover:text-amber-400 group-hover:shadow-[0_0_8px_rgba(251,146,60,0.4)]`}>
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
                     </svg>
@@ -346,13 +341,14 @@ const CharacterSidebar: React.FC<CharacterSidebarProps> = ({
                 className={"menu-item flex justify-center p-2 rounded-md cursor-pointer hover:bg-[#252525] transition-all duration-300"}
                 onClick={() => setShowDialogueTreeModal(true)}
               >
-                <div className={"w-6 h-6 flex items-center justify-center text-[#f4e8c1] bg-[#1c1c1c] rounded-lg border border-[#333333] shadow-inner transition-all duration-300 group-hover:border-[#444444] hover:text-amber-400 hover:border-[#444444] hover:shadow-[0_0_8px_rgba(251,146,60,0.4)]"}>
+                <div className={`${isMobile ? "w-6 h-6" : "w-8 h-8"} flex items-center justify-center text-[#f4e8c1] bg-[#1c1c1c] rounded-lg border border-[#333333] shadow-inner transition-all duration-300 group-hover:border-[#444444] hover:text-amber-400 hover:border-[#444444] hover:shadow-[0_0_8px_rgba(251,146,60,0.4)]`}>
                   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
                   </svg>
                 </div>
               </div>
             )}
+
           </div>
         </div>
         <div className="mx-4 menu-divider my-2"></div>
@@ -366,13 +362,13 @@ const CharacterSidebar: React.FC<CharacterSidebarProps> = ({
             {!isCollapsed ? (
               <div className="relative">
                 <div 
-                  className="group relative overflow-hidden rounded-md w-full transition-all duration-300 cursor-pointer"
+                  className={`menu-item flex items-center p-2 rounded-md hover:bg-[#252525] cursor-pointer overflow-hidden transition-all duration-300 group ${showPromptDropdown ? "bg-[#252525]" : ""}`}
                   onClick={() => setShowPromptDropdown(!showPromptDropdown)}
                 >
-                  <div className="absolute inset-0 bg-gradient-to-br from-amber-500/10 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                  <div className={`relative flex items-center p-2 w-full transition-all duration-300 z-10 ${showPromptDropdown ? "bg-[#252525]" : ""}`}>
-                    <div className="absolute inset-0 w-full h-full bg-[#333] opacity-0 group-hover:opacity-10 transition-opacity duration-300"></div>
-                    <div className="absolute bottom-0 left-0 h-[1px] bg-gradient-to-r from-transparent via-[#f8d36a] to-transparent w-0 group-hover:w-full transition-all duration-500"></div>
+                  <div className="absolute inset-0 bg-gradient-to-br from-amber-500/10 via-transparent to-transparent rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-0" />
+                  <div className="absolute inset-0 w-full h-full bg-[#333] opacity-0 group-hover:opacity-10 transition-opacity duration-300 z-0" />
+                  <div className="absolute bottom-0 left-0 h-[1px] bg-gradient-to-r from-transparent via-[#f8d36a] to-transparent w-0 group-hover:w-full transition-all duration-500 z-10" />
+                  <div className="relative z-10 flex items-center">
                     <div
                       className={`${isMobile ? "w-6 h-6" : "w-8 h-8"} flex items-center justify-center flex-shrink-0 text-[#f4e8c1] bg-[#1c1c1c] rounded-lg border border-[#333333] shadow-inner transition-all duration-300 group-hover:border-[#444444] group-hover:text-amber-400 group-hover:shadow-[0_0_8px_rgba(251,146,60,0.4)]`}
                     >
@@ -407,36 +403,36 @@ const CharacterSidebar: React.FC<CharacterSidebarProps> = ({
                       </svg>
                     </div>
                   </div>
-
-                  {showPromptDropdown && (
-                    <div className="absolute left-0 right-0 mt-1 bg-[#1c1c1c] border border-[#333333] rounded-md shadow-lg z-10 overflow-hidden">
-                      <div 
-                        className={`p-2 hover:bg-[#252525] cursor-pointer ${currentPromptType === PromptType.COMPANION ? "bg-[#252525] text-amber-300" : "text-[#f4e8c1]"}`}
-                        onClick={() => handlePromptTypeChange(PromptType.COMPANION)}
-                      >
-                        <span className={`text-xs ${fontClass}`}>{t("characterChat.companionMode")}</span>
-                      </div>
-                      <div 
-                        className={`p-2 hover:bg-[#252525] cursor-pointer ${currentPromptType === PromptType.NSFW ? "bg-[#252525] text-yellow-300" : "text-[#f4e8c1]"}`}
-                        onClick={() => handlePromptTypeChange(PromptType.NSFW)}
-                      >
-                        <span className={`text-xs ${fontClass}`}>{t("characterChat.nsfwMode")}</span>
-                      </div>
-                      <div 
-                        className={`p-2 hover:bg-[#252525] cursor-pointer ${currentPromptType === PromptType.EXPLICIT ? "bg-[#252525] text-amber-400" : "text-[#f4e8c1]"}`}
-                        onClick={() => handlePromptTypeChange(PromptType.EXPLICIT)}
-                      >
-                        <span className={`text-xs ${fontClass}`}>{t("characterChat.explicitMode")}</span>
-                      </div>
-                      <div 
-                        className={`p-2 hover:bg-[#252525] cursor-pointer ${currentPromptType === PromptType.CUSTOM ? "bg-[#252525] text-amber-300" : "text-[#f4e8c1]"}`}
-                        onClick={() => handlePromptTypeChange(PromptType.CUSTOM)}
-                      >
-                        <span className={`text-xs ${fontClass}`}>{t("characterChat.customMode") || "自定义模式"}</span>
-                      </div>
-                    </div>
-                  )}
                 </div>
+
+                {showPromptDropdown && (
+                  <div className="absolute left-0 right-0 mt-1 bg-[#1c1c1c] border border-[#333333] rounded-md shadow-lg z-10 overflow-hidden">
+                    <div 
+                      className={`p-2 hover:bg-[#252525] cursor-pointer ${currentPromptType === PromptType.COMPANION ? "bg-[#252525] text-amber-300" : "text-[#f4e8c1]"}`}
+                      onClick={() => handlePromptTypeChange(PromptType.COMPANION)}
+                    >
+                      <span className={`text-xs ${fontClass}`}>{t("characterChat.companionMode")}</span>
+                    </div>
+                    <div 
+                      className={`p-2 hover:bg-[#252525] cursor-pointer ${currentPromptType === PromptType.NSFW ? "bg-[#252525] text-yellow-300" : "text-[#f4e8c1]"}`}
+                      onClick={() => handlePromptTypeChange(PromptType.NSFW)}
+                    >
+                      <span className={`text-xs ${fontClass}`}>{t("characterChat.nsfwMode")}</span>
+                    </div>
+                    <div 
+                      className={`p-2 hover:bg-[#252525] cursor-pointer ${currentPromptType === PromptType.EXPLICIT ? "bg-[#252525] text-amber-400" : "text-[#f4e8c1]"}`}
+                      onClick={() => handlePromptTypeChange(PromptType.EXPLICIT)}
+                    >
+                      <span className={`text-xs ${fontClass}`}>{t("characterChat.explicitMode")}</span>
+                    </div>
+                    <div 
+                      className={`p-2 hover:bg-[#252525] cursor-pointer ${currentPromptType === PromptType.CUSTOM ? "bg-[#252525] text-amber-300" : "text-[#f4e8c1]"}`}
+                      onClick={() => handlePromptTypeChange(PromptType.CUSTOM)}
+                    >
+                      <span className={`text-xs ${fontClass}`}>{t("characterChat.customMode") || "自定义模式"}</span>
+                    </div>
+                  </div>
+                )}
               </div>
             ) : (
               <div 
@@ -451,11 +447,13 @@ const CharacterSidebar: React.FC<CharacterSidebarProps> = ({
             
         {!isCollapsed && (
           <div 
-            className="menu-item group relative overflow-hidden mx-4 rounded-md transition-all duration-300"
+            className="menu-item flex items-center p-2 mx-6 rounded-md hover:bg-[#252525] cursor-pointer overflow-hidden transition-all duration-300 group"
             onClick={handleOpenPromptEditor}
           >
-            <div className="absolute inset-0 bg-gradient-to-br from-amber-500/10 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-            <div className="relative flex items-center p-2 cursor-pointer z-10">
+            <div className="absolute inset-0 bg-gradient-to-br from-amber-500/10 via-transparent to-transparent rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-0" />
+            <div className="absolute inset-0 w-full h-full bg-[#333] opacity-0 group-hover:opacity-10 transition-opacity duration-300 z-0" />
+            <div className="absolute bottom-0 left-0 h-[1px] bg-gradient-to-r from-transparent via-[#f8d36a] to-transparent w-0 group-hover:w-full transition-all duration-500 z-10" />
+            <div className="relative z-10 flex items-center">
               <div className={`${isMobile ? "w-6 h-6" : "w-8 h-8"} flex items-center justify-center flex-shrink-0 text-[#f4e8c1] bg-[#1c1c1c] rounded-lg border border-[#333333] shadow-inner transition-all duration-300 group-hover:border-[#444444] group-hover:text-amber-400 group-hover:shadow-[0_0_8px_rgba(251,146,60,0.4)]`}>
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M12 20h9"></path>
@@ -468,20 +466,15 @@ const CharacterSidebar: React.FC<CharacterSidebarProps> = ({
                 </span>
               </div>
             </div>
-            <div className="absolute bottom-0 left-0 h-[1px] bg-gradient-to-r from-transparent via-[#f8d36a] to-transparent w-0 group-hover:w-full transition-all duration-500"></div>
           </div>
         )}
             
         <div className="mx-4 menu-divider my-2"></div>
             
-        <div className="group relative overflow-hidden mx-4 rounded-md transition-all duration-300">
-          <div className="px-2 py-1 flex justify-between items-center text-xs text-[#8a8a8a] uppercase tracking-wider font-medium text-[10px] transition-all duration-300 ease-in-out overflow-hidden" style={{ opacity: isCollapsed ? 0 : 1 }}>
-            <span className="relative z-10">{t("characterChat.responseLength")}</span>
-          </div>
-          <div className="absolute inset-0 bg-gradient-to-br from-amber-500/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+        <div className="px-2 py-1 flex justify-between items-center text-xs text-[#8a8a8a] uppercase tracking-wider font-medium text-[10px] transition-all duration-300 ease-in-out overflow-hidden mx-4" style={{ opacity: isCollapsed ? 0 : 1 }}>
+          <span>{t("characterChat.responseLength")}</span>
         </div>
-        
-        <div className="transition-all duration-300 ease-in-out px-4 max-h-[500px] opacity-100 group">
+        <div className="transition-all duration-300 ease-in-out px-6 max-h-[500px] opacity-100">
           <div className="space-y-1 my-2"></div>
           {!isCollapsed ? (
             <div className="px-2 py-2">

@@ -26,6 +26,7 @@ MVP 2.0 (supports world books and regular expressions, logic refinement in progr
 
 <p align="center"> <img src="public/show_1.png" width="100%" alt="screenshot 1"/> </p> 
 <p align="center"> <img src="public/show_2.png" width="100%" alt="screenshot 2"/> </p>
+<p align="center"> <img src="public/show_3.png" width="100%" alt="screenshot 3"/> </p>
 
 ## 🚀 Features
 
