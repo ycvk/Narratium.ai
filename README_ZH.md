@@ -21,6 +21,8 @@ MVP 2.0 体验版本(支持世界书、正则，正在完善逻辑)：[Narratium
 <p align="center"> <img src="public/show_1.png" width="100%" alt="界面截图 1"/> </p> 
 <p align="center"> <img src="public/show_2.png" width="100%" alt="界面截图 2"/> </p>
 <p align="center"> <img src="public/show_3.png" width="100%" alt="界面截图 3"/> </p>
+<p align="center"> <img src="public/show_4.png" width="100%" alt="界面截图 4"/> </p>
+
 
 ## 🚀 当前功能
 
