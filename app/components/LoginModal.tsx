@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { useLanguage } from "@/app/i18n";
+import { useLanguage } from "../i18n";
 
 interface LoginModalProps {
   isOpen: boolean;
@@ -12,7 +12,7 @@ interface LoginModalProps {
 export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
   const { t,  fontClass, titleFontClass, serifFontClass } = useLanguage();
   const [activeTab, setActiveTab] = useState("password");
-  const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [verificationCode, setVerificationCode] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -56,8 +56,8 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
   const questions = [
     {
       id: 1,
-      text: t("auth.wizardQuestion"),
-      placeholder: t("auth.emailPlaceholder"),
+      text: t("auth.wizardQuestion").replace("邮箱", "名称"),
+      placeholder: t("auth.emailPlaceholder").replace("邮箱", "名称"),
     },
     {
       id: 2,
@@ -96,19 +96,9 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
     if (e.key === "Enter") {
       e.preventDefault();
 
-      if (step === 1 && email.trim() !== "") {
-        handleNext();
-      } else if (step === 2) {
-        if ((activeTab === "password" && password.trim() !== "") ||
-          (activeTab === "code" && verificationCode.trim() !== "")) {
-          handleLogin(e as unknown as React.FormEvent);
-        }
+      if (username.trim() !== "") {
+        handleLogin(e as unknown as React.FormEvent);
       }
-    } else if (e.key === "Backspace" && step === 2 &&
-      ((activeTab === "password" && password === "") ||
-        (activeTab === "code" && verificationCode === ""))) {
-      e.preventDefault();
-      handlePrev();
     }
   };
 
@@ -117,7 +107,7 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
 
     switch (step) {
     case 1:
-      setEmail(value);
+      setUsername(value);
       break;
     case 2:
       if (activeTab === "password") {
@@ -132,11 +122,7 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (activeTab === "password" && !password.trim()) {
-      return;
-    }
-
-    if (activeTab === "code" && !verificationCode.trim()) {
+    if (!username.trim()) {
       return;
     }
 
@@ -146,14 +132,13 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
     try {
       const userId = Math.floor(Math.random() * 10000).toString();
       
-      localStorage.setItem("email", email);
-      localStorage.setItem("username", email.split("@")[0]);
+      localStorage.setItem("username", username);
       localStorage.setItem("userId", userId);
       localStorage.setItem("isLoggedIn", "true");
 
       onClose();
       setStep(1);
-      setEmail("");
+      setUsername("");
       setPassword("");
       setVerificationCode("");
       window.location.reload();
@@ -166,8 +151,8 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
   };
 
   const handleSendVerificationCode = () => {
-    if (!email.trim()) {
-      setError("请输入电子邮件");
+    if (!username.trim()) {
+      setError("请输入名称");
       return;
     }
 
@@ -184,7 +169,7 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
           type={step === 2 && activeTab === "password" ? "password" : "text"}
           className={`bg-transparent border-0 outline-none w-full text-center text-lg text-[#eae6db] placeholder-[#a18d6f] shadow-none focus:ring-0 focus:border-0 ${serifFontClass}`}
           placeholder={placeholder}
-          value={step === 1 ? email : (activeTab === "password" ? password : verificationCode)}
+          value={step === 1 ? username : (activeTab === "password" ? password : verificationCode)}
           onChange={handleInputChange}
           onKeyDown={handleKeyPress}
           disabled={isLoading}
@@ -236,7 +221,7 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
               </svg>
             </button>
             <div className="text-center mb-6">
-              <h1 className={`text-3xl font-bold text-[#f9c86d] mb-2 ${titleFontClass}`}>{t("auth.welcomeBack")}</h1>
+              <h1 className={"text-3xl font-bold text-[#f9c86d] mb-2 font-cinzel"}>Welcome Back</h1>
               <p className={`text-[#c0a480] ${serifFontClass}`}>{t("auth.continueJourney")}</p>
             </div>
 
@@ -301,7 +286,7 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
                 )}
               </AnimatePresence>
 
-              <div className="flex justify-center mt-6">
+              {/* <div className="flex justify-center mt-6">
                 <button
                   type="button"
                   className={`px-3 py-1 mx-2 text-xs portal-button ${activeTab === "password" ? "text-[#f9c86d]" : "text-[#a18d6f]"} transition-colors ${fontClass}`}
@@ -332,7 +317,7 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
                 >
                   {t("auth.starCode")}
                 </button>
-              </div>
+              </div> */}
 
               <div className={`text-center mt-8 text-xs text-[#a18d6f] ${fontClass}`}>
                 <p>{t("auth.agreementText")}</p>
@@ -345,13 +330,6 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
 
               <div className="flex justify-center mt-8">
                 <div className="flex space-x-4">
-                  {/* GitHub */}
-                  <button type="button" className="w-10 h-10 rounded-full flex items-center justify-center border border-[#333333] bg-[#1a1a1a] hover:bg-[#252525] transition-colors">
-                    <svg className="w-5 h-5" aria-hidden="true" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"></path>
-                    </svg>
-                  </button>
-
                   <button type="button" className="w-10 h-10 rounded-full flex items-center justify-center border border-[#333333] bg-[#1a1a1a] hover:bg-[#252525] transition-colors">
                     <svg className="w-5 h-5" aria-hidden="true" fill="currentColor" viewBox="0 0 24 24">
                       <path d="M12.545 10.239v3.821h5.445c-.712 2.315-2.647 3.972-5.445 3.972a6.033 6.033 0 110-12.064c1.498 0 2.866.549 3.921 1.453l2.814-2.814A9.969 9.969 0 0012.545 2C7.021 2 2.543 6.477 2.543 12s4.478 10 10.002 10c8.396 0 10.249-7.85 9.426-11.748l-9.426-.013z"></path>
@@ -360,6 +338,11 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
                   <button type="button" className="w-10 h-10 rounded-full flex items-center justify-center border border-[#333333] bg-[#1a1a1a] hover:bg-[#252525] transition-colors">
                     <svg className="w-5 h-5" aria-hidden="true" fill="currentColor" viewBox="0 0 24 24">
                       <path d="M23.954 4.569c-.885.389-1.83.654-2.825.775 1.014-.611 1.794-1.574 2.163-2.723-.951.555-2.005.959-3.127 1.184-.896-.959-2.173-1.559-3.591-1.559-2.717 0-4.92 2.203-4.92 4.917 0 .39.045.765.127 1.124C7.691 8.094 4.066 6.13 1.64 3.161c-.427.722-.666 1.561-.666 2.475 0 1.71.87 3.213 2.188 4.096-.807-.026-1.566-.248-2.228-.616v.061c0 2.385 1.693 4.374 3.946 4.827-.413.111-.849.171-1.296.171-.314 0-.615-.03-.916-.086.631 1.953 2.445 3.377 4.604 3.417-1.68 1.319-3.809 2.105-6.102 2.105-.39 0-.779-.023-1.17-.067 2.189 1.394 4.768 2.209 7.557 2.209 9.054 0 14-7.503 14-14 0-.21-.005-.42-.015-.63.961-.689 1.8-1.56 2.46-2.548l-.047-.02z"></path>
+                    </svg>
+                  </button>
+                  <button type="button" className="w-10 h-10 rounded-full flex items-center justify-center border border-[#333333] bg-[#1a1a1a] hover:bg-[#252525] transition-colors">
+                    <svg className="w-5 h-5" aria-hidden="true" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"></path>
                     </svg>
                   </button>
                 </div>
