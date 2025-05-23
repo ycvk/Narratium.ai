@@ -270,7 +270,7 @@ export default function Sidebar({ isOpen, toggleSidebar, openLoginModal }: Sideb
           {!isLoggedIn ? (
             <button 
               onClick={openLoginModal}
-              className={`focus:outline-none group relative overflow-hidden rounded-md w-full transition-all duration-300 ${!isOpen ? "p-2 flex justify-center" : "py-1.5 px-2 flex items-center justify-center"}`}
+              className={`focus:outline-none group relative overflow-hidden rounded-md w-full transition-all duration-300 ${!isOpen ? "p-2 flex justify-center" : "py-1.5 px-2 flex items-center justify-center"} cursor-pointer`}
             >
               <div className="absolute inset-0 bg-gradient-to-br from-[#242424]/0 to-[#1a1a1a]/0 opacity-0 group-hover:opacity-80 transition-opacity duration-300"></div>
               <div className="relative flex items-center justify-center w-full transition-all duration-300 z-10">
@@ -308,11 +308,11 @@ export default function Sidebar({ isOpen, toggleSidebar, openLoginModal }: Sideb
           ) : (
             <button
               onClick={handleLogout}
-              className={`focus:outline-none group relative overflow-hidden rounded-md w-full transition-all duration-300 ${!isOpen ? "p-2 flex justify-center" : "py-1.5 px-2 flex items-center justify-center"}`}
+              className={`focus:outline-none group relative overflow-hidden rounded-md w-full transition-all duration-300 ${!isOpen ? "p-2 flex justify-center" : "py-1.5 px-2 flex items-center justify-center"} cursor-pointer`}
             >
               <div className="absolute inset-0 bg-gradient-to-br from-[#242424]/0 to-[#1a1a1a]/0 opacity-0 group-hover:opacity-80 transition-opacity duration-300"></div>
               <div className="relative flex items-center justify-center w-full transition-all duration-300 z-10">
-                <div className={`${isOpen ? "w-6 h-6" : "w-8 h-8"} flex items-center justify-center flex-shrink-0 text-[#f8d36a] group-hover:text-[#ffc107] transition-colors duration-300`}>
+                <div className={`${isOpen ? "w-6 h-6" : "w-8 h-8"} flex items-center justify-center flex-shrink-0 text-[#f8d36a] group-hover:text-[#ffc107] transition-colors duration-300 `}>
                   <svg xmlns="http://www.w3.org/2000/svg" width={isOpen ? "14" : "16"} height={isOpen ? "14" : "16"} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="transition-transform duration-300 group-hover:scale-110">
                     <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
                     <polyline points="16 17 21 12 16 7" />
