@@ -9,14 +9,43 @@ export async function getWorldBookEntries(characterId: string) {
     const worldBook = await WorldBookOperations.getWorldBook(characterId);
     const entries = worldBook ? Object.entries(worldBook).map(([key, entry]) => {
       return {
-        id: key,
-        ...entry,
+        entry_id: key,
+        id: entry.id,
+        content: entry.content || "",
+        keys: entry.keys || [],
+        secondary_keys: entry.secondary_keys || [],
+        selective: entry.selective !== undefined ? entry.selective : false,
+        constant: entry.constant !== undefined ? entry.constant : false,
+        position: entry.position !== undefined ? entry.position : 4,
+        insertion_order: entry.insertion_order || 0,
+        enabled: entry.enabled !== undefined ? entry.enabled : true,
+        use_regex: entry.use_regex !== undefined ? entry.use_regex : false,
+        depth: entry.depth || 1,
+        comment: entry.comment || "",
+        tokens: entry.tokens || undefined,
+        extensions: entry.extensions || {},
+        primaryKey: Array.isArray(entry.keys) && entry.keys.length > 0 ? entry.keys[0] : "",
+        keyCount: Array.isArray(entry.keys) ? entry.keys.length : 0,
+        secondaryKeyCount: Array.isArray(entry.secondary_keys) ? entry.secondary_keys.length : 0,
+        contentLength: entry.content ? entry.content.length : 0,
+        isActive: entry.enabled !== false,
+        lastUpdated: entry.extensions?.updatedAt || entry.extensions?.createdAt || Date.now(),
       };
     }) : [];
+
+    entries.sort((a, b) => {
+      if (a.insertion_order !== b.insertion_order) {
+        return a.insertion_order - b.insertion_order;
+      }
+      return b.lastUpdated - a.lastUpdated;
+    });
 
     return {
       success: true,
       entries,
+      totalCount: entries.length,
+      enabledCount: entries.filter(e => e.isActive).length,
+      disabledCount: entries.filter(e => !e.isActive).length,
     };
   } catch (error: any) {
     console.error("Failed to get world book entries:", error);
