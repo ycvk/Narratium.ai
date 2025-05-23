@@ -164,13 +164,13 @@ const DialogueFlowStyles = () => (
     }
     
     .react-flow__edge path {
-      stroke-dasharray: 5, 5 !important;
+      strokeDasharray: 5, 5 !important;
       animation: flowLine 30s linear infinite !important;
     }
     
     @keyframes flowLine {
       to {
-        stroke-dashoffset: -1000;
+        strokeDashoffset: -1000;
       }
     }
   `}</style>

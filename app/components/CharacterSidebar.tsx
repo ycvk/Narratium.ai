@@ -205,9 +205,9 @@ const CharacterSidebar: React.FC<CharacterSidebarProps> = ({
                           stroke="currentColor"
                           strokeWidth="4"
                           fill="none"
-                          stroke-linecap="round"
-                          stroke-dasharray="1, 150"
-                          stroke-dashoffset="0"
+                          strokeLinecap="round"
+                          strokeDasharray="1, 150"
+                          strokeDashoffset="0"
                           transform="rotate(0 25 25)"
                         >
                           <animateTransform
@@ -279,9 +279,9 @@ const CharacterSidebar: React.FC<CharacterSidebarProps> = ({
                         stroke="currentColor"
                         strokeWidth="4"
                         fill="none"
-                        stroke-linecap="round"
-                        stroke-dasharray="1, 150"
-                        stroke-dashoffset="0"
+                        strokeLinecap="round"
+                        strokeDasharray="1, 150"
+                        strokeDashoffset="0"
                         transform="rotate(0 25 25)"
                       >
                         <animateTransform

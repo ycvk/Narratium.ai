@@ -439,12 +439,6 @@ export default function WorldBookEditor({
                             {entry.isActive ? t("worldBook.enabled") : t("worldBook.disabled")}
                           </span>
                         </div>
-                        {entry.use_regex && (
-                          <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-gradient-to-r from-blue-500/20 to-indigo-500/20 text-blue-300 border border-blue-500/30 hover:from-blue-500/30 hover:to-indigo-500/30 hover:border-blue-400/50 transition-all duration-300">
-                            <span className="w-1.5 h-1.5 bg-blue-400 rounded-full mr-1.5 opacity-80"></span>
-                            {t("worldBook.regex")}
-                          </span>
-                        )}
                         {entry.constant && (
                           <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-gradient-to-r from-purple-500/20 to-fuchsia-500/20 text-purple-300 border border-purple-500/30 hover:from-purple-500/30 hover:to-fuchsia-500/30 hover:border-purple-400/50 transition-all duration-300">
                             <span className="w-1.5 h-1.5 bg-purple-400 rounded-full mr-1.5 opacity-80"></span>
