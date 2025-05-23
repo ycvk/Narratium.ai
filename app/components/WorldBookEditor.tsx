@@ -67,7 +67,6 @@ export default function WorldBookEditor({
   const { t, fontClass,serifFontClass } = useLanguage();
   const [entries, setEntries] = useState<WorldBookEntryData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [selectedEntries, setSelectedEntries] = useState<Set<string>>(new Set());
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [editingEntry, setEditingEntry] = useState<EditingEntry | null>(null);
   const [isSaving, setIsSaving] = useState(false);
@@ -108,64 +107,6 @@ export default function WorldBookEditor({
       }
     } catch (error) {
       console.error("Failed to load settings:", error);
-    }
-  };
-
-  const handleSelectEntry = (entryId: string) => {
-    const newSelected = new Set(selectedEntries);
-    if (newSelected.has(entryId)) {
-      newSelected.delete(entryId);
-    } else {
-      newSelected.add(entryId);
-    }
-    setSelectedEntries(newSelected);
-  };
-
-  const handleSelectAll = () => {
-    if (selectedEntries.size === entries.length) {
-      setSelectedEntries(new Set());
-    } else {
-      setSelectedEntries(new Set(entries.map(e => e.id?.toString() || "")));
-    }
-  };
-
-  const handleBulkToggle = async (enabled: boolean) => {
-    if (selectedEntries.size === 0) {
-      toast.error(t("worldBook.selectEntriesFirst"));
-      return;
-    }
-
-    try {
-      const result = await bulkToggleWorldBookEntries(
-        characterId,
-        Array.from(selectedEntries),
-        enabled,
-      );
-      
-      if (result.success) {
-        const action = enabled ? t("worldBook.bulkToggleEnabled") : t("worldBook.bulkToggleDisabled");
-        toast.success(t("worldBook.bulkToggleSuccess").replace("{count}", selectedEntries.size.toString()).replace("{action}", action));
-        await loadWorldBookData();
-        setSelectedEntries(new Set());
-      }
-    } catch (error) {
-      console.error("Bulk toggle failed:", error);
-      toast.error(t("worldBook.bulkOperationFailed"));
-    }
-  };
-
-  const handleDeleteEntry = async (entryId: string) => {
-    if (!confirm(t("worldBook.confirmDelete"))) return;
-
-    try {
-      const result = await deleteWorldBookEntry(characterId, entryId);
-      if (result.success) {
-        toast.success(t("worldBook.deleteSuccess"));
-        await loadWorldBookData();
-      }
-    } catch (error) {
-      console.error("Delete failed:", error);
-      toast.error(t("worldBook.deleteFailed"));
     }
   };
 
@@ -266,6 +207,95 @@ export default function WorldBookEditor({
     return positionMap[position] || "Unknown";
   };
 
+  // Bulk operations for all entries
+  const handleBulkToggleAll = async (enabled: boolean) => {
+    if (entries.length === 0) {
+      toast.error(t("worldBook.noEntries"));
+      return;
+    }
+
+    try {
+      const entryIds = entries.map(entry => entry.entry_id);
+      const result = await bulkToggleWorldBookEntries(
+        characterId,
+        entryIds,
+        enabled,
+      );
+      
+      if (result.success) {
+        const action = enabled ? t("worldBook.enabledAll") : t("worldBook.disabledAll");
+        toast.success(`${action} ${entries.length} ${t("worldBook.items")}`);
+        await loadWorldBookData();
+      }
+    } catch (error) {
+      console.error("Bulk toggle failed:", error);
+      toast.error(t("worldBook.bulkOperationFailed"));
+    }
+  };
+
+  // Bulk operations for filtered entries (enabled/disabled only)
+  const handleBulkToggleFiltered = async (targetEnabled: boolean, newEnabled: boolean) => {
+    const filteredEntries = entries.filter(entry => entry.isActive === targetEnabled);
+    
+    if (filteredEntries.length === 0) {
+      const statusText = targetEnabled ? t("worldBook.enabled") : t("worldBook.disabled");
+      toast.error(t("worldBook.noEntriesWithStatus").replace("{status}", statusText));
+      return;
+    }
+
+    try {
+      const entryIds = filteredEntries.map(entry => entry.entry_id);
+      const result = await bulkToggleWorldBookEntries(
+        characterId,
+        entryIds,
+        newEnabled,
+      );
+      
+      if (result.success) {
+        const action = newEnabled ? t("worldBook.enabled") : t("worldBook.disabled");
+        toast.success(`${action} ${filteredEntries.length} ${t("worldBook.items")}`);
+        await loadWorldBookData();
+      }
+    } catch (error) {
+      console.error("Bulk toggle failed:", error);
+      toast.error(t("worldBook.bulkOperationFailed"));
+    }
+  };
+
+  const handleDeleteEntry = async (entryId: string) => {
+    if (!confirm(t("worldBook.confirmDelete"))) return;
+
+    try {
+      const result = await deleteWorldBookEntry(characterId, entryId);
+      if (result.success) {
+        toast.success(t("worldBook.deleteSuccess"));
+        await loadWorldBookData();
+      }
+    } catch (error) {
+      console.error("Delete failed:", error);
+      toast.error(t("worldBook.deleteFailed"));
+    }
+  };
+
+  const handleToggleEntry = async (entryId: string, newEnabled: boolean) => {
+    try {
+      const result = await bulkToggleWorldBookEntries(
+        characterId,
+        [entryId],
+        newEnabled,
+      );
+      
+      if (result.success) {
+        const action = newEnabled ? t("worldBook.enabled") : t("worldBook.disabled");
+        toast.success(`${action} 1 ${t("worldBook.item")}`);
+        await loadWorldBookData();
+      }
+    } catch (error) {
+      console.error("Toggle failed:", error);
+      toast.error(t("worldBook.toggleFailed"));
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="h-full flex items-center justify-center breathing-bg">
@@ -295,7 +325,7 @@ export default function WorldBookEditor({
             <div className={`hidden md:flex items-center space-x-2 text-xs text-[#a18d6f] ${serifFontClass} flex-shrink-0`}>
               <span className="whitespace-nowrap">{t("worldBook.totalCount")} {entries.length}</span>
               <span>•</span>
-              <span className="text-emerald-400 whitespace-nowrap">{t("worldBook.enabledCount")} {entries.filter(e => e.isActive).length}</span>
+              <span className="text-amber-400 whitespace-nowrap">{t("worldBook.enabledCount")} {entries.filter(e => e.isActive).length}</span>
               <span>•</span>
               <span className="text-rose-400 whitespace-nowrap">{t("worldBook.disabledCount")} {entries.filter(e => !e.isActive).length}</span>
             </div>
@@ -322,7 +352,7 @@ export default function WorldBookEditor({
           <div className="flex items-center space-x-2 flex-wrap">
             <button
               onClick={() => handleEditEntry()}
-              className="px-3 py-1.5 bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-500 hover:to-emerald-600 text-white rounded-md transition-all duration-300 text-sm font-medium shadow-lg hover:shadow-emerald-500/25 group flex-shrink-0"
+              className="px-3 py-1.5 bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-500 hover:to-amber-600 text-white rounded-md transition-all duration-300 text-sm font-medium shadow-lg hover:shadow-amber-500/25 group flex-shrink-0"
             >
               <span className={`flex items-center ${serifFontClass}`}>
                 <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-1.5 transition-transform duration-300 group-hover:scale-110">
@@ -333,25 +363,50 @@ export default function WorldBookEditor({
               </span>
             </button>
             
-            {selectedEntries.size > 0 && (
-              <div className="flex items-center space-x-2 flex-wrap">
-                <button
-                  onClick={() => handleBulkToggle(true)}
-                  className={`px-2.5 py-1.5 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 text-white rounded-md transition-all duration-300 text-xs font-medium shadow-md hover:shadow-blue-500/25 ${serifFontClass} flex-shrink-0`}
-                >
-                  {t("worldBook.bulkEnable")}
-                </button>
-                <button
-                  onClick={() => handleBulkToggle(false)}
-                  className={`px-2.5 py-1.5 bg-gradient-to-r from-orange-600 to-orange-700 hover:from-orange-500 hover:to-orange-600 text-white rounded-md transition-all duration-300 text-xs font-medium shadow-md hover:shadow-orange-500/25 ${serifFontClass} flex-shrink-0`}
-                >
-                  {t("worldBook.bulkDisable")}
-                </button>
-                <span className="text-xs text-[#a18d6f] bg-[#252220] px-2 py-1 rounded border border-[#534741] whitespace-nowrap">
-                  {t("worldBook.selectedItems")} {selectedEntries.size} {t("worldBook.items")}
+            <div className="flex items-center space-x-2 flex-wrap">
+              <div className="flex items-center space-x-1 bg-[#252220]/80 backdrop-blur-sm px-2 py-1 rounded-lg border border-[#534741]/40">
+                <span className={`text-xs text-[#a18d6f] ${serifFontClass} whitespace-nowrap`}>
+                  {t("worldBook.bulkOperations")}:
                 </span>
               </div>
-            )}
+              
+              <button
+                onClick={() => handleBulkToggleAll(true)}
+                className={`relative group px-3 py-1.5 rounded-lg transition-all duration-300 text-xs font-medium flex items-center ${serifFontClass} 
+                  bg-gradient-to-br from-slate-800/60 via-amber-900/40 to-slate-800/60 
+                  backdrop-blur-sm border border-amber-600/30 text-amber-200/90
+                  hover:from-slate-700/70 hover:via-amber-800/50 hover:to-slate-700/70
+                  hover:border-amber-500/40 hover:text-amber-100 
+                  hover:shadow-lg hover:shadow-amber-500/10 flex-shrink-0
+                  disabled:opacity-50 disabled:cursor-not-allowed`}
+                disabled={entries.length === 0}
+                title={`${t("worldBook.enableAll")} (${entries.length} ${t("worldBook.items")})`}
+              >
+                <div className="flex items-center">
+                  <div className="w-2.5 h-2.5 mr-1.5 rounded-full bg-amber-400/70 group-hover:bg-amber-400 transition-all duration-300"></div>
+                  <span>{t("worldBook.enableAll")}</span>
+                  <span className="ml-1 text-[10px] opacity-60 group-hover:opacity-80">({entries.length})</span>
+                </div>
+              </button>
+              <button
+                onClick={() => handleBulkToggleAll(false)}
+                className={`relative group px-3 py-1.5 rounded-lg transition-all duration-300 text-xs font-medium flex items-center ${serifFontClass} 
+                  bg-gradient-to-br from-slate-800/60 via-stone-700/40 to-slate-800/60 
+                  backdrop-blur-sm border border-stone-500/30 text-stone-300/90
+                  hover:from-slate-700/70 hover:via-stone-600/50 hover:to-slate-700/70
+                  hover:border-stone-400/40 hover:text-stone-200 
+                  hover:shadow-lg hover:shadow-stone-500/10 flex-shrink-0
+                  disabled:opacity-50 disabled:cursor-not-allowed`}
+                disabled={entries.length === 0}
+                title={`${t("worldBook.disableAll")} - ${t("worldBook.confirmBulkDisable")}`}
+              >
+                <div className="flex items-center">
+                  <div className="w-2.5 h-2.5 mr-1.5 rounded-full bg-stone-400/70 group-hover:bg-stone-400 transition-all duration-300"></div>
+                  <span>{t("worldBook.disableAll")}</span>
+                  <span className="ml-1 text-[10px] opacity-60 group-hover:opacity-80">({entries.length})</span>
+                </div>
+              </button>
+            </div>
           </div>
           
           <div className="flex items-center space-x-2 text-xs text-[#a18d6f] bg-[#252220] px-2 py-1 rounded border border-[#534741] flex-shrink-0">
@@ -364,15 +419,7 @@ export default function WorldBookEditor({
           <table className="w-full table-fixed">
             <thead className="sticky top-0 bg-[#252220] border-b border-[#534741] z-10">
               <tr>
-                <th className="w-12 p-3 text-left">
-                  <input
-                    type="checkbox"
-                    checked={selectedEntries.size === entries.length && entries.length > 0}
-                    onChange={handleSelectAll}
-                    className="w-4 h-4 rounded border-[#534741] bg-[#1a1816] text-[#a18d6f] focus:ring-[#a18d6f] focus:ring-1"
-                  />
-                </th>
-                <th className="w-8 p-3"></th>
+                <th className={`w-16 p-3 text-left text-xs font-medium text-[#a18d6f] uppercase tracking-wider whitespace-nowrap ${fontClass}`}>{t("worldBook.toggle")}</th>
                 <th className={`w-32 p-3 text-left text-xs font-medium text-[#a18d6f] uppercase tracking-wider whitespace-nowrap ${fontClass}`}>{t("worldBook.status")}</th>
                 <th className={`w-32 p-3 text-left text-xs font-medium text-[#a18d6f] uppercase tracking-wider whitespace-nowrap ${fontClass}`}>{t("worldBook.comment")}</th>
                 <th className={`w-32 p-3 text-left text-xs font-medium text-[#a18d6f] uppercase tracking-wider whitespace-nowrap ${fontClass}`}>{t("worldBook.keywords")}</th>
@@ -387,9 +434,7 @@ export default function WorldBookEditor({
               {entries.map((entry, index) => (
                 <React.Fragment key={entry.entry_id}>
                   <tr 
-                    className={`border-b border-[#534741] hover:bg-[#252220] transition-all duration-300 group ${
-                      selectedEntries.has(entry.entry_id) ? "bg-[#252220]" : ""
-                    }`}
+                    className="border-b border-[#534741] hover:bg-[#252220] transition-all duration-300 group"
                     style={{
                       opacity: animationComplete ? 1 : 0,
                       transform: animationComplete ? "translateY(0)" : "translateY(20px)",
@@ -397,54 +442,66 @@ export default function WorldBookEditor({
                     }}
                   >
                     <td className="p-3">
-                      <input
-                        type="checkbox"
-                        checked={selectedEntries.has(entry.entry_id)}
-                        onChange={() => handleSelectEntry(entry.entry_id)}
-                        className="w-4 h-4 rounded border-[#534741] bg-[#1a1816] text-[#a18d6f] focus:ring-[#a18d6f] focus:ring-1"
-                      />
-                    </td>
-                    <td className="p-3">
                       <button
-                        onClick={() => toggleRowExpansion(entry.entry_id)}
-                        className="w-6 h-6 flex items-center justify-center text-[#a18d6f] hover:text-[#eae6db] transition-colors duration-300 rounded hover:bg-[#333]"
+                        onClick={() => handleToggleEntry(entry.entry_id, !entry.isActive)}
+                        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-[#1a1816] backdrop-blur-sm ${
+                          entry.isActive 
+                            ? "bg-gradient-to-r from-slate-700/80 via-amber-800/60 to-slate-700/80 border border-amber-600/40 focus:ring-amber-500/50" 
+                            : "bg-gradient-to-r from-slate-700/60 via-stone-600/40 to-slate-700/60 border border-stone-500/30 focus:ring-stone-400/50"
+                        }`}
+                        title={entry.isActive ? t("worldBook.disableEntry") : t("worldBook.enableEntry")}
                       >
-                        <svg 
-                          xmlns="http://www.w3.org/2000/svg" 
-                          width="12" 
-                          height="12" 
-                          viewBox="0 0 24 24" 
-                          fill="none" 
-                          stroke="currentColor" 
-                          strokeWidth="2" 
-                          strokeLinecap="round" 
-                          strokeLinejoin="round"
-                          className={`transition-transform duration-300 ${expandedRows.has(entry.entry_id) ? "rotate-90" : ""}`}
-                        >
-                          <path d="M9 18l6-6-6-6"></path>
-                        </svg>
+                        <span
+                          className={`inline-block h-4 w-4 transform rounded-full shadow-lg transition-all duration-300 ${
+                            entry.isActive 
+                              ? "translate-x-6 bg-gradient-to-br from-amber-300 via-amber-200 to-amber-300 shadow-amber-400/30" 
+                              : "translate-x-1 bg-gradient-to-br from-stone-300 via-stone-200 to-stone-300 shadow-stone-400/30"
+                          }`}
+                        />
                       </button>
                     </td>
                     <td className="p-3">
-                      <div className="flex items-center flex-wrap gap-1.5">
-                        <div className="flex items-center space-x-1.5">
-                          <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium transition-all duration-300 ${
-                            entry.isActive 
-                              ? "bg-gradient-to-r from-emerald-500/20 to-green-500/20 text-emerald-300 border border-emerald-500/30 hover:from-emerald-500/30 hover:to-green-500/30 hover:border-emerald-400/50" 
-                              : "bg-gradient-to-r from-rose-500/20 to-red-500/20 text-rose-300 border border-rose-500/30 hover:from-rose-500/30 hover:to-red-500/30 hover:border-rose-400/50"
-                          }`}>
-                            <span className={`w-1.5 h-1.5 rounded-full mr-1.5 ${
-                              entry.isActive ? "bg-emerald-400" : "bg-rose-400"
-                            } opacity-80`}></span>
-                            {entry.isActive ? t("worldBook.enabled") : t("worldBook.disabled")}
-                          </span>
+                      <div className="flex items-center space-x-2">
+                        <div className="flex items-center flex-wrap gap-1.5">
+                          <div className="flex items-center space-x-1.5">
+                            <span className={`inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-300 backdrop-blur-sm border ${
+                              entry.isActive 
+                                ? "bg-gradient-to-br from-slate-800/60 via-amber-900/40 to-slate-800/60 text-amber-200/90 border-amber-600/30 hover:from-slate-700/70 hover:via-amber-800/50 hover:to-slate-700/70 hover:border-amber-500/40 hover:text-amber-100 hover:shadow-lg hover:shadow-amber-500/10" 
+                                : "bg-gradient-to-br from-slate-800/60 via-stone-700/40 to-slate-800/60 text-stone-300/90 border-stone-500/30 hover:from-slate-700/70 hover:via-stone-600/50 hover:to-slate-700/70 hover:border-stone-400/40 hover:text-stone-200 hover:shadow-lg hover:shadow-stone-500/10"
+                            }`}>
+                              <span className={`w-2 h-2 rounded-full mr-2 ${
+                                entry.isActive ? "bg-amber-400/80 shadow-sm shadow-amber-400/50" : "bg-stone-400/80 shadow-sm shadow-stone-400/50"
+                              }`}></span>
+                              {entry.isActive ? t("worldBook.enabled") : t("worldBook.disabled")}
+                            </span>
+                          </div>
+                          {entry.constant && (
+                            <span className="inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-300 backdrop-blur-sm border bg-gradient-to-br from-slate-800/60 via-slate-700/40 to-slate-800/60 text-slate-300/90 border-slate-500/30 hover:from-slate-700/70 hover:via-slate-600/50 hover:to-slate-700/70 hover:border-slate-400/40 hover:text-slate-200 hover:shadow-lg hover:shadow-slate-500/10">
+                              <span className="w-2 h-2 bg-slate-400/80 rounded-full mr-2 shadow-sm shadow-slate-400/50"></span>
+                              {t("worldBook.constant")}
+                            </span>
+                          )}
                         </div>
-                        {entry.constant && (
-                          <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-gradient-to-r from-purple-500/20 to-fuchsia-500/20 text-purple-300 border border-purple-500/30 hover:from-purple-500/30 hover:to-fuchsia-500/30 hover:border-purple-400/50 transition-all duration-300">
-                            <span className="w-1.5 h-1.5 bg-purple-400 rounded-full mr-1.5 opacity-80"></span>
-                            {t("worldBook.constant")}
-                          </span>
-                        )}
+                        <button
+                          onClick={() => toggleRowExpansion(entry.entry_id)}
+                          className="w-6 h-6 flex items-center justify-center text-[#a18d6f] hover:text-[#eae6db] transition-colors duration-300 rounded hover:bg-[#333] ml-2"
+                          title={expandedRows.has(entry.entry_id) ? "收起详情" : "展开详情"}
+                        >
+                          <svg 
+                            xmlns="http://www.w3.org/2000/svg" 
+                            width="12" 
+                            height="12" 
+                            viewBox="0 0 24 24" 
+                            fill="none" 
+                            stroke="currentColor" 
+                            strokeWidth="2" 
+                            strokeLinecap="round" 
+                            strokeLinejoin="round"
+                            className={`transition-transform duration-300 ${expandedRows.has(entry.entry_id) ? "rotate-90" : ""}`}
+                          >
+                            <path d="M9 18l6-6-6-6"></path>
+                          </svg>
+                        </button>
                       </div>
                     </td>
                     <td className="p-3 text-sm text-[#eae6db] max-w-xs truncate">
@@ -455,18 +512,19 @@ export default function WorldBookEditor({
                         {entry.keys.slice(0, 2).map((key, i) => (
                           <span 
                             key={i} 
-                            className="inline-flex items-center text-xs bg-gradient-to-r from-amber-500/20 to-orange-500/20 border border-amber-500/30 text-amber-200 px-2.5 py-1 rounded-full font-medium hover:from-amber-500/30 hover:to-orange-500/30 hover:border-amber-400/50 transition-all duration-200 cursor-default"
+                            className="inline-flex items-center text-xs bg-gradient-to-br from-slate-800/60 via-amber-900/30 to-slate-800/60 backdrop-blur-sm border border-amber-600/20 text-amber-200/90 px-3 py-1.5 rounded-lg font-medium hover:from-slate-700/70 hover:via-amber-800/40 hover:to-slate-700/70 hover:border-amber-500/30 hover:text-amber-100 hover:shadow-lg hover:shadow-amber-500/10 transition-all duration-200 cursor-default"
                             title={key}
                           >
-                            <span className="w-1.5 h-1.5 bg-amber-400 rounded-full mr-1.5 opacity-80"></span>
+                            <span className="w-2 h-2 bg-amber-400/70 rounded-full mr-2 shadow-sm shadow-amber-400/50"></span>
                             <span className="truncate max-w-[80px]">{key}</span>
                           </span>
                         ))}
                         {entry.keys.length > 2 && (
                           <span 
-                            className="inline-flex items-center text-xs bg-gradient-to-r from-slate-600/20 to-slate-700/20 border border-slate-500/30 text-slate-300 px-2 py-1 rounded-full font-medium cursor-default"
+                            className="inline-flex items-center text-xs bg-gradient-to-br from-slate-800/60 via-slate-700/40 to-slate-800/60 backdrop-blur-sm border border-slate-500/20 text-slate-300/90 px-3 py-1.5 rounded-lg font-medium cursor-default hover:from-slate-700/70 hover:via-slate-600/50 hover:to-slate-700/70 hover:border-slate-400/30 hover:text-slate-200 hover:shadow-lg hover:shadow-slate-500/10 transition-all duration-200"
                             title={`还有 ${entry.keys.length - 2} 个关键词: ${entry.keys.slice(2).join(", ")}`}
                           >
+                            <span className="w-2 h-2 bg-slate-400/70 rounded-full mr-2 shadow-sm shadow-slate-400/50"></span>
                             +{entry.keys.length - 2}
                           </span>
                         )}
@@ -514,7 +572,7 @@ export default function WorldBookEditor({
 
                   {expandedRows.has(entry.entry_id) && (
                     <tr className="border-b border-[#534741] bg-[#1a1816]">
-                      <td colSpan={10} className="p-4">
+                      <td colSpan={9} className="p-4">
                         <div className="space-y-3">
                           <div>
                             <h4 className="text-sm font-medium text-[#a18d6f] mb-2">{t("worldBook.contentPreview")}</h4>
@@ -530,10 +588,10 @@ export default function WorldBookEditor({
                                 {entry.secondary_keys.map((key, i) => (
                                   <span 
                                     key={i} 
-                                    className="inline-flex items-center text-xs bg-gradient-to-r from-blue-500/20 to-indigo-500/20 border border-blue-500/30 text-blue-200 px-2.5 py-1 rounded-full font-medium hover:from-blue-500/30 hover:to-indigo-500/30 hover:border-blue-400/50 transition-all duration-200 cursor-default"
+                                    className="inline-flex items-center text-xs bg-gradient-to-br from-slate-800/60 via-blue-900/30 to-slate-800/60 backdrop-blur-sm border border-blue-600/20 text-blue-200/90 px-3 py-1.5 rounded-lg font-medium hover:from-slate-700/70 hover:via-blue-800/40 hover:to-slate-700/70 hover:border-blue-500/30 hover:text-blue-100 hover:shadow-lg hover:shadow-blue-500/10 transition-all duration-200 cursor-default"
                                     title={key}
                                   >
-                                    <span className="w-1.5 h-1.5 bg-blue-400 rounded-full mr-1.5 opacity-80"></span>
+                                    <span className="w-2 h-2 bg-blue-400/70 rounded-full mr-2 shadow-sm shadow-blue-400/50"></span>
                                     <span className="truncate max-w-[100px]">{key}</span>
                                   </span>
                                 ))}
