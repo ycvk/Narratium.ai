@@ -315,7 +315,8 @@ export default function CharacterPage() {
         role: "user",
         content: message,
         timestamp: new Date().toISOString(),
-      }; setMessages((prev) => [...prev, userMessage]);
+      }; 
+      setMessages((prev) => [...prev, userMessage]);
 
       const language = localStorage.getItem("language") || "zh";
       const llmType = localStorage.getItem("llmType") || "openai";
@@ -327,6 +328,7 @@ export default function CharacterPage() {
       const username = localStorage.getItem("username") || "";
       const responseLength = storedNumber ? parseInt(storedNumber) : 200;
       const nodeId = uuidv4();
+      
       const response = await handleCharacterChatRequest({
         username,
         characterId: character.id,
@@ -336,7 +338,7 @@ export default function CharacterPage() {
         apiKey,
         llmType,
         language: language as "zh" | "en",
-        streaming: true,
+        streaming: false,
         promptType: promptType as PromptType,
         number: responseLength,
         nodeId,
@@ -346,13 +348,26 @@ export default function CharacterPage() {
         throw new Error(`Failed to send message: ${response.status}`);
       }
 
-      const contentType = response.headers.get("content-type");
+      const result = await response.json();
       
-      if (contentType && contentType.includes("text/event-stream")) {
-        await handleStreamResponse(response, nodeId);
+      if (result.success) {
+        const assistantMessage = {
+          id: nodeId,
+          role: "assistant",
+          content: result.content || "",
+          timestamp: new Date().toISOString(),
+        };
+        setMessages(prev => [...prev, assistantMessage]);
+        
+        if (result.parsedContent?.nextPrompts) {
+          setSuggestedInputs(result.parsedContent.nextPrompts);
+        }
+      } else {
+        throw new Error(result.message || "Failed to get response");
       }
     } catch (err) {
       console.error("Error sending message:", err);
+      setError(err instanceof Error ? err.message : "An error occurred");
     } finally {
       setIsSending(false);
     }
