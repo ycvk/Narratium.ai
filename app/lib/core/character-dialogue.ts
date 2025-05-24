@@ -182,16 +182,19 @@ export class CharacterDialogue {
         username,
       );
 
-      const response = await this.dialogueChain.invoke({
+      const stream = await this.dialogueChain.stream({
         system_message: systemMessage,
         user_message: enhancedUserMessage,
       });
 
-      console.log("response", response);
+      let response = "";
+      for await (const chunk of stream) {
+        response += chunk;
+      }
+
       const result = await RegexProcessor.processFullContext(response, {
         ownerId: this.character.id,
       });
-      console.log("result", result);
       
       return { 
         response: response,
