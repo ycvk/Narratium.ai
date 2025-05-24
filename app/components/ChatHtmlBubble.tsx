@@ -1,25 +1,41 @@
 "use client";
 
 import { useEffect, useRef, memo, useState, useCallback } from "react";
-import { marked } from "marked";
 
-function looksLikeHtml(str: string) {
-  return /</.test(str);
-}
-
-function stripCodeFences(str: string): string {
-  const trimmed = str.trim();
-  if (!trimmed.startsWith("```") || !trimmed.endsWith("```")) return str;
-
-  const firstNewline = trimmed.indexOf("\n");
-  if (firstNewline === -1) return str;
-
-  const withoutOpen = trimmed.slice(firstNewline + 1);
-  const lastFence = withoutOpen.lastIndexOf("```\n") > -1
-    ? withoutOpen.lastIndexOf("```\n")
-    : withoutOpen.lastIndexOf("```");
-  if (lastFence === -1) return str;
-  return withoutOpen.slice(0, lastFence).trim();
+function convertMarkdownCodeBlocks(str: string): string {
+  str = str.replace(/`([^`\n]+)`/g, "<code>$1</code>");
+  const lines = str.split("\n");
+  const result: string[] = [];
+  let inCodeBlock = false;
+  let codeBlockContent: string[] = [];
+  let codeBlockLang = "";
+  
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    
+    if (!inCodeBlock && line.trim().startsWith("```")) {
+      inCodeBlock = true;
+      codeBlockContent = [];
+      const langMatch = line.trim().match(/^```(\w+)?/);
+      codeBlockLang = langMatch && langMatch[1] ? langMatch[1] : "";
+    } else if (inCodeBlock && line.trim() === "```") {
+      inCodeBlock = false;
+      const codeContent = codeBlockContent.join("\n");
+      result.push(`<code>${codeContent}</code>`);
+      codeBlockContent = [];
+    } else if (inCodeBlock) {
+      codeBlockContent.push(line);
+    } else {
+      result.push(line);
+    }
+  }
+  
+  if (inCodeBlock) {
+    result.push("```" + codeBlockLang);
+    result.push(...codeBlockContent);
+  }
+  
+  return result.join("\n");
 }
 
 function isCompleteHtmlDocument(str: string): boolean {
@@ -184,8 +200,8 @@ export default memo(function ChatHtmlBubble({
   serifFontClass = "",
   forceFullDocument = false,
 }: Props) {
-  const html = stripCodeFences(rawHtml);
-
+  const html = convertMarkdownCodeBlocks(rawHtml);
+  console.log("html", html);
   const [showLoader, setShowLoader] = useState(
     isLoading || html.trim() === "",
   );
@@ -210,16 +226,7 @@ export default memo(function ChatHtmlBubble({
     } catch (_) {
     }
   }, []);
-
-  if (!looksLikeHtml(html)) {
-    const parsed = marked.parse(html);
-    return (
-      <div
-        className={`whitespace-pre-wrap text-[#f4e8c1] ${serifFontClass} leading-relaxed`}
-        dangerouslySetInnerHTML={{ __html: parsed }}
-      />
-    );
-  }
+  
   const isFullDoc = forceFullDocument || isCompleteHtmlDocument(html);
   if (isFullDoc) {
     return (
@@ -240,7 +247,7 @@ export default memo(function ChatHtmlBubble({
   }
   const processedHtml = replaceTags(html).replace(/^[\s\r\n]+|[\s\r\n]+$/g, "");
 
-  const srcDoc = `<!DOCTYPE html><html><head><meta charset="utf-8"><style>*,*::before,*::after{box-sizing:border-box;max-width:100%}html,body{margin:0;padding:0;color:#f4e8c1;font:16px/${1.5} serif;background:transparent;word-wrap:break-word;overflow-wrap:break-word;hyphens:auto;white-space:pre-wrap;}img,video,iframe{max-width:100%;height:auto;display:block;margin:0 auto}table{width:100%;border-collapse:collapse;overflow-x:auto;display:block}code,pre{font-family:monospace;font-size:0.9rem;white-space:pre-wrap}pre{background:rgba(255,255,255,0.05);padding:8px;border-radius:4px}a{color:#93c5fd}.tag-styled{padding:2px 4px;border-radius:3px;border:1px solid rgba(255,255,255,0.1);white-space:inherit}</style></head><body>${processedHtml}<script>function postHeight(){const h=document.documentElement.scrollHeight||document.body.scrollHeight;parent.postMessage({__chatBubbleHeight:h+4},'*');}window.addEventListener('load',postHeight,{once:true});new ResizeObserver(postHeight).observe(document.body);</script></body></html>`;
+  const srcDoc = `<!DOCTYPE html><html><head><meta charset="utf-8"><style>*,*::before,*::after{box-sizing:border-box;max-width:100%}html,body{margin:0;padding:0;color:#f4e8c1;font:16px/${1.5} serif;background:transparent;word-wrap:break-word;overflow-wrap:break-word;hyphens:auto;white-space:pre-wrap;}img,video,iframe{max-width:100%;height:auto;display:block;margin:0 auto}table{width:100%;border-collapse:collapse;overflow-x:auto;display:block}code,pre{font-family:monospace;font-size:0.9rem;white-space:pre-wrap;background:rgba(40,40,40,0.8);padding:4px 8px;border-radius:4px;border:1px solid rgba(255,255,255,0.1);}pre{background:rgba(40,40,40,0.8);padding:12px;border-radius:6px;border:1px solid rgba(255,255,255,0.1);margin:8px 0;}a{color:#93c5fd}.tag-styled{padding:2px 6px;border-radius:4px;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.08);backdrop-filter:blur(2px);white-space:inherit;box-shadow:0 1px 3px rgba(0,0,0,0.1);transition:all 0.2s ease;display:inline-block;margin:1px 2px;}.tag-styled:hover{background:rgba(255,255,255,0.12);border-color:rgba(255,255,255,0.25);box-shadow:0 2px 6px rgba(0,0,0,0.15);}</style></head><body>${processedHtml}<script>let lastHeight=0;function postHeight(){try{const h=Math.max(document.documentElement.scrollHeight||0,document.body.scrollHeight||0,document.documentElement.offsetHeight||0,document.body.offsetHeight||0);if(h!==lastHeight){lastHeight=h;parent.postMessage({__chatBubbleHeight:h+10},'*');}}catch(e){}}function delayedHeight(){setTimeout(postHeight,50);}window.addEventListener('load',delayedHeight);document.addEventListener('DOMContentLoaded',delayedHeight);setTimeout(postHeight,100);setTimeout(postHeight,300);new ResizeObserver(postHeight).observe(document.body);</script></body></html>`;
 
   useEffect(() => {
     if (showLoader) return;
