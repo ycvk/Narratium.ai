@@ -100,8 +100,13 @@ export default memo(function ChatHtmlBubble({
     try {
       const doc = frame.contentDocument || frame.contentWindow?.document;
       if (!doc) return;
-      const h = doc.documentElement.scrollHeight || doc.body.scrollHeight;
-      frame.style.height = `${h}px`;
+      const h = Math.max(
+        doc.documentElement.scrollHeight || 0,
+        doc.body.scrollHeight || 0,
+        doc.body.offsetHeight || 0,
+      );
+      const bufferHeight = Math.max(50, h * 0.1);
+      frame.style.height = `${h + bufferHeight}px`;
     } catch (_) {
     }
   }, []);
@@ -127,7 +132,7 @@ export default memo(function ChatHtmlBubble({
           width: "100%",
           border: 0,
           overflow: "auto",
-          height: "600px",
+          height: "700px",
           background: "transparent",
         }}
       />
@@ -135,7 +140,7 @@ export default memo(function ChatHtmlBubble({
   }
   const processedHtml = replaceTags(html).replace(/^[\s\r\n]+|[\s\r\n]+$/g, "");
 
-  const srcDoc = `<!DOCTYPE html><html><head><meta charset="utf-8"><style>*,*::before,*::after{box-sizing:border-box;max-width:100%}html,body{margin:0;padding:0;color:#f4e8c1;font:16px/${1.5} serif;background:transparent;word-wrap:break-word;overflow-wrap:break-word;hyphens:auto;white-space:pre-wrap;}img,video,iframe{max-width:100%;height:auto;display:block;margin:0 auto}table{width:100%;border-collapse:collapse;overflow-x:auto;display:block}code,pre{font-family:monospace;font-size:0.9rem;white-space:pre-wrap}pre{background:rgba(255,255,255,0.05);padding:8px;border-radius:4px}a{color:#93c5fd}.tag-styled{padding:2px 4px;border-radius:3px;border:1px solid rgba(255,255,255,0.1);white-space:inherit}</style></head><body>${processedHtml}<script>function postHeight(){const h=document.documentElement.scrollHeight||document.body.scrollHeight;parent.postMessage({__chatBubbleHeight:h+4},'*');}window.addEventListener('load',postHeight,{once:true});new ResizeObserver(postHeight).observe(document.body);</script></body></html>`;
+  const srcDoc = `<!DOCTYPE html><html><head><meta charset="utf-8"><style>*,*::before,*::after{box-sizing:border-box;max-width:100%}html,body{margin:0;padding:0;color:#f4e8c1;font:16px/${1.5} serif;background:transparent;word-wrap:break-word;overflow-wrap:break-word;hyphens:auto;white-space:pre-wrap;}img,video,iframe{max-width:100%;height:auto;display:block;margin:0 auto}table{width:100%;border-collapse:collapse;overflow-x:auto;display:block}code,pre{font-family:monospace;font-size:0.9rem;white-space:pre-wrap}pre{background:rgba(255,255,255,0.05);padding:8px;border-radius:4px}a{color:#93c5fd}.tag-styled{padding:2px 4px;border-radius:3px;border:1px solid rgba(255,255,255,0.1);white-space:inherit}strong{font-weight:bold;color:#f4e8c1}em{font-style:italic;color:#f4e8c1}del{text-decoration:line-through;color:#a18d6f}code{background:rgba(255,255,255,0.1);padding:2px 4px;border-radius:3px;font-family:monospace;font-size:0.9em}</style></head><body>${processedHtml}<script>function postHeight(){const h=Math.max(document.documentElement.scrollHeight||0,document.body.scrollHeight||0,document.body.offsetHeight||0);const bufferHeight=Math.max(30,h*0.1);parent.postMessage({__chatBubbleHeight:h+bufferHeight},'*');}window.addEventListener('load',postHeight,{once:true});new ResizeObserver(postHeight).observe(document.body);setTimeout(postHeight,100);setTimeout(postHeight,300);</script></body></html>`;
 
   useEffect(() => {
     if (showLoader) return;
@@ -165,7 +170,7 @@ export default memo(function ChatHtmlBubble({
       ref={frameRef}
       sandbox="allow-scripts allow-same-origin"
       srcDoc={srcDoc}
-      style={{ width: "100%", border: 0, overflow: "hidden", height: "150px", background: "transparent" }}
+      style={{ width: "100%", border: 0, overflow: "hidden", height: "200px", background: "transparent" }}
     />
   );
 });
