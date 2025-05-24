@@ -1,135 +1,171 @@
 "use client";
 
-import { useEffect, useRef, memo, useState } from "react";
+import { useEffect, useRef, memo, useState, useCallback } from "react";
 import { marked } from "marked";
 
 function looksLikeHtml(str: string) {
   return /</.test(str);
 }
 
+function stripCodeFences(str: string): string {
+  const trimmed = str.trim();
+  if (!trimmed.startsWith("```") || !trimmed.endsWith("```")) return str;
+
+  const firstNewline = trimmed.indexOf("\n");
+  if (firstNewline === -1) return str;
+
+  const withoutOpen = trimmed.slice(firstNewline + 1);
+  const lastFence = withoutOpen.lastIndexOf("```\n") > -1
+    ? withoutOpen.lastIndexOf("```\n")
+    : withoutOpen.lastIndexOf("```");
+  if (lastFence === -1) return str;
+  return withoutOpen.slice(0, lastFence).trim();
+}
+
+function isCompleteHtmlDocument(str: string): boolean {
+  const trimmed = str.trim().toLowerCase();
+  return (
+    trimmed.startsWith("<!doctype html") ||
+    (trimmed.startsWith("<html") && trimmed.includes("</html>"))
+  );
+}
+
+function detectHtmlTags(str: string) {
+  const htmlTagRegex = /<\s*([a-zA-Z][a-zA-Z0-9]*)\b[^>]*>([\s\S]*?)<\s*\/\s*\1\s*>/g;
+  const selfClosingTagRegex = /<\s*([a-zA-Z][a-zA-Z0-9]*)\b[^>]*\/\s*>/g;
+  const tags = new Set<string>();
+
+  let match: RegExpExecArray | null;
+  while ((match = htmlTagRegex.exec(str)) !== null) tags.add(match[1].toLowerCase());
+  while ((match = selfClosingTagRegex.exec(str)) !== null) tags.add(match[1].toLowerCase());
+  return [...tags];
+}
+
+function generatePalette(uniqueTags: string[]): Record<string, string> {
+  const palette = [
+    "#fcd34d", "#93c5fd", "#86efac", "#c4b5fd", "#fda4af", "#fde047",
+    "#67e8f9", "#fb7185", "#a78bfa", "#34d399", "#f59e0b", "#60a5fa",
+    "#10b981", "#f97316", "#8b5cf6", "#ef4444", "#06b6d4", "#84cc16",
+  ];
+  const colours: Record<string, string> = {};
+  uniqueTags.sort((a, b) => a.localeCompare(b)).forEach((t, i) => {
+    colours[t] = palette[i % palette.length];
+  });
+  return colours;
+}
+
+function replaceTags(html: string) {
+  const tags = detectHtmlTags(html);
+  if (tags.length === 0) return html;
+  const colours = generatePalette(tags);
+
+  return html.replace(
+    /<([a-zA-Z][a-zA-Z0-9]*)\b([^>]*)>([\s\S]*?)<\/\1>/g,
+    (_, tag: string, _attrs: string, inner: string) =>
+      `<span class="tag-styled" style="color:${colours[tag.toLowerCase()]}" data-tag="${tag}">${inner}</span>`,
+  );
+}
+
 interface Props {
   html: string;
   isLoading?: boolean;
   serifFontClass?: string;
+  forceFullDocument?: boolean;
 }
 
-export default memo(function ChatHtmlBubble({ html, isLoading = false, serifFontClass = "" }: Props) {
-  const [showLoader, setShowLoader] = useState(isLoading || html.trim() === "");
+export default memo(function ChatHtmlBubble({
+  html: rawHtml,
+  isLoading = false,
+  serifFontClass = "",
+  forceFullDocument = false,
+}: Props) {
+  const html = stripCodeFences(rawHtml);
+
+  const [showLoader, setShowLoader] = useState(
+    isLoading || html.trim() === "",
+  );
   const frameRef = useRef<HTMLIFrameElement>(null);
-  
+
   useEffect(() => {
     setShowLoader(isLoading || html.trim() === "");
-    
     if (html.trim() !== "") {
-      const timer = setTimeout(() => {
-        setShowLoader(false);
-      }, 300);
-      return () => clearTimeout(timer);
+      const t = setTimeout(() => setShowLoader(false), 250);
+      return () => clearTimeout(t);
     }
   }, [html, isLoading]);
 
-  useEffect(() => {
-    if (!looksLikeHtml(html) || showLoader) return;
-    
-    const onMessage = (e: MessageEvent) => {
-      if (
-        e.data &&
-        typeof e.data === "object" &&
-        e.data.__chatBubbleHeight &&
-        frameRef.current &&
-        e.source === frameRef.current.contentWindow
-      ) {
-        frameRef.current.style.height = `${e.data.__chatBubbleHeight}px`;
-      }
-    };
-    window.addEventListener("message", onMessage);
-    return () => window.removeEventListener("message", onMessage);
-  }, [html, showLoader]);
-
-  if (showLoader) {
-    return (
-      <div className="relative min-h-[80px] bg-[#1a1816] bg-opacity-40 rounded-lg p-4 backdrop-blur-sm border border-[#534741]">
-        <div className="fantasy-loader">
-          <div className="rune-circle">
-            {[...Array(8)].map((_, i) => (
-              <div key={i} className="rune" style={{ animationDelay: `${i * 0.15}s` }}>
-                <svg viewBox="0 0 24 24" fill="none" className="w-full h-full">
-                  <path d="M12 3v18M3 12h18M7 7l10 10M7 17l10-10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-                </svg>
-              </div>
-            ))}
-          </div>
-          <div className="pulse-glow"></div>
-        </div>
-      </div>
-    );
-  }
+  const adjustHeightOnce = useCallback(() => {
+    const frame = frameRef.current;
+    if (!frame) return;
+    try {
+      const doc = frame.contentDocument || frame.contentWindow?.document;
+      if (!doc) return;
+      const h = doc.documentElement.scrollHeight || doc.body.scrollHeight;
+      frame.style.height = `${h}px`;
+    } catch (_) {
+    }
+  }, []);
 
   if (!looksLikeHtml(html)) {
-    const parsedHtml = marked.parse(html);
+    const parsed = marked.parse(html);
     return (
       <div
-        className={`whitespace-pre-line text-[#f4e8c1] story-text ${serifFontClass} leading-relaxed magical-text`}
-        dangerouslySetInnerHTML={{ __html: parsedHtml }}
+        className={`whitespace-pre-wrap text-[#f4e8c1] ${serifFontClass} leading-relaxed`}
+        dangerouslySetInnerHTML={{ __html: parsed }}
       />
     );
   }
-  
-  const srcDoc = `
-<!DOCTYPE html><html><head>
-  <meta charset="utf-8">
-  <style>
-    body {
-      margin: 0;
-      padding: 10px;
-      color: #f4e8c1;
-      font-size: 0.95rem;
-      line-height: 1.8;
-      white-space: pre-wrap;
-      font-family: 'Noto Serif', 'Source Serif Pro', 'Crimson Pro', Georgia, 'Times New Roman', serif;
-      letter-spacing: 0.01em;
-      text-rendering: optimizeLegibility;
-      background-color: rgba(26, 24, 22, 0.6);
-      background-image: linear-gradient(to bottom, rgba(40, 36, 32, 0.7), rgba(26, 24, 22, 0.6));
-      border-radius: 8px;
-      overflow: hidden;
-    }
-    p:not([style]), div:not([style]), span:not([style]), li:not([style]) {
-      color: inherit;
-      font-family: inherit;
-      line-height: inherit;
-    }
-    html, body {
-      backdrop-filter: blur(3px);
-    }
-  </style>
-</head>
-<body class="story-text">
-${html}
-<script>
-  function postHeight(){
-    const h = document.documentElement.scrollHeight || document.body.scrollHeight;
-    parent.postMessage({__chatBubbleHeight: h}, '*');
+  const isFullDoc = forceFullDocument || isCompleteHtmlDocument(html);
+  if (isFullDoc) {
+    return (
+      <iframe
+        ref={frameRef}
+        sandbox="allow-scripts allow-same-origin"
+        srcDoc={html}
+        onLoad={adjustHeightOnce}
+        style={{
+          width: "100%",
+          border: 0,
+          overflow: "auto",
+          height: "600px",
+          background: "transparent",
+        }}
+      />
+    );
   }
-  window.addEventListener('load', postHeight);
-  new ResizeObserver(postHeight).observe(document.body);
-</script>
-</body></html>`.trim();
+  const processedHtml = replaceTags(html).replace(/^[\s\r\n]+|[\s\r\n]+$/g, "");
+
+  const srcDoc = `<!DOCTYPE html><html><head><meta charset="utf-8"><style>*,*::before,*::after{box-sizing:border-box;max-width:100%}html,body{margin:0;padding:0;color:#f4e8c1;font:16px/${1.5} serif;background:transparent;word-wrap:break-word;overflow-wrap:break-word;hyphens:auto;white-space:pre-wrap;}img,video,iframe{max-width:100%;height:auto;display:block;margin:0 auto}table{width:100%;border-collapse:collapse;overflow-x:auto;display:block}code,pre{font-family:monospace;font-size:0.9rem;white-space:pre-wrap}pre{background:rgba(255,255,255,0.05);padding:8px;border-radius:4px}a{color:#93c5fd}.tag-styled{padding:2px 4px;border-radius:3px;border:1px solid rgba(255,255,255,0.1);white-space:inherit}</style></head><body>${processedHtml}<script>function postHeight(){const h=document.documentElement.scrollHeight||document.body.scrollHeight;parent.postMessage({__chatBubbleHeight:h+4},'*');}window.addEventListener('load',postHeight,{once:true});new ResizeObserver(postHeight).observe(document.body);</script></body></html>`;
+
+  useEffect(() => {
+    if (showLoader) return;
+    const handler = (e: MessageEvent) => {
+      if (
+        e.source === frameRef.current?.contentWindow &&
+        typeof e.data === "object" &&
+        e.data.__chatBubbleHeight
+      ) {
+        frameRef.current!.style.height = `${e.data.__chatBubbleHeight}px`;
+      }
+    };
+    window.addEventListener("message", handler);
+    return () => window.removeEventListener("message", handler);
+  }, [showLoader]);
+
+  if (showLoader) {
+    return (
+      <div className="flex items-center justify-center py-4">
+        <div className="animate-spin w-6 h-6 border-2 border-t-transparent border-b-transparent rounded-full" />
+      </div>
+    );
+  }
 
   return (
     <iframe
       ref={frameRef}
       sandbox="allow-scripts allow-same-origin"
       srcDoc={srcDoc}
-      style={{
-        width: "100%",
-        border: "1px solid rgba(83, 71, 65, 0.5)",
-        overflow: "hidden",
-        height: "150px",
-        backgroundColor: "rgba(26, 24, 22, 0.4)",
-        transition: "all 0.3s ease",
-      }}
-      className="rounded-lg shadow-md hover:shadow-[0_0_10px_rgba(249,200,109,0.15)]"
+      style={{ width: "100%", border: 0, overflow: "hidden", height: "150px", background: "transparent" }}
     />
   );
 });
