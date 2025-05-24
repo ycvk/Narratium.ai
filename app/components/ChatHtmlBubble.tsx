@@ -59,11 +59,116 @@ function replaceTags(html: string) {
   if (tags.length === 0) return html;
   const colours = generatePalette(tags);
 
-  return html.replace(
-    /<([a-zA-Z][a-zA-Z0-9]*)\b([^>]*)>([\s\S]*?)<\/\1>/g,
-    (_, tag: string, _attrs: string, inner: string) =>
-      `<span class="tag-styled" style="color:${colours[tag.toLowerCase()]}" data-tag="${tag}">${inner}</span>`,
-  );
+  function processHtml(htmlStr: string): string {
+    const tagRegex = /<([a-zA-Z][a-zA-Z0-9]*)\b([^>]*)>([\s\S]*?)<\/\1>/g;
+    
+    return htmlStr.replace(tagRegex, (match, tagName: string, attributes: string, innerContent: string) => {
+      const lowerTagName = tagName.toLowerCase();
+
+      const skipTags = ["script", "style", "head", "meta", "link", "title"];
+      if (skipTags.includes(lowerTagName)) {
+        return match;
+      }
+
+      const processedInner = processHtml(innerContent);
+
+      if (colours[lowerTagName]) {
+        const preservedAttrs = attributes.trim();
+        const styleAttr = `style="color:${colours[lowerTagName]}"`;
+        const dataAttr = `data-tag="${tagName}"`;
+        const classAttr = "class=\"tag-styled\"";
+        
+        let finalAttrs = "";
+        if (preservedAttrs) {
+          const styleMatch = preservedAttrs.match(/style\s*=\s*["']([^"']*)["']/i);
+          const classMatch = preservedAttrs.match(/class\s*=\s*["']([^"']*)["']/i);
+          
+          let modifiedAttrs = preservedAttrs;
+          
+          if (styleMatch) {
+            const existingStyle = styleMatch[1];
+            const newStyle = `${existingStyle}; color:${colours[lowerTagName]}`;
+            modifiedAttrs = modifiedAttrs.replace(styleMatch[0], `style="${newStyle}"`);
+          } else {
+            modifiedAttrs += ` ${styleAttr}`;
+          }
+          
+          if (classMatch) {
+            const existingClass = classMatch[1];
+            const newClass = `${existingClass} tag-styled`;
+            modifiedAttrs = modifiedAttrs.replace(classMatch[0], `class="${newClass}"`);
+          } else {
+            modifiedAttrs += ` ${classAttr}`;
+          }
+          
+          finalAttrs = modifiedAttrs + ` ${dataAttr}`;
+        } else {
+          finalAttrs = `${classAttr} ${styleAttr} ${dataAttr}`;
+        }
+        
+        return `<${tagName}${finalAttrs ? " " + finalAttrs : ""}>${processedInner}</${tagName}>`;
+      } else {
+        return `<${tagName}${attributes ? " " + attributes : ""}>${processedInner}</${tagName}>`;
+      }
+    });
+  }
+  
+  function processSelfClosingTags(htmlStr: string): string {
+    const selfClosingRegex = /<([a-zA-Z][a-zA-Z0-9]*)\b([^>]*)\s*\/\s*>/g;
+    
+    return htmlStr.replace(selfClosingRegex, (match, tagName: string, attributes: string) => {
+      const lowerTagName = tagName.toLowerCase();
+      
+      const skipTags = ["br", "hr", "img", "input", "meta", "link"];
+      if (skipTags.includes(lowerTagName)) {
+        return match;
+      }
+      
+      if (colours[lowerTagName]) {
+        const preservedAttrs = attributes.trim();
+        const styleAttr = `style="color:${colours[lowerTagName]}"`;
+        const dataAttr = `data-tag="${tagName}"`;
+        const classAttr = "class=\"tag-styled\"";
+        
+        let finalAttrs = "";
+        if (preservedAttrs) {
+          const styleMatch = preservedAttrs.match(/style\s*=\s*["']([^"']*)["']/i);
+          const classMatch = preservedAttrs.match(/class\s*=\s*["']([^"']*)["']/i);
+          
+          let modifiedAttrs = preservedAttrs;
+          
+          if (styleMatch) {
+            const existingStyle = styleMatch[1];
+            const newStyle = `${existingStyle}; color:${colours[lowerTagName]}`;
+            modifiedAttrs = modifiedAttrs.replace(styleMatch[0], `style="${newStyle}"`);
+          } else {
+            modifiedAttrs += ` ${styleAttr}`;
+          }
+          
+          if (classMatch) {
+            const existingClass = classMatch[1];
+            const newClass = `${existingClass} tag-styled`;
+            modifiedAttrs = modifiedAttrs.replace(classMatch[0], `class="${newClass}"`);
+          } else {
+            modifiedAttrs += ` ${classAttr}`;
+          }
+          
+          finalAttrs = modifiedAttrs + ` ${dataAttr}`;
+        } else {
+          finalAttrs = `${classAttr} ${styleAttr} ${dataAttr}`;
+        }
+        
+        return `<${tagName}${finalAttrs ? " " + finalAttrs : ""} />`;
+      } else {
+        return match;
+      }
+    });
+  }
+
+  let result = processHtml(html);
+  result = processSelfClosingTags(result);
+
+  return result;
 }
 
 interface Props {
@@ -100,13 +205,8 @@ export default memo(function ChatHtmlBubble({
     try {
       const doc = frame.contentDocument || frame.contentWindow?.document;
       if (!doc) return;
-      const h = Math.max(
-        doc.documentElement.scrollHeight || 0,
-        doc.body.scrollHeight || 0,
-        doc.body.offsetHeight || 0,
-      );
-      const bufferHeight = Math.max(50, h * 0.1);
-      frame.style.height = `${h + bufferHeight}px`;
+      const h = doc.documentElement.scrollHeight || doc.body.scrollHeight;
+      frame.style.height = `${h}px`;
     } catch (_) {
     }
   }, []);
@@ -132,7 +232,7 @@ export default memo(function ChatHtmlBubble({
           width: "100%",
           border: 0,
           overflow: "auto",
-          height: "700px",
+          height: "600px",
           background: "transparent",
         }}
       />
@@ -140,7 +240,7 @@ export default memo(function ChatHtmlBubble({
   }
   const processedHtml = replaceTags(html).replace(/^[\s\r\n]+|[\s\r\n]+$/g, "");
 
-  const srcDoc = `<!DOCTYPE html><html><head><meta charset="utf-8"><style>*,*::before,*::after{box-sizing:border-box;max-width:100%}html,body{margin:0;padding:0;color:#f4e8c1;font:16px/${1.5} serif;background:transparent;word-wrap:break-word;overflow-wrap:break-word;hyphens:auto;white-space:pre-wrap;}img,video,iframe{max-width:100%;height:auto;display:block;margin:0 auto}table{width:100%;border-collapse:collapse;overflow-x:auto;display:block}code,pre{font-family:monospace;font-size:0.9rem;white-space:pre-wrap}pre{background:rgba(255,255,255,0.05);padding:8px;border-radius:4px}a{color:#93c5fd}.tag-styled{padding:2px 4px;border-radius:3px;border:1px solid rgba(255,255,255,0.1);white-space:inherit}strong{font-weight:bold;color:#f4e8c1}em{font-style:italic;color:#f4e8c1}del{text-decoration:line-through;color:#a18d6f}code{background:rgba(255,255,255,0.1);padding:2px 4px;border-radius:3px;font-family:monospace;font-size:0.9em}</style></head><body>${processedHtml}<script>function postHeight(){const h=Math.max(document.documentElement.scrollHeight||0,document.body.scrollHeight||0,document.body.offsetHeight||0);const bufferHeight=Math.max(30,h*0.1);parent.postMessage({__chatBubbleHeight:h+bufferHeight},'*');}window.addEventListener('load',postHeight,{once:true});new ResizeObserver(postHeight).observe(document.body);setTimeout(postHeight,100);setTimeout(postHeight,300);</script></body></html>`;
+  const srcDoc = `<!DOCTYPE html><html><head><meta charset="utf-8"><style>*,*::before,*::after{box-sizing:border-box;max-width:100%}html,body{margin:0;padding:0;color:#f4e8c1;font:16px/${1.5} serif;background:transparent;word-wrap:break-word;overflow-wrap:break-word;hyphens:auto;white-space:pre-wrap;}img,video,iframe{max-width:100%;height:auto;display:block;margin:0 auto}table{width:100%;border-collapse:collapse;overflow-x:auto;display:block}code,pre{font-family:monospace;font-size:0.9rem;white-space:pre-wrap}pre{background:rgba(255,255,255,0.05);padding:8px;border-radius:4px}a{color:#93c5fd}.tag-styled{padding:2px 4px;border-radius:3px;border:1px solid rgba(255,255,255,0.1);white-space:inherit}</style></head><body>${processedHtml}<script>function postHeight(){const h=document.documentElement.scrollHeight||document.body.scrollHeight;parent.postMessage({__chatBubbleHeight:h+4},'*');}window.addEventListener('load',postHeight,{once:true});new ResizeObserver(postHeight).observe(document.body);</script></body></html>`;
 
   useEffect(() => {
     if (showLoader) return;
@@ -170,7 +270,7 @@ export default memo(function ChatHtmlBubble({
       ref={frameRef}
       sandbox="allow-scripts allow-same-origin"
       srcDoc={srcDoc}
-      style={{ width: "100%", border: 0, overflow: "hidden", height: "200px", background: "transparent" }}
+      style={{ width: "100%", border: 0, overflow: "hidden", height: "150px", background: "transparent" }}
     />
   );
 });
