@@ -233,7 +233,6 @@ export default function WorldBookEditor({
     }
   };
 
-  // Bulk operations for filtered entries (enabled/disabled only)
   const handleBulkToggleFiltered = async (targetEnabled: boolean, newEnabled: boolean) => {
     const filteredEntries = entries.filter(entry => entry.isActive === targetEnabled);
     
@@ -346,7 +345,7 @@ export default function WorldBookEditor({
           </button>
         </div>
       </div>
-
+      
       <div className="p-3 border-b border-[#534741] bg-[#1a1816]">
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
           <div className="flex items-center space-x-2 flex-wrap">
@@ -369,7 +368,7 @@ export default function WorldBookEditor({
                   {t("worldBook.bulkOperations")}:
                 </span>
               </div>
-              
+          
               <button
                 onClick={() => handleBulkToggleAll(true)}
                 className={`relative group px-3 py-1.5 rounded-lg transition-all duration-300 text-xs font-medium flex items-center ${serifFontClass} 
