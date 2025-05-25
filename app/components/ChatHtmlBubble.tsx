@@ -4,44 +4,21 @@ import { useEffect, useRef, memo, useState, useCallback } from "react";
 
 function convertMarkdownCodeBlocks(str: string): string {
   str = str.replace(/`([^`\n]+)`/g, "<code>$1</code>");
-  const lines = str.split("\n");
-  const result: string[] = [];
-  let inCodeBlock = false;
-  let codeBlockContent: string[] = [];
-  let codeBlockLang = "";
-  
-  for (let i = 0; i < lines.length; i++) {
-    const line = lines[i];
-    
-    if (!inCodeBlock && line.trim().startsWith("```")) {
-      inCodeBlock = true;
-      codeBlockContent = [];
-      const langMatch = line.trim().match(/^```(\w+)?/);
-      codeBlockLang = langMatch && langMatch[1] ? langMatch[1] : "";
-    } else if (inCodeBlock && line.trim() === "```") {
-      inCodeBlock = false;
-      const codeContent = codeBlockContent.join("\n");
-      result.push(`<code>${codeContent}</code>`);
-      codeBlockContent = [];
-    } else if (inCodeBlock) {
-      codeBlockContent.push(line);
-    } else {
-      result.push(line);
-    }
-  }
-  
-  if (inCodeBlock) {
-    result.push("```" + codeBlockLang);
-    result.push(...codeBlockContent);
-  }
-  
-  return result.join("\n");
+
+  str = str.replace(/```[\s\S]*?```/g, (match) => {
+    const content = match.replace(/^```\w*\n?/, "").replace(/```$/, "");
+    return `<code>${content}</code>`;
+  });
+
+  str = str.replace(/"([^"]+)"/g, "<span class=\"dialogue\">\"$1\"</span>");
+  str = str.replace(/“([^”]+)”/g, "<span class=\"dialogue\">“$1”</span>");
+  return str;
 }
 
 function isCompleteHtmlDocument(str: string): boolean {
   const trimmed = str.trim().toLowerCase();
   return (
-    trimmed.startsWith("<!doctype html") ||
+    trimmed.includes("<!doctype html") ||
     (trimmed.startsWith("<html") && trimmed.includes("</html>"))
   );
 }
@@ -200,20 +177,18 @@ export default memo(function ChatHtmlBubble({
   serifFontClass = "",
   forceFullDocument = false,
 }: Props) {
-  const html = convertMarkdownCodeBlocks(rawHtml);
-  console.log("html", html);
   const [showLoader, setShowLoader] = useState(
-    isLoading || html.trim() === "",
+    isLoading || rawHtml.trim() === "",
   );
   const frameRef = useRef<HTMLIFrameElement>(null);
 
   useEffect(() => {
-    setShowLoader(isLoading || html.trim() === "");
-    if (html.trim() !== "") {
+    setShowLoader(isLoading || rawHtml.trim() === "");
+    if (rawHtml.trim() !== "") {
       const t = setTimeout(() => setShowLoader(false), 250);
       return () => clearTimeout(t);
     }
-  }, [html, isLoading]);
+  }, [rawHtml, isLoading]);
 
   const adjustHeightOnce = useCallback(() => {
     const frame = frameRef.current;
@@ -227,13 +202,13 @@ export default memo(function ChatHtmlBubble({
     }
   }, []);
   
-  const isFullDoc = forceFullDocument || isCompleteHtmlDocument(html);
+  const isFullDoc = isCompleteHtmlDocument(rawHtml);
   if (isFullDoc) {
     return (
       <iframe
         ref={frameRef}
         sandbox="allow-scripts allow-same-origin"
-        srcDoc={html}
+        srcDoc={rawHtml}
         onLoad={adjustHeightOnce}
         style={{
           width: "100%",
@@ -245,6 +220,7 @@ export default memo(function ChatHtmlBubble({
       />
     );
   }
+  const html = convertMarkdownCodeBlocks(rawHtml);
   const processedHtml = replaceTags(html).replace(/^[\s\r\n]+|[\s\r\n]+$/g, "");
 
   const srcDoc = `<!DOCTYPE html><html><head><meta charset="utf-8"><style>*,*::before,*::after{box-sizing:border-box;max-width:100%}html,body{margin:0;padding:0;color:#f4e8c1;font:16px/${1.5} serif;background:transparent;word-wrap:break-word;overflow-wrap:break-word;hyphens:auto;white-space:pre-wrap;}img,video,iframe{max-width:100%;height:auto;display:block;margin:0 auto}table{width:100%;border-collapse:collapse;overflow-x:auto;display:block}code,pre{font-family:monospace;font-size:0.9rem;white-space:pre-wrap;background:rgba(40,40,40,0.8);padding:4px 8px;border-radius:4px;border:1px solid rgba(255,255,255,0.1);}pre{background:rgba(40,40,40,0.8);padding:12px;border-radius:6px;border:1px solid rgba(255,255,255,0.1);margin:8px 0;}a{color:#93c5fd}.tag-styled{padding:2px 6px;border-radius:4px;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.08);backdrop-filter:blur(2px);white-space:inherit;box-shadow:0 1px 3px rgba(0,0,0,0.1);transition:all 0.2s ease;display:inline-block;margin:1px 2px;}.tag-styled:hover{background:rgba(255,255,255,0.12);border-color:rgba(255,255,255,0.25);box-shadow:0 2px 6px rgba(0,0,0,0.15);}</style></head><body>${processedHtml}<script>let lastHeight=0;function postHeight(){try{const h=Math.max(document.documentElement.scrollHeight||0,document.body.scrollHeight||0,document.documentElement.offsetHeight||0,document.body.offsetHeight||0);if(h!==lastHeight){lastHeight=h;parent.postMessage({__chatBubbleHeight:h+10},'*');}}catch(e){}}function delayedHeight(){setTimeout(postHeight,50);}window.addEventListener('load',delayedHeight);document.addEventListener('DOMContentLoaded',delayedHeight);setTimeout(postHeight,100);setTimeout(postHeight,300);new ResizeObserver(postHeight).observe(document.body);</script></body></html>`;
