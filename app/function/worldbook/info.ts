@@ -30,13 +30,23 @@ export async function getWorldBookEntries(characterId: string) {
         contentLength: entry.content ? entry.content.length : 0,
         isActive: entry.enabled !== false,
         lastUpdated: entry.extensions?.updatedAt || entry.extensions?.createdAt || Date.now(),
+        isImported: entry.extensions?.imported || false,
+        importedAt: entry.extensions?.importedAt || null,
       };
     }) : [];
 
     entries.sort((a, b) => {
+      const positionA = typeof a.position === "number" ? a.position : 4;
+      const positionB = typeof b.position === "number" ? b.position : 4;
+      
+      if (positionA !== positionB) {
+        return positionA - positionB;
+      }
+
       if (a.insertion_order !== b.insertion_order) {
         return a.insertion_order - b.insertion_order;
       }
+      
       return b.lastUpdated - a.lastUpdated;
     });
 
