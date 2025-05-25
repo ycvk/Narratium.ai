@@ -1,9 +1,11 @@
 import { readData, writeData, WORLD_BOOK_FILE } from "@/app/lib/data/local-storage";
 import { WorldBookEntry } from "@/app/lib/models/world-book-model";
+
 export interface WorldBookSettings {
   enabled: boolean;
   maxEntries: number;
   contextWindow: number;
+  metadata?: any;
 }
 
 const DEFAULT_SETTINGS: WorldBookSettings = {
@@ -13,7 +15,7 @@ const DEFAULT_SETTINGS: WorldBookSettings = {
 };
 
 export class WorldBookOperations {
-  private static async getWorldBooks(): Promise<Record<string, any>> {
+  static async getWorldBooks(): Promise<Record<string, any>> {
     const worldBooksArray = await readData(WORLD_BOOK_FILE);
     return worldBooksArray[0] || {};
   }
