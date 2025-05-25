@@ -3,13 +3,11 @@
 import { useEffect, useRef, memo, useState, useCallback } from "react";
 
 function convertMarkdownCodeBlocks(str: string): string {
-  str = str.replace(/`([^`\n]+)`/g, "<code>$1</code>");
-
   str = str.replace(/```[\s\S]*?```/g, (match) => {
     const content = match.replace(/^```\w*\n?/, "").replace(/```$/, "");
-    return `<code>${content}</code>`;
+    return `<pre>${content}</pre>`;
   });
-
+  str = str.replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>");
   str = str.replace(/"([^"]+)"/g, "<span class=\"dialogue\">\"$1\"</span>");
   str = str.replace(/“([^”]+)”/g, "<span class=\"dialogue\">“$1”</span>");
   return str;
@@ -174,8 +172,6 @@ interface Props {
 export default memo(function ChatHtmlBubble({
   html: rawHtml,
   isLoading = false,
-  serifFontClass = "",
-  forceFullDocument = false,
 }: Props) {
   const [showLoader, setShowLoader] = useState(
     isLoading || rawHtml.trim() === "",

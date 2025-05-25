@@ -3,7 +3,6 @@
 import { CharacterAvatarBackground } from "@/app/components/CharacterAvatarBackground";
 import { trackButtonClick } from "@/app/lib/utils/google-analytics";
 import { useLanguage } from "@/app/i18n";
-import { useEffect, useState } from "react";
 
 interface Props {
   character: {
@@ -24,12 +23,6 @@ export default function CharacterChatHeader({
   onToggleView,
 }: Props) {
   const { t } = useLanguage();
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    const timer = setTimeout(() => setMounted(true), 100);
-    return () => clearTimeout(timer);
-  }, []);
 
   return (
     <div className="bg-[#1a1816] border-b border-[#534741] p-4 flex items-center">
@@ -60,7 +53,6 @@ export default function CharacterChatHeader({
             >
               <path d="M5 12H19" />
               <polyline points="12 5 19 12 12 19" />
-              {/* Add animated decorative elements */}
               <circle cx="19" cy="12" r="1" fill="currentColor" opacity="0.4" className="animate-pulse">
                 <animate attributeName="opacity" values="0.4;0.8;0.4" dur="2s" repeatCount="indefinite"/>
               </circle>
@@ -70,7 +62,6 @@ export default function CharacterChatHeader({
             </svg>
           </div>
           
-          {/* Bottom accent line */}
           <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-0 h-[1px] bg-gradient-to-r from-transparent via-amber-400 to-transparent group-hover:w-3/4 transition-all duration-500"></div>
         </button>
       )}
@@ -94,7 +85,7 @@ export default function CharacterChatHeader({
           )}
         </div>
 
-        <h2 className={`text-lg text-[#eae6db] magical-text ${serifFontClass}`}>
+        <h2 className={`text-lg text-[#eae6db] magical-text ${serifFontClass} truncate max-w-[200px]`}>
           {character.name}
         </h2>
         <button
