@@ -3,7 +3,7 @@
 > **Reshape the world through imagination, discover yourself through choices.**
 
 <p align="center">
-  <img src="public/image.png" width="100%" />
+  <img src="public/image.png" width="80%" />
 </p>
 
 ![GitHub stars](https://img.shields.io/github/stars/Narratium/Narratium.ai?style=social)

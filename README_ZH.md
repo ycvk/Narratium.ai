@@ -2,7 +2,7 @@
 
 > **在想象中重塑世界，在抉择中发现自我**
 <p align="center">
-  <img src="public/image.png" width="full" />
+  <img src="public/image.png" width="80%" />
 </p>
 
 ![GitHub stars](https://img.shields.io/github/stars/Narratium/Narratium.ai?style=social)
