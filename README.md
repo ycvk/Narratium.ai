@@ -6,6 +6,9 @@
   <img src="public/image.png" width="100%" />
 </p>
 
+![GitHub stars](https://img.shields.io/github/stars/Narratium/Narratium.ai?style=social)
+![GitHub commits](https://img.shields.io/github/commit-activity/m/Narratium/Narratium.ai)
+
 [🇨🇳 中文文档](./README_ZH.md)
 
 **Narratium** is an AI-powered immersive interactive storytelling and creation platform, aiming to be an open-source alternative to AI Dungeon and a more user-friendly version of SillyTavern. Whether exploring fantasy worlds, seeking emotional resonance, or rewriting history, anyone can become the protagonist of their own epic.
@@ -130,3 +133,4 @@ Special thanks to the SillyTavern community and countless character card contrib
 ## ⭐ Star Growth
 
 [![Stargazers over time](https://starchart.cc/Narratium/Narratium.ai.svg?variant=dark)](https://starchart.cc/Narratium/Narratium.ai)
+
