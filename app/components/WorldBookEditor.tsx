@@ -4,11 +4,12 @@ import { useState, useEffect } from "react";
 import { toast } from "react-hot-toast";
 import { getWorldBookEntries } from "@/app/function/worldbook/info";
 import { deleteWorldBookEntry } from "@/app/function/worldbook/delete";
-import { saveAdvancedWorldBookEntry } from "@/app/function/worldbook/advanced-edit";
+import { saveAdvancedWorldBookEntry } from "@/app/function/worldbook/edit";
 import { bulkToggleWorldBookEntries } from "@/app/function/worldbook/bulk-operations";
 import { getWorldBookSettings } from "@/app/function/worldbook/settings";
 import { useLanguage } from "@/app/i18n";
-import WorldBookEntryEditor from "./WorldBookEntryEditor";
+import WorldBookEntryEditor from "@/app/components/WorldBookEntryEditor";
+import ImportWorldBookModal from "@/app/components/ImportWorldBookModal";
 import "@/app/styles/fantasy-ui.css";
 import React from "react";
 import { v4 as uuidv4 } from "uuid";
@@ -41,6 +42,8 @@ interface WorldBookEntryData {
   contentLength: number;
   isActive: boolean;
   lastUpdated: number;
+  isImported: boolean;
+  importedAt: number | null;
 }
 
 interface EditingEntry {
@@ -72,16 +75,144 @@ export default function WorldBookEditor({
   const [isSaving, setIsSaving] = useState(false);
   const [animationComplete, setAnimationComplete] = useState(false);
   const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
+  const [sortBy, setSortBy] = useState<string>("position");
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
+  const [isImportModalOpen, setIsImportModalOpen] = useState(false);
+  const [filterBy, setFilterBy] = useState<string>("all");
   const [settings, setSettings] = useState({
     enabled: true,
     contextWindow: 5,
   });
 
+  const SORT_STORAGE_KEY = `worldbook_sort_${characterId}`;
+  const FILTER_STORAGE_KEY = `worldbook_filter_${characterId}`;
+
+  const loadSortPreferences = () => {
+    try {
+      const stored = localStorage.getItem(SORT_STORAGE_KEY);
+      if (stored) {
+        const { sortBy: storedSortBy, sortOrder: storedSortOrder } = JSON.parse(stored);
+        if (storedSortBy) setSortBy(storedSortBy);
+        if (storedSortOrder) setSortOrder(storedSortOrder);
+      } else {
+        setSortBy("position");
+        setSortOrder("asc");
+      }
+    } catch (error) {
+      console.error("Failed to load sort preferences:", error);
+      setSortBy("position");
+      setSortOrder("asc");
+    }
+  };
+
+  const loadFilterPreferences = () => {
+    try {
+      const stored = localStorage.getItem(FILTER_STORAGE_KEY);
+      if (stored) {
+        const { filterBy: storedFilterBy } = JSON.parse(stored);
+        if (storedFilterBy) setFilterBy(storedFilterBy);
+      } else {
+        setFilterBy("all");
+      }
+    } catch (error) {
+      console.error("Failed to load filter preferences:", error);
+      setFilterBy("all");
+    }
+  };
+
+  const saveSortPreferences = (newSortBy: string, newSortOrder: "asc" | "desc") => {
+    try {
+      const preferences = {
+        sortBy: newSortBy,
+        sortOrder: newSortOrder,
+        timestamp: Date.now(),
+      };
+      localStorage.setItem(SORT_STORAGE_KEY, JSON.stringify(preferences));
+    } catch (error) {
+      console.error("Failed to save sort preferences:", error);
+      try {
+        cleanupOldSortPreferences();
+        localStorage.setItem(SORT_STORAGE_KEY, JSON.stringify({
+          sortBy: newSortBy,
+          sortOrder: newSortOrder,
+          timestamp: Date.now(),
+        }));
+      } catch (retryError) {
+        console.error("Failed to save sort preferences after cleanup:", retryError);
+      }
+    }
+  };
+
+  const cleanupOldSortPreferences = () => {
+    try {
+      const keysToRemove: string[] = [];
+      const currentTime = Date.now();
+      const maxAge = 30 * 24 * 60 * 60 * 1000;
+
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key && key.startsWith("worldbook_sort_")) {
+          try {
+            const stored = localStorage.getItem(key);
+            if (stored) {
+              const data = JSON.parse(stored);
+              if (data.timestamp && (currentTime - data.timestamp > maxAge)) {
+                keysToRemove.push(key);
+              }
+            }
+          } catch (parseError) {
+            keysToRemove.push(key);
+          }
+        }
+      }
+
+      keysToRemove.forEach(key => localStorage.removeItem(key));
+    } catch (error) {
+      console.error("Failed to cleanup old sort preferences:", error);
+    }
+  };
+
+  const handleSortByChange = (newSortBy: string) => {
+    setSortBy(newSortBy);
+    saveSortPreferences(newSortBy, sortOrder);
+  };
+
+  const handleSortOrderChange = () => {
+    const newSortOrder = sortOrder === "asc" ? "desc" : "asc";
+    setSortOrder(newSortOrder);
+    saveSortPreferences(sortBy, newSortOrder);
+  };
+
+  const handleFilterByChange = (newFilterBy: string) => {
+    setFilterBy(newFilterBy);
+    saveFilterPreferences(newFilterBy);
+  };
+
+  const saveFilterPreferences = (newFilterBy: string) => {
+    try {
+      const preferences = {
+        filterBy: newFilterBy,
+        timestamp: Date.now(),
+      };
+      localStorage.setItem(FILTER_STORAGE_KEY, JSON.stringify(preferences));
+    } catch (error) {
+      console.error("Failed to save filter preferences:", error);
+    }
+  };
+
   useEffect(() => {
     loadWorldBookData();
     loadSettings();
+    loadSortPreferences();
+    loadFilterPreferences();
+    cleanupOldSortPreferences();
     const timer = setTimeout(() => setAnimationComplete(true), 100);
     return () => clearTimeout(timer);
+  }, [characterId]);
+
+  useEffect(() => {
+    loadSortPreferences();
+    loadFilterPreferences();
   }, [characterId]);
 
   const loadWorldBookData = async () => {
@@ -109,6 +240,73 @@ export default function WorldBookEditor({
       console.error("Failed to load settings:", error);
     }
   };
+
+  const filterEntries = (entries: WorldBookEntryData[], filterBy: string) => {
+    if (filterBy === "all") return entries;
+    
+    return entries.filter(entry => {
+      switch (filterBy) {
+      case "enabled":
+        return entry.isActive;
+      case "disabled":
+        return !entry.isActive;
+      case "constant":
+        return entry.constant;
+      case "imported":
+        return entry.isImported;
+      default:
+        return true;
+      }
+    });
+  };
+
+  const sortEntries = (entries: WorldBookEntryData[], sortBy: string, sortOrder: "asc" | "desc") => {
+    const sorted = [...entries].sort((a, b) => {
+      let comparison = 0;
+      
+      switch (sortBy) {
+      case "position":
+        const positionA = typeof a.position === "number" ? a.position : 4;
+        const positionB = typeof b.position === "number" ? b.position : 4;
+        comparison = positionA - positionB;
+        break;
+      case "priority":
+        comparison = a.insertion_order - b.insertion_order;
+        break;
+      case "characterCount":
+        comparison = a.contentLength - b.contentLength;
+        break;
+      case "keywords":
+        comparison = a.keyCount - b.keyCount;
+        break;
+      case "comment":
+        const commentA = a.comment || a.primaryKey || "";
+        const commentB = b.comment || b.primaryKey || "";
+        comparison = commentA.localeCompare(commentB);
+        break;
+      case "status":
+        comparison = (a.isActive ? 1 : 0) - (b.isActive ? 1 : 0);
+        break;
+      case "depth":
+        comparison = a.depth - b.depth;
+        break;
+      case "lastUpdated":
+        comparison = a.lastUpdated - b.lastUpdated;
+        break;
+      default:
+        const defaultPosA = typeof a.position === "number" ? a.position : 4;
+        const defaultPosB = typeof b.position === "number" ? b.position : 4;
+        comparison = defaultPosA - defaultPosB;
+      }
+      
+      return sortOrder === "desc" ? -comparison : comparison;
+    });
+    
+    return sorted;
+  };
+
+  const filteredEntries = filterEntries(entries, filterBy);
+  const sortedEntries = sortEntries(filteredEntries, sortBy, sortOrder);
 
   const handleEditEntry = (entry?: WorldBookEntryData) => {
     if (entry) {
@@ -207,15 +405,14 @@ export default function WorldBookEditor({
     return positionMap[position] || "Unknown";
   };
 
-  // Bulk operations for all entries
   const handleBulkToggleAll = async (enabled: boolean) => {
-    if (entries.length === 0) {
+    if (filteredEntries.length === 0) {
       toast.error(t("worldBook.noEntries"));
       return;
     }
 
     try {
-      const entryIds = entries.map(entry => entry.entry_id);
+      const entryIds = filteredEntries.map(entry => entry.entry_id);
       const result = await bulkToggleWorldBookEntries(
         characterId,
         entryIds,
@@ -224,7 +421,8 @@ export default function WorldBookEditor({
       
       if (result.success) {
         const action = enabled ? t("worldBook.enabledAll") : t("worldBook.disabledAll");
-        toast.success(`${action} ${entries.length} ${t("worldBook.items")}`);
+        const filterText = filterBy !== "all" ? ` (${t("worldBook.filtered")})` : "";
+        toast.success(`${action} ${filteredEntries.length} ${t("worldBook.items")}${filterText}`);
         await loadWorldBookData();
       }
     } catch (error) {
@@ -319,7 +517,7 @@ export default function WorldBookEditor({
               <span className={`magical-text bg-clip-text text-transparent bg-gradient-to-r from-amber-500 via-orange-400 to-yellow-300 ${serifFontClass}`}>
                 {t("worldBook.title")}
               </span>
-              <span className={`ml-2 text-sm text-[#a18d6f] ${serifFontClass} truncate`}>- {characterName}</span>
+              <span className={`ml-2 text-sm text-[#a18d6f] ${serifFontClass} inline-block truncate max-w-[150px] align-bottom`} title={characterName}>- {characterName}</span>
             </h2>
             <div className={`hidden md:flex items-center space-x-2 text-xs text-[#a18d6f] ${serifFontClass} flex-shrink-0`}>
               <span className="whitespace-nowrap">{t("worldBook.totalCount")} {entries.length}</span>
@@ -327,10 +525,17 @@ export default function WorldBookEditor({
               <span className="text-amber-400 whitespace-nowrap">{t("worldBook.enabledCount")} {entries.filter(e => e.isActive).length}</span>
               <span>•</span>
               <span className="text-rose-400 whitespace-nowrap">{t("worldBook.disabledCount")} {entries.filter(e => !e.isActive).length}</span>
+              {filterBy !== "all" && (
+                <>
+                  <span>•</span>
+                  <span className="text-blue-400 whitespace-nowrap">{t("worldBook.filteredCount")} {filteredEntries.length}</span>
+                </>
+              )}
             </div>
             <div className={`md:hidden flex items-center space-x-1 text-xs text-[#a18d6f] ${serifFontClass} flex-shrink-0`}>
               <span className="bg-[#1a1816] px-2 py-1 rounded border border-[#534741] whitespace-nowrap">
                 {entries.length} / {entries.filter(e => e.isActive).length} / {entries.filter(e => !e.isActive).length}
+                {filterBy !== "all" && ` (${filteredEntries.length})`}
               </span>
             </div>
           </div>
@@ -351,7 +556,7 @@ export default function WorldBookEditor({
           <div className="flex items-center space-x-2 flex-wrap">
             <button
               onClick={() => handleEditEntry()}
-              className="px-3 py-1.5 bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-500 hover:to-amber-600 text-white rounded-md transition-all duration-300 text-sm font-medium shadow-lg hover:shadow-amber-500/25 group flex-shrink-0"
+              className="px-3 py-1.5 bg-gradient-to-r from-amber-700 to-amber-800 hover:from-amber-600 hover:to-amber-700 text-white rounded-md transition-all duration-300 text-sm font-medium shadow-lg hover:shadow-amber-500/25 group flex-shrink-0"
             >
               <span className={`flex items-center ${serifFontClass}`}>
                 <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-1.5 transition-transform duration-300 group-hover:scale-110">
@@ -359,6 +564,22 @@ export default function WorldBookEditor({
                   <line x1="5" y1="12" x2="19" y2="12"></line>
                 </svg>
                 {t("worldBook.createEntry")}
+              </span>
+            </button>
+            
+            <button
+              onClick={() => setIsImportModalOpen(true)}
+              className="px-3 py-1.5 bg-gradient-to-r from-blue-700 to-blue-800 hover:from-blue-600 hover:to-blue-700 text-white rounded-md transition-all duration-300 text-sm font-medium shadow-lg hover:shadow-blue-500/25 group flex-shrink-0"
+            >
+              <span className={`flex items-center ${serifFontClass}`}>
+                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-1.5 transition-transform duration-300 group-hover:scale-110">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                  <polyline points="14 2 14 8 20 8"></polyline>
+                  <line x1="16" y1="13" x2="8" y2="13"></line>
+                  <line x1="16" y1="17" x2="8" y2="17"></line>
+                  <polyline points="10 9 9 9 8 9"></polyline>
+                </svg>
+                {t("worldBook.importWorldBook")}
               </span>
             </button>
             
@@ -378,13 +599,13 @@ export default function WorldBookEditor({
                   hover:border-amber-500/40 hover:text-amber-100 
                   hover:shadow-lg hover:shadow-amber-500/10 flex-shrink-0
                   disabled:opacity-50 disabled:cursor-not-allowed`}
-                disabled={entries.length === 0}
-                title={`${t("worldBook.enableAll")} (${entries.length} ${t("worldBook.items")})`}
+                disabled={filteredEntries.length === 0}
+                title={`${t("worldBook.enableAll")} ${filterBy !== "all" ? `(${t("worldBook.filtered")})` : ""} (${filteredEntries.length} ${t("worldBook.items")})`}
               >
                 <div className="flex items-center">
                   <div className="w-2.5 h-2.5 mr-1.5 rounded-full bg-amber-400/70 group-hover:bg-amber-400 transition-all duration-300"></div>
                   <span>{t("worldBook.enableAll")}</span>
-                  <span className="ml-1 text-[10px] opacity-60 group-hover:opacity-80">({entries.length})</span>
+                  <span className="ml-1 text-[10px] opacity-60 group-hover:opacity-80">({filteredEntries.length})</span>
                 </div>
               </button>
               <button
@@ -396,13 +617,13 @@ export default function WorldBookEditor({
                   hover:border-stone-400/40 hover:text-stone-200 
                   hover:shadow-lg hover:shadow-stone-500/10 flex-shrink-0
                   disabled:opacity-50 disabled:cursor-not-allowed`}
-                disabled={entries.length === 0}
-                title={`${t("worldBook.disableAll")} - ${t("worldBook.confirmBulkDisable")}`}
+                disabled={filteredEntries.length === 0}
+                title={`${t("worldBook.disableAll")} ${filterBy !== "all" ? `(${t("worldBook.filtered")})` : ""} - ${t("worldBook.confirmBulkDisable")}`}
               >
                 <div className="flex items-center">
                   <div className="w-2.5 h-2.5 mr-1.5 rounded-full bg-stone-400/70 group-hover:bg-stone-400 transition-all duration-300"></div>
                   <span>{t("worldBook.disableAll")}</span>
-                  <span className="ml-1 text-[10px] opacity-60 group-hover:opacity-80">({entries.length})</span>
+                  <span className="ml-1 text-[10px] opacity-60 group-hover:opacity-80">({filteredEntries.length})</span>
                 </div>
               </button>
             </div>
@@ -415,6 +636,113 @@ export default function WorldBookEditor({
       </div>
       <div className="flex-1 overflow-hidden">
         <div className="h-full overflow-y-auto fantasy-scrollbar pb-15">
+          <div className="mb-3 p-3 bg-gradient-to-r from-[#252220]/80 via-[#1a1816]/60 to-[#252220]/80 backdrop-blur-sm border border-[#534741]/40 rounded-lg shadow-lg">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+              <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1.5">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-amber-400/80">
+                    <path d="M3 6h18M7 12h10m-7 6h4"></path>
+                  </svg>
+                  <label className={`text-xs text-[#a18d6f] font-medium ${serifFontClass}`}>
+                    {t("worldBook.sortBy")}
+                  </label>
+                </div>
+                
+                <div className="relative">
+                  <select
+                    value={sortBy}
+                    onChange={(e) => handleSortByChange(e.target.value)}
+                    className={`appearance-none bg-gradient-to-br from-[#1a1816] via-[#252220] to-[#1a1816] 
+                      text-[#eae6db] px-3 py-1.5 pr-7 rounded-md border border-[#534741]/60 
+                      focus:border-amber-500/60 focus:outline-none focus:ring-2 focus:ring-amber-500/20 
+                      transition-all duration-300 hover:border-[#534741] backdrop-blur-sm
+                      shadow-inner text-xs font-medium ${serifFontClass}
+                      hover:shadow-lg hover:shadow-amber-500/5`}
+                  >
+                    <option value="position" className="bg-[#1a1816] text-[#eae6db]">{t("worldBook.position")}</option>
+                    <option value="priority" className="bg-[#1a1816] text-[#eae6db]">{t("worldBook.priority")}</option>
+                    <option value="characterCount" className="bg-[#1a1816] text-[#eae6db]">{t("worldBook.characterCount")}</option>
+                    <option value="keywords" className="bg-[#1a1816] text-[#eae6db]">{t("worldBook.keywords")}</option>
+                    <option value="comment" className="bg-[#1a1816] text-[#eae6db]">{t("worldBook.comment")}</option>
+                    <option value="status" className="bg-[#1a1816] text-[#eae6db]">{t("worldBook.status")}</option>
+                    <option value="depth" className="bg-[#1a1816] text-[#eae6db]">{t("worldBook.depth")}</option>
+                    <option value="lastUpdated" className="bg-[#1a1816] text-[#eae6db]">{t("worldBook.lastUpdated")}</option>
+                  </select>
+                  <div className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-[#a18d6f]">
+                      <path d="M6 9l6 6 6-6"></path>
+                    </svg>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="flex items-center gap-1.5">
+                <span className={`text-xs text-[#a18d6f] font-medium ${serifFontClass}`}>
+                  {t("worldBook.sortOrder")}:
+                </span>
+                <button
+                  onClick={handleSortOrderChange}
+                  className={`group relative flex items-center gap-1.5 px-3 py-1.5 rounded-md 
+                    bg-gradient-to-br from-[#1a1816] via-[#252220] to-[#1a1816] 
+                    border border-[#534741]/60 hover:border-amber-500/40 
+                    text-[#eae6db] hover:text-amber-200 
+                    transition-all duration-300 backdrop-blur-sm
+                    hover:shadow-lg hover:shadow-amber-500/10 
+                    focus:outline-none focus:ring-2 focus:ring-amber-500/20 ${serifFontClass}`}
+                  title={sortOrder === "asc" ? t("worldBook.ascending") : t("worldBook.descending")}
+                >
+                  <div className={`flex items-center justify-center w-4 h-4 rounded-full 
+                    bg-gradient-to-br ${sortOrder === "asc" 
+      ? "from-amber-500/20 to-amber-600/30 text-amber-400" 
+      : "from-blue-500/20 to-blue-600/30 text-blue-400"} 
+                    transition-all duration-300 group-hover:scale-110`}>
+                    <span className="text-xs font-bold">
+                      {sortOrder === "asc" ? "↑" : "↓"}
+                    </span>
+                  </div>
+                  <span className="text-xs font-medium">
+                    {sortOrder === "asc" ? t("worldBook.asc") : t("worldBook.desc")}
+                  </span>
+                  <div className="absolute inset-0 rounded-md bg-gradient-to-r from-transparent via-amber-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                </button>
+              </div>
+              
+              <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1.5">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-blue-400/80">
+                    <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
+                  </svg>
+                  <label className={`text-xs text-[#a18d6f] font-medium ${serifFontClass}`}>
+                    {t("worldBook.filterBy")}
+                  </label>
+                </div>
+                
+                <div className="relative">
+                  <select
+                    value={filterBy}
+                    onChange={(e) => handleFilterByChange(e.target.value)}
+                    className={`appearance-none bg-gradient-to-br from-[#1a1816] via-[#252220] to-[#1a1816] 
+                      text-[#eae6db] px-3 py-1.5 pr-7 rounded-md border border-[#534741]/60 
+                      focus:border-blue-500/60 focus:outline-none focus:ring-2 focus:ring-blue-500/20 
+                      transition-all duration-300 hover:border-[#534741] backdrop-blur-sm
+                      shadow-inner text-xs font-medium ${serifFontClass}
+                      hover:shadow-lg hover:shadow-blue-500/5`}
+                  >
+                    <option value="all" className="bg-[#1a1816] text-[#eae6db]">{t("worldBook.filterAll")}</option>
+                    <option value="enabled" className="bg-[#1a1816] text-[#eae6db]">{t("worldBook.filterEnabled")}</option>
+                    <option value="disabled" className="bg-[#1a1816] text-[#eae6db]">{t("worldBook.filterDisabled")}</option>
+                    <option value="constant" className="bg-[#1a1816] text-[#eae6db]">{t("worldBook.filterConstant")}</option>
+                    <option value="imported" className="bg-[#1a1816] text-[#eae6db]">{t("worldBook.filterImported")}</option>
+                  </select>
+                  <div className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-[#a18d6f]">
+                      <path d="M6 9l6 6 6-6"></path>
+                    </svg>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
           <table className="w-full table-fixed">
             <thead className="sticky top-0 bg-[#252220] border-b border-[#534741] z-10">
               <tr>
@@ -430,7 +758,7 @@ export default function WorldBookEditor({
               </tr>
             </thead>
             <tbody>
-              {entries.map((entry, index) => (
+              {sortedEntries.map((entry, index) => (
                 <React.Fragment key={entry.entry_id}>
                   <tr 
                     className="border-b border-[#534741] hover:bg-[#252220] transition-all duration-300 group"
@@ -478,6 +806,12 @@ export default function WorldBookEditor({
                             <span className="inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-300 backdrop-blur-sm border bg-gradient-to-br from-slate-800/60 via-slate-700/40 to-slate-800/60 text-slate-300/90 border-slate-500/30 hover:from-slate-700/70 hover:via-slate-600/50 hover:to-slate-700/70 hover:border-slate-400/40 hover:text-slate-200 hover:shadow-lg hover:shadow-slate-500/10">
                               <span className="w-2 h-2 bg-slate-400/80 rounded-full mr-2 shadow-sm shadow-slate-400/50"></span>
                               {t("worldBook.constant")}
+                            </span>
+                          )}
+                          {entry.isImported && (
+                            <span className="inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-300 backdrop-blur-sm border bg-gradient-to-br from-slate-800/60 via-blue-700/40 to-slate-800/60 text-blue-300/90 border-blue-500/30 hover:from-slate-700/70 hover:via-blue-600/50 hover:to-slate-700/70 hover:border-blue-400/40 hover:text-blue-200 hover:shadow-lg hover:shadow-blue-500/10">
+                              <span className="w-2 h-2 bg-blue-400/80 rounded-full mr-2 shadow-sm shadow-blue-400/50"></span>
+                              {t("worldBook.imported")}
                             </span>
                           )}
                         </div>
@@ -617,6 +951,14 @@ export default function WorldBookEditor({
                               <span className="text-[#a18d6f]">{t("worldBook.totalKeywords")}</span>
                               <span className="ml-2 text-[#eae6db]">{entry.keyCount + entry.secondaryKeyCount}</span>
                             </div>
+                            {entry.isImported && entry.importedAt && (
+                              <div>
+                                <span className="text-[#a18d6f]">{t("worldBook.importedAt")}</span>
+                                <span className="ml-2 text-[#eae6db]">
+                                  {new Date(entry.importedAt).toLocaleString()}
+                                </span>
+                              </div>
+                            )}
                           </div>
                         </div>
                       </td>
@@ -636,8 +978,8 @@ export default function WorldBookEditor({
                 <line x1="16" y1="17" x2="8" y2="17"></line>
                 <polyline points="10 9 9 9 8 9"></polyline>
               </svg>
-              <p className="text-lg mb-2">{t("worldBook.noEntries")}</p>
-              <p className="text-sm opacity-70">{t("worldBook.noEntriesDescription")}</p>
+              <p className={`text-lg mb-2 ${fontClass}`}>{t("worldBook.noEntries")}</p>
+              <p className={`text-sm opacity-70 ${fontClass}`}>{t("worldBook.noEntriesDescription")}</p>
             </div>
           )}
         </div>
@@ -653,6 +995,16 @@ export default function WorldBookEditor({
         }}
         onSave={handleSaveEntry}
         onEntryChange={setEditingEntry}
+      />
+      
+      <ImportWorldBookModal
+        isOpen={isImportModalOpen}
+        characterId={characterId}
+        onClose={() => setIsImportModalOpen(false)}
+        onImportSuccess={() => {
+          setIsImportModalOpen(false);
+          loadWorldBookData();
+        }}
       />
     </div>
   );
