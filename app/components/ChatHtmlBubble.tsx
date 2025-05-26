@@ -4,23 +4,29 @@ import { useEffect, useRef, memo, useState, useCallback } from "react";
 
 function convertMarkdown(str: string): string {
   const imagePlaceholders: string[] = [];
+
   str = str.replace(/!\[\]\(([^)]+)\)/g, (match, url) => {
     const placeholder = `__IMAGE_PLACEHOLDER_${imagePlaceholders.length}__`;
     imagePlaceholders.push(`<img src="${url}" alt="Image" />`);
     return placeholder;
   });
+  str = str.replace(/^---$/gm, "");
   str = str.replace(/```[\s\S]*?```/g, (match) => {
     const content = match.replace(/^```\w*\n?/, "").replace(/```$/, "");
     return `<pre>${content}</pre>`;
   });
+  str = str.replace(/^>\s*(.+)$/gm, "<blockquote>$1</blockquote>");
+  str = str.replace(/<\/blockquote>\s*<blockquote>/g, "\n");
   str = str.replace(/!\[\]\(([^)]+)\)/g, "<img src=\"$1\" alt=\"Image\" />");
   str = str.replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>");
   str = str.replace(/\*([^*]+)\*/g, "<em>$1</em>");
   str = str.replace(/"([^"]+)"/g, "<span class=\"dialogue\">\"$1\"</span>");
   str = str.replace(/“([^”]+)”/g, "<span class=\"dialogue\">“$1”</span>");
+
   imagePlaceholders.forEach((html, i) => {
     str = str.replace(`__IMAGE_PLACEHOLDER_${i}__`, html);
   });
+
   return str;
 }
 
@@ -44,15 +50,46 @@ function detectHtmlTags(str: string) {
 }
 
 function generatePalette(uniqueTags: string[]): Record<string, string> {
-  const palette = [
-    "#fcd34d", "#93c5fd", "#86efac", "#c4b5fd", "#fda4af", "#fde047",
-    "#67e8f9", "#fb7185", "#a78bfa", "#34d399", "#f59e0b", "#60a5fa",
+  const predefinedColors: Record<string, string> = {
+    "strong": "#fb7185",
+    "em": "#c4b5fd", 
+    "blockquote": "#93c5fd", 
+    "pre": "#86efac",        
+    "code": "#86efac",        
+    "dialogue": "#fda4af",    
+    "img": "#67e8f9",        
+    "a": "#93c5fd",    
+  };
+
+  const availableColors = [
+    "#fde047", "#a78bfa", "#34d399", "#f59e0b", "#60a5fa",
     "#10b981", "#f97316", "#8b5cf6", "#ef4444", "#06b6d4", "#84cc16",
+    "#facc15", "#f472b6", "#818cf8", "#22d3ee", "#4ade80", "#fb923c",
+    "#d946ef", "#06b6d4", "#65a30d", "#dc2626", "#7c3aed", "#059669",
   ];
+
   const colours: Record<string, string> = {};
-  uniqueTags.sort((a, b) => a.localeCompare(b)).forEach((t, i) => {
-    colours[t] = palette[i % palette.length];
+  const usedColors = new Set<string>();
+
+  uniqueTags.forEach(tag => {
+    const lowerTag = tag.toLowerCase();
+    if (predefinedColors[lowerTag]) {
+      colours[lowerTag] = predefinedColors[lowerTag];
+      usedColors.add(predefinedColors[lowerTag]);
+    }
   });
+
+  const unassignedTags = uniqueTags.filter(tag => !predefinedColors[tag.toLowerCase()]);
+  const unusedColors = availableColors.filter(color => !usedColors.has(color));
+  
+  unassignedTags.sort((a, b) => a.localeCompare(b)).forEach((tag, i) => {
+    const lowerTag = tag.toLowerCase();
+    if (!colours[lowerTag]) {
+      const colorIndex = i % (unusedColors.length || availableColors.length);
+      colours[lowerTag] = unusedColors.length > 0 ? unusedColors[colorIndex] : availableColors[colorIndex];
+    }
+  });
+
   return colours;
 }
 
@@ -230,7 +267,7 @@ export default memo(function ChatHtmlBubble({
   const html = convertMarkdown(rawHtml);
   const processedHtml = replaceTags(html).replace(/^[\s\r\n]+|[\s\r\n]+$/g, "");
 
-  const srcDoc = `<!DOCTYPE html><html><head><meta charset="utf-8"><style>*,*::before,*::after{box-sizing:border-box;max-width:100%}html,body{margin:0;padding:0;color:#f4e8c1;font:16px/${1.5} serif;background:transparent;word-wrap:break-word;overflow-wrap:break-word;hyphens:auto;white-space:pre-wrap;}img,video,iframe{max-width:100%;height:auto;display:block;margin:0 auto}table{width:100%;border-collapse:collapse;overflow-x:auto;display:block}code,pre{font-family:monospace;font-size:0.9rem;white-space:pre-wrap;background:rgba(40,40,40,0.8);padding:4px 8px;border-radius:4px;border:1px solid rgba(255,255,255,0.1);}pre{background:rgba(40,40,40,0.8);padding:12px;border-radius:6px;border:1px solid rgba(255,255,255,0.1);margin:8px 0;}a{color:#93c5fd}.tag-styled{padding:2px 6px;border-radius:4px;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.08);backdrop-filter:blur(2px);white-space:inherit;box-shadow:0 1px 3px rgba(0,0,0,0.1);transition:all 0.2s ease;display:inline-block;margin:1px 2px;}.tag-styled:hover{background:rgba(255,255,255,0.12);border-color:rgba(255,255,255,0.25);box-shadow:0 2px 6px rgba(0,0,0,0.15);}</style></head><body>${processedHtml}<script>let lastHeight=0;function postHeight(){try{const h=Math.max(document.documentElement.scrollHeight||0,document.body.scrollHeight||0,document.documentElement.offsetHeight||0,document.body.offsetHeight||0);if(h!==lastHeight){lastHeight=h;parent.postMessage({__chatBubbleHeight:h+10},'*');}}catch(e){}}function delayedHeight(){setTimeout(postHeight,50);}window.addEventListener('load',delayedHeight);document.addEventListener('DOMContentLoaded',delayedHeight);setTimeout(postHeight,100);setTimeout(postHeight,300);new ResizeObserver(postHeight).observe(document.body);</script></body></html>`;
+  const srcDoc = `<!DOCTYPE html><html><head><meta charset="utf-8"><style>*,*::before,*::after{box-sizing:border-box;max-width:100%}html,body{margin:0;padding:0;color:#f4e8c1;font:16px/${1.5} serif;background:transparent;word-wrap:break-word;overflow-wrap:break-word;hyphens:auto;white-space:pre-wrap;}img,video,iframe{max-width:100%;height:auto;display:block;margin:0 auto}table{width:100%;border-collapse:collapse;overflow-x:auto;display:block}code,pre{font-family:monospace;font-size:0.9rem;white-space:pre-wrap;background:rgba(40,40,40,0.8);padding:4px 8px;border-radius:4px;border:1px solid rgba(255,255,255,0.1);}pre{background:rgba(40,40,40,0.8);padding:12px;border-radius:6px;border:1px solid rgba(255,255,255,0.1);margin:8px 0;}blockquote{margin:8px 0;padding:8px 12px;border-left:4px solid #93c5fd;background:rgba(147,197,253,0.08);border-radius:0 4px 4px 0;font-style:italic;color:#93c5fd;}strong{color:#fb7185;font-weight:bold;}em{color:#c4b5fd;font-style:italic;}.dialogue{color:#fda4af;}a{color:#93c5fd}.tag-styled{transition:all 0.2s ease;white-space:inherit;}.tag-styled:hover{text-shadow:0 0 8px currentColor;}pre.tag-styled:hover{text-shadow:none;}</style></head><body>${processedHtml}<script>let lastHeight=0;function postHeight(){try{const h=Math.max(document.documentElement.scrollHeight||0,document.body.scrollHeight||0,document.documentElement.offsetHeight||0,document.body.offsetHeight||0);if(h!==lastHeight){lastHeight=h;parent.postMessage({__chatBubbleHeight:h+10},'*');}}catch(e){}}function delayedHeight(){setTimeout(postHeight,50);}window.addEventListener('load',delayedHeight);document.addEventListener('DOMContentLoaded',delayedHeight);setTimeout(postHeight,100);setTimeout(postHeight,300);new ResizeObserver(postHeight).observe(document.body);</script></body></html>`;
 
   useEffect(() => {
     if (showLoader) return;
