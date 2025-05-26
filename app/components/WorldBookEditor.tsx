@@ -206,6 +206,7 @@ export default function WorldBookEditor({
     loadSortPreferences();
     loadFilterPreferences();
     cleanupOldSortPreferences();
+    
     const timer = setTimeout(() => setAnimationComplete(true), 100);
     return () => clearTimeout(timer);
   }, [characterId]);
@@ -284,9 +285,6 @@ export default function WorldBookEditor({
         const commentB = b.comment || b.primaryKey || "";
         comparison = commentA.localeCompare(commentB);
         break;
-      case "status":
-        comparison = (a.isActive ? 1 : 0) - (b.isActive ? 1 : 0);
-        break;
       case "depth":
         comparison = a.depth - b.depth;
         break;
@@ -298,8 +296,21 @@ export default function WorldBookEditor({
         const defaultPosB = typeof b.position === "number" ? b.position : 4;
         comparison = defaultPosA - defaultPosB;
       }
+
+      if (sortOrder === "desc") {
+        comparison = -comparison;
+      }
       
-      return sortOrder === "desc" ? -comparison : comparison;
+      if (comparison === 0) {
+        const orderComparison = a.insertion_order - b.insertion_order;
+        if (orderComparison !== 0) {
+          return orderComparison;
+        }
+        
+        return a.entry_id.localeCompare(b.entry_id);
+      }
+      
+      return comparison;
     });
     
     return sorted;
@@ -372,9 +383,46 @@ export default function WorldBookEditor({
 
       if (result.success) {
         toast.success(t("worldBook.saveSuccess"));
+        
+        const updatedEntry = {
+          entry_id: editingEntry.entry_id,
+          id: editingEntry.id,
+          content: editingEntry.content,
+          keys: editingEntry.keys.filter(k => k.trim()),
+          secondary_keys: editingEntry.secondary_keys.filter(k => k.trim()),
+          selective: editingEntry.selective,
+          constant: editingEntry.constant,
+          position: editingEntry.position,
+          insertion_order: editingEntry.insertion_order,
+          enabled: editingEntry.enabled,
+          use_regex: editingEntry.use_regex,
+          depth: editingEntry.depth,
+          comment: editingEntry.comment,
+          tokens: undefined,
+          extensions: {},
+          primaryKey: editingEntry.keys.filter(k => k.trim())[0] || "",
+          keyCount: editingEntry.keys.filter(k => k.trim()).length,
+          secondaryKeyCount: editingEntry.secondary_keys.filter(k => k.trim()).length,
+          contentLength: editingEntry.content.length,
+          isActive: editingEntry.enabled,
+          lastUpdated: Date.now(),
+          isImported: false,
+          importedAt: null,
+        };
+
+        setEntries(prev => {
+          const existingIndex = prev.findIndex(e => e.entry_id === editingEntry.entry_id);
+          if (existingIndex >= 0) {
+            const newEntries = [...prev];
+            newEntries[existingIndex] = updatedEntry;
+            return newEntries;
+          } else {
+            return [...prev, updatedEntry];
+          }
+        });
+        
         setIsEditModalOpen(false);
         setEditingEntry(null);
-        await loadWorldBookData();
       }
     } catch (error) {
       console.error("Save failed:", error);
@@ -411,8 +459,17 @@ export default function WorldBookEditor({
       return;
     }
 
+    const entryIds = filteredEntries.map(entry => entry.entry_id);
+    
+    setEntries(prev =>
+      prev.map(entry =>
+        entryIds.includes(entry.entry_id)
+          ? { ...entry, isActive: enabled, enabled: enabled }
+          : entry,
+      ),
+    );
+
     try {
-      const entryIds = filteredEntries.map(entry => entry.entry_id);
       const result = await bulkToggleWorldBookEntries(
         characterId,
         entryIds,
@@ -423,9 +480,24 @@ export default function WorldBookEditor({
         const action = enabled ? t("worldBook.enabledAll") : t("worldBook.disabledAll");
         const filterText = filterBy !== "all" ? ` (${t("worldBook.filtered")})` : "";
         toast.success(`${action} ${filteredEntries.length} ${t("worldBook.items")}${filterText}`);
-        await loadWorldBookData();
+      } else {
+        setEntries(prev =>
+          prev.map(entry =>
+            entryIds.includes(entry.entry_id)
+              ? { ...entry, isActive: !enabled, enabled: !enabled }
+              : entry,
+          ),
+        );
+        toast.error(t("worldBook.bulkOperationFailed"));
       }
     } catch (error) {
+      setEntries(prev =>
+        prev.map(entry =>
+          entryIds.includes(entry.entry_id)
+            ? { ...entry, isActive: !enabled, enabled: !enabled }
+            : entry,
+        ),
+      );
       console.error("Bulk toggle failed:", error);
       toast.error(t("worldBook.bulkOperationFailed"));
     }
@@ -440,8 +512,17 @@ export default function WorldBookEditor({
       return;
     }
 
+    const entryIds = filteredEntries.map(entry => entry.entry_id);
+    
+    setEntries(prev =>
+      prev.map(entry =>
+        entryIds.includes(entry.entry_id)
+          ? { ...entry, isActive: newEnabled, enabled: newEnabled }
+          : entry,
+      ),
+    );
+
     try {
-      const entryIds = filteredEntries.map(entry => entry.entry_id);
       const result = await bulkToggleWorldBookEntries(
         characterId,
         entryIds,
@@ -451,9 +532,24 @@ export default function WorldBookEditor({
       if (result.success) {
         const action = newEnabled ? t("worldBook.enabled") : t("worldBook.disabled");
         toast.success(`${action} ${filteredEntries.length} ${t("worldBook.items")}`);
-        await loadWorldBookData();
+      } else {
+        setEntries(prev =>
+          prev.map(entry =>
+            entryIds.includes(entry.entry_id)
+              ? { ...entry, isActive: !newEnabled, enabled: !newEnabled }
+              : entry,
+          ),
+        );
+        toast.error(t("worldBook.bulkOperationFailed"));
       }
     } catch (error) {
+      setEntries(prev =>
+        prev.map(entry =>
+          entryIds.includes(entry.entry_id)
+            ? { ...entry, isActive: !newEnabled, enabled: !newEnabled }
+            : entry,
+        ),
+      );
       console.error("Bulk toggle failed:", error);
       toast.error(t("worldBook.bulkOperationFailed"));
     }
@@ -466,7 +562,14 @@ export default function WorldBookEditor({
       const result = await deleteWorldBookEntry(characterId, entryId);
       if (result.success) {
         toast.success(t("worldBook.deleteSuccess"));
-        await loadWorldBookData();
+        
+        setEntries(prev => prev.filter(entry => entry.entry_id !== entryId));
+        
+        setExpandedRows(prev => {
+          const newExpanded = new Set(prev);
+          newExpanded.delete(entryId);
+          return newExpanded;
+        });
       }
     } catch (error) {
       console.error("Delete failed:", error);
@@ -475,6 +578,14 @@ export default function WorldBookEditor({
   };
 
   const handleToggleEntry = async (entryId: string, newEnabled: boolean) => {
+    setEntries(prev =>
+      prev.map(entry =>
+        entry.entry_id === entryId 
+          ? { ...entry, isActive: newEnabled, enabled: newEnabled }
+          : entry,
+      ),
+    );
+
     try {
       const result = await bulkToggleWorldBookEntries(
         characterId,
@@ -485,9 +596,24 @@ export default function WorldBookEditor({
       if (result.success) {
         const action = newEnabled ? t("worldBook.enabled") : t("worldBook.disabled");
         toast.success(`${action} 1 ${t("worldBook.item")}`);
-        await loadWorldBookData();
+      } else {
+        setEntries(prev =>
+          prev.map(entry =>
+            entry.entry_id === entryId 
+              ? { ...entry, isActive: !newEnabled, enabled: !newEnabled }
+              : entry,
+          ),
+        );
+        toast.error(t("worldBook.toggleFailed"));
       }
     } catch (error) {
+      setEntries(prev =>
+        prev.map(entry =>
+          entry.entry_id === entryId 
+            ? { ...entry, isActive: !newEnabled, enabled: !newEnabled }
+            : entry,
+        ),
+      );
       console.error("Toggle failed:", error);
       toast.error(t("worldBook.toggleFailed"));
     }
@@ -514,7 +640,7 @@ export default function WorldBookEditor({
         <div className="relative z-10 flex justify-between items-center min-h-[2rem]">
           <div className="flex items-center space-x-3 flex-1 min-w-0">
             <h2 className="text-lg font-medium text-[#eae6db] flex-shrink-0">
-              <span className={`magical-text bg-clip-text text-transparent bg-gradient-to-r from-amber-500 via-orange-400 to-yellow-300 ${serifFontClass}`}>
+              <span className={`bg-clip-text text-transparent bg-gradient-to-r from-amber-500 via-orange-400 to-yellow-300 ${serifFontClass}`}>
                 {t("worldBook.title")}
               </span>
               <span className={`ml-2 text-sm text-[#a18d6f] ${serifFontClass} inline-block truncate max-w-[150px] align-bottom`} title={characterName}>- {characterName}</span>
@@ -664,7 +790,6 @@ export default function WorldBookEditor({
                     <option value="characterCount" className="bg-[#1a1816] text-[#eae6db]">{t("worldBook.characterCount")}</option>
                     <option value="keywords" className="bg-[#1a1816] text-[#eae6db]">{t("worldBook.keywords")}</option>
                     <option value="comment" className="bg-[#1a1816] text-[#eae6db]">{t("worldBook.comment")}</option>
-                    <option value="status" className="bg-[#1a1816] text-[#eae6db]">{t("worldBook.status")}</option>
                     <option value="depth" className="bg-[#1a1816] text-[#eae6db]">{t("worldBook.depth")}</option>
                     <option value="lastUpdated" className="bg-[#1a1816] text-[#eae6db]">{t("worldBook.lastUpdated")}</option>
                   </select>
@@ -1003,6 +1128,8 @@ export default function WorldBookEditor({
         onClose={() => setIsImportModalOpen(false)}
         onImportSuccess={() => {
           setIsImportModalOpen(false);
+          // For import, we still need to reload data as it's a complex operation
+          // that may affect multiple entries in ways we can't predict locally
           loadWorldBookData();
         }}
       />
