@@ -2,14 +2,25 @@
 
 import { useEffect, useRef, memo, useState, useCallback } from "react";
 
-function convertMarkdownCodeBlocks(str: string): string {
+function convertMarkdown(str: string): string {
+  const imagePlaceholders: string[] = [];
+  str = str.replace(/!\[\]\(([^)]+)\)/g, (match, url) => {
+    const placeholder = `__IMAGE_PLACEHOLDER_${imagePlaceholders.length}__`;
+    imagePlaceholders.push(`<img src="${url}" alt="Image" />`);
+    return placeholder;
+  });
   str = str.replace(/```[\s\S]*?```/g, (match) => {
     const content = match.replace(/^```\w*\n?/, "").replace(/```$/, "");
     return `<pre>${content}</pre>`;
   });
+  str = str.replace(/!\[\]\(([^)]+)\)/g, "<img src=\"$1\" alt=\"Image\" />");
   str = str.replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>");
+  str = str.replace(/\*([^*]+)\*/g, "<em>$1</em>");
   str = str.replace(/"([^"]+)"/g, "<span class=\"dialogue\">\"$1\"</span>");
   str = str.replace(/“([^”]+)”/g, "<span class=\"dialogue\">“$1”</span>");
+  imagePlaceholders.forEach((html, i) => {
+    str = str.replace(`__IMAGE_PLACEHOLDER_${i}__`, html);
+  });
   return str;
 }
 
@@ -216,7 +227,7 @@ export default memo(function ChatHtmlBubble({
       />
     );
   }
-  const html = convertMarkdownCodeBlocks(rawHtml);
+  const html = convertMarkdown(rawHtml);
   const processedHtml = replaceTags(html).replace(/^[\s\r\n]+|[\s\r\n]+$/g, "");
 
   const srcDoc = `<!DOCTYPE html><html><head><meta charset="utf-8"><style>*,*::before,*::after{box-sizing:border-box;max-width:100%}html,body{margin:0;padding:0;color:#f4e8c1;font:16px/${1.5} serif;background:transparent;word-wrap:break-word;overflow-wrap:break-word;hyphens:auto;white-space:pre-wrap;}img,video,iframe{max-width:100%;height:auto;display:block;margin:0 auto}table{width:100%;border-collapse:collapse;overflow-x:auto;display:block}code,pre{font-family:monospace;font-size:0.9rem;white-space:pre-wrap;background:rgba(40,40,40,0.8);padding:4px 8px;border-radius:4px;border:1px solid rgba(255,255,255,0.1);}pre{background:rgba(40,40,40,0.8);padding:12px;border-radius:6px;border:1px solid rgba(255,255,255,0.1);margin:8px 0;}a{color:#93c5fd}.tag-styled{padding:2px 6px;border-radius:4px;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.08);backdrop-filter:blur(2px);white-space:inherit;box-shadow:0 1px 3px rgba(0,0,0,0.1);transition:all 0.2s ease;display:inline-block;margin:1px 2px;}.tag-styled:hover{background:rgba(255,255,255,0.12);border-color:rgba(255,255,255,0.25);box-shadow:0 2px 6px rgba(0,0,0,0.15);}</style></head><body>${processedHtml}<script>let lastHeight=0;function postHeight(){try{const h=Math.max(document.documentElement.scrollHeight||0,document.body.scrollHeight||0,document.documentElement.offsetHeight||0,document.body.offsetHeight||0);if(h!==lastHeight){lastHeight=h;parent.postMessage({__chatBubbleHeight:h+10},'*');}}catch(e){}}function delayedHeight(){setTimeout(postHeight,50);}window.addEventListener('load',delayedHeight);document.addEventListener('DOMContentLoaded',delayedHeight);setTimeout(postHeight,100);setTimeout(postHeight,300);new ResizeObserver(postHeight).observe(document.body);</script></body></html>`;
