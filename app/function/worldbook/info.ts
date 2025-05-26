@@ -47,7 +47,12 @@ export async function getWorldBookEntries(characterId: string) {
         return a.insertion_order - b.insertion_order;
       }
       
-      return b.lastUpdated - a.lastUpdated;
+      const lastUpdatedComparison = b.lastUpdated - a.lastUpdated;
+      if (lastUpdatedComparison !== 0) {
+        return lastUpdatedComparison;
+      }
+
+      return a.entry_id.localeCompare(b.entry_id);
     });
 
     return {
