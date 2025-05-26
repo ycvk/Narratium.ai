@@ -13,6 +13,8 @@
 
 **Narratium** is an AI-powered immersive interactive storytelling and creation platform, aiming to be an open-source alternative to AI Dungeon and a more user-friendly version of SillyTavern. Whether exploring fantasy worlds, seeking emotional resonance, or rewriting history, anyone can become the protagonist of their own epic.
 
+[📖 DeepWiki Documentation](https://deepwiki.com/Narratium/Narratium.ai/)
+
 ## 🌟 Product Overview
 
 Narratium aims to deliver a lightweight storytelling engine combining context compression, memory systems, and graph-based knowledge retrieval (Graph-RAG) to ensure character consistency and world coherence in long-form stories, significantly enhancing the immersion and continuity of AI-generated narratives.

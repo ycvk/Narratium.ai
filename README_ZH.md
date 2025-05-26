@@ -9,6 +9,9 @@
 ![GitHub commits](https://img.shields.io/github/commit-activity/m/Narratium/Narratium.ai)
 
 Narratium 是一个由 AI 驱动的**沉浸式交互故事创作与体验平台**，致力打造开源版本的 AI Dungeon 和更加易用的 Sillytavern。无论是探索奇幻世界、追寻情感共鸣，还是重写历史，每个人都能轻松成为属于自己传奇故事的主角。
+
+[📖 DeepWiki 文档](https://deepwiki.com/Narratium/Narratium.ai/)
+
 ## 🌟 产品概述
 
 Narratium 目标打造一套轻量化故事引擎，结合上下文压缩、记忆系统、图结构知识检索（Graph-RAG），支持在长篇故事中保持角色一致性和世界逻辑连续性，显著提升 AI 生成故事的沉浸感和连贯性。
