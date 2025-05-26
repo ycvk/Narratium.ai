@@ -300,7 +300,7 @@ export default function RegexScriptEditor({ onClose, characterName, characterId 
           <div className="flex items-center space-x-2 flex-wrap">
             <button
               onClick={() => setEditingScript({})}
-              className="px-3 py-1.5 bg-gradient-to-r from-amber-700 to-amber-800 hover:from-amber-600 hover:to-amber-700 text-white rounded-md transition-all duration-300 text-sm font-medium shadow-lg hover:shadow-amber-500/25 group flex-shrink-0"
+              className="px-3 py-1.5 bg-gradient-to-r from-[#1f1c1a] to-[#13100e] hover:from-[#282521] hover:to-[#1a1613] text-[#e9c08d] hover:text-[#f6daae] rounded-md transition-all duration-300 text-sm font-medium shadow-lg hover:shadow-[#f8b758]/20 group flex-shrink-0 border border-[#403a33]"
             >
               <span className={`flex items-center ${serifFontClass}`}>
                 <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-1.5 transition-transform duration-300 group-hover:scale-110">
@@ -475,7 +475,7 @@ export default function RegexScriptEditor({ onClose, characterName, characterId 
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                             </svg>
                           </button>
-                          <h4 className={`font-medium ${serifFontClass} ${script.disabled ? "text-[#a18d6f]" : "text-[#eae6db]"}`}>
+                          <h4 className={`font-medium ${serifFontClass} ${script.disabled ? "text-[#a18d6f]" : "text-[#f6daae]"}`}>
                             {script.scriptName}
                           </h4>
                         </div>
@@ -485,8 +485,9 @@ export default function RegexScriptEditor({ onClose, characterName, characterId 
                           </span>
                           <button
                             onClick={() => setEditingScript({ ...script, scriptKey: scriptId })}
-                            className={`text-xs px-3 py-1.5 bg-gradient-to-r from-blue-700 to-blue-800 hover:from-blue-600 hover:to-blue-700 
-                              text-white rounded-md transition-all duration-300 font-medium shadow-lg hover:shadow-blue-500/25 group flex-shrink-0`}
+                            className={`text-xs px-3 py-1.5 bg-gradient-to-r from-[#1a1f1c] to-[#0e1310] hover:from-[#212821] hover:to-[#131a16]
+                              text-[#8de9c0] hover:text-[#aef6da] rounded-md transition-all duration-300 font-medium 
+                              shadow-lg hover:shadow-[#58f8b7]/20 group flex-shrink-0 border border-[#33403a]`}
                           >
                             <span className={`flex items-center ${serifFontClass}`}>
                               <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-1 transition-transform duration-300 group-hover:scale-110">
@@ -500,8 +501,8 @@ export default function RegexScriptEditor({ onClose, characterName, characterId 
                             onClick={() => handleToggleScript(scriptId)}
                             className={`text-xs px-3 py-1.5 rounded-md transition-all duration-300 font-medium shadow-lg group flex-shrink-0 ${
                               script.disabled
-                                ? "bg-gradient-to-r from-green-700 to-green-800 hover:from-green-600 hover:to-green-700 text-white hover:shadow-green-500/25"
-                                : "bg-gradient-to-r from-orange-700 to-orange-800 hover:from-orange-600 hover:to-orange-700 text-white hover:shadow-orange-500/25"
+                                ? "bg-gradient-to-r from-[#1a1f1c] to-[#0e1310] hover:from-[#212821] hover:to-[#131a16] text-[#8de9c0] hover:text-[#aef6da] border border-[#33403a] hover:shadow-[#58f8b7]/20"
+                                : "bg-gradient-to-r from-[#1f1c1a] to-[#13100e] hover:from-[#282521] hover:to-[#1a1613] text-[#e9c08d] hover:text-[#f6daae] border border-[#403a33] hover:shadow-[#f8b758]/20"
                             }`}
                           >
                             <span className={`flex items-center ${serifFontClass}`}>
@@ -524,8 +525,9 @@ export default function RegexScriptEditor({ onClose, characterName, characterId 
                           </button>
                           <button
                             onClick={() => handleDeleteScript(scriptId)}
-                            className={`text-xs px-3 py-1.5 bg-gradient-to-r from-red-700 to-red-800 hover:from-red-600 hover:to-red-700 
-                              text-white rounded-md transition-all duration-300 font-medium shadow-lg hover:shadow-red-500/25 group flex-shrink-0`}
+                            className={`text-xs px-3 py-1.5 bg-gradient-to-r from-[#1f1a1a] to-[#130e0e] hover:from-[#282121] hover:to-[#1a1313]
+                              text-[#e98d8d] hover:text-[#f6aeae] rounded-md transition-all duration-300 font-medium 
+                              shadow-lg hover:shadow-[#f85858]/20 group flex-shrink-0 border border-[#403333]`}
                           >
                             <span className={`flex items-center ${serifFontClass}`}>
                               <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-1 transition-transform duration-300 group-hover:scale-110">

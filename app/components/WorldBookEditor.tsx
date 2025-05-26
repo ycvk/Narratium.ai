@@ -682,7 +682,7 @@ export default function WorldBookEditor({
           <div className="flex items-center space-x-2 flex-wrap">
             <button
               onClick={() => handleEditEntry()}
-              className="px-3 py-1.5 bg-gradient-to-r from-amber-700 to-amber-800 hover:from-amber-600 hover:to-amber-700 text-white rounded-md transition-all duration-300 text-sm font-medium shadow-lg hover:shadow-amber-500/25 group flex-shrink-0"
+              className="px-3 py-1.5 bg-gradient-to-r from-[#1f1c1a] to-[#13100e] hover:from-[#282521] hover:to-[#1a1613] text-[#e9c08d] hover:text-[#f6daae] rounded-md transition-all duration-300 text-sm font-medium shadow-lg hover:shadow-[#f8b758]/20 group flex-shrink-0 border border-[#403a33]"
             >
               <span className={`flex items-center ${serifFontClass}`}>
                 <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-1.5 transition-transform duration-300 group-hover:scale-110">
@@ -695,7 +695,7 @@ export default function WorldBookEditor({
             
             <button
               onClick={() => setIsImportModalOpen(true)}
-              className="px-3 py-1.5 bg-gradient-to-r from-blue-700 to-blue-800 hover:from-blue-600 hover:to-blue-700 text-white rounded-md transition-all duration-300 text-sm font-medium shadow-lg hover:shadow-blue-500/25 group flex-shrink-0"
+              className="px-3 py-1.5 bg-gradient-to-r from-[#1a1f1c] to-[#0e1310] hover:from-[#212821] hover:to-[#131a16] text-[#8de9c0] hover:text-[#aef6da] rounded-md transition-all duration-300 text-sm font-medium shadow-lg hover:shadow-[#58f8b7]/20 group flex-shrink-0 border border-[#33403a]"
             >
               <span className={`flex items-center ${serifFontClass}`}>
                 <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-1.5 transition-transform duration-300 group-hover:scale-110">
@@ -916,7 +916,7 @@ export default function WorldBookEditor({
                       <div className="flex items-center space-x-2">
                         <div className="flex items-center flex-wrap gap-1.5">
                           <div className="flex items-center space-x-1.5">
-                            <span className={`inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-300 backdrop-blur-sm border ${
+                            <span className={`inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition-all duration-300 backdrop-blur-sm border ${
                               entry.isActive 
                                 ? "bg-gradient-to-br from-slate-800/60 via-amber-900/40 to-slate-800/60 text-amber-200/90 border-amber-600/30 hover:from-slate-700/70 hover:via-amber-800/50 hover:to-slate-700/70 hover:border-amber-500/40 hover:text-amber-100 hover:shadow-lg hover:shadow-amber-500/10" 
                                 : "bg-gradient-to-br from-slate-800/60 via-stone-700/40 to-slate-800/60 text-stone-300/90 border-stone-500/30 hover:from-slate-700/70 hover:via-stone-600/50 hover:to-slate-700/70 hover:border-stone-400/40 hover:text-stone-200 hover:shadow-lg hover:shadow-stone-500/10"
@@ -1128,8 +1128,6 @@ export default function WorldBookEditor({
         onClose={() => setIsImportModalOpen(false)}
         onImportSuccess={() => {
           setIsImportModalOpen(false);
-          // For import, we still need to reload data as it's a complex operation
-          // that may affect multiple entries in ways we can't predict locally
           loadWorldBookData();
         }}
       />
