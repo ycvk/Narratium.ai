@@ -11,7 +11,9 @@ interface Props {
   };
   serifFontClass: string;
   sidebarCollapsed: boolean;
+  activeView: "chat" | "worldbook" | "regex";
   toggleSidebar: () => void;
+  onSwitchToView: (view: "chat" | "worldbook" | "regex") => void;
   onToggleView: () => void;
   onToggleRegexEditor: () => void;
 }
@@ -20,7 +22,9 @@ export default function CharacterChatHeader({
   character,
   serifFontClass,
   sidebarCollapsed,
+  activeView,
   toggleSidebar,
+  onSwitchToView,
   onToggleView,
   onToggleRegexEditor,
 }: Props) {
@@ -93,14 +97,23 @@ export default function CharacterChatHeader({
         <button
           onClick={() => {
             trackButtonClick("page", "切换世界书");
-            onToggleView();
+            if (activeView === "worldbook") {
+              onSwitchToView("chat");
+            } else {
+              onSwitchToView("worldbook");
+            }
           }}
-          className="group ml-2 px-3 py-1 flex items-center rounded-md border border-[#33403a]
-            bg-gradient-to-br from-[#1a1f1c] to-[#0e1310] hover:from-[#212821] hover:to-[#131a16]
-            transition-all duration-300 shadow-md hover:shadow-[0_0_12px_rgba(88,248,183,0.2)]
-            relative overflow-hidden portal-button"
+          className={`group ml-2 px-3 py-1 flex items-center rounded-md border transition-all duration-300 shadow-md relative overflow-hidden portal-button ${
+            activeView === "worldbook"
+              ? "border-[#59d3a2]/60 bg-gradient-to-br from-[#212821] to-[#131a16] shadow-[0_0_12px_rgba(88,248,183,0.3)]"
+              : "border-[#33403a] bg-gradient-to-br from-[#1a1f1c] to-[#0e1310] hover:from-[#212821] hover:to-[#131a16] hover:shadow-[0_0_12px_rgba(88,248,183,0.2)]"
+          }`}
         >
-          <div className="relative w-6 h-6 mr-2 flex items-center justify-center text-[#59d3a2] group-hover:text-[#aef6da] transition-colors">
+          <div className={`relative w-6 h-6 mr-2 flex items-center justify-center transition-colors ${
+            activeView === "worldbook" 
+              ? "text-[#aef6da]" 
+              : "text-[#59d3a2] group-hover:text-[#aef6da]"
+          }`}>
             <svg
               xmlns="http://www.w3.org/2000/svg"
               viewBox="0 0 24 24"
@@ -118,7 +131,11 @@ export default function CharacterChatHeader({
             <span className="absolute inset-0 rounded-full border border-[#59d3a2]/40 group-hover:border-[#aef6da]/60 animate-ring-pulse pointer-events-none"></span>
             <span className="absolute w-3 h-3 rounded-full bg-[#aef6da]/40 blur-sm animate-ping-fast top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none"></span>
           </div>
-          <span className={`font-medium text-sm text-[#8de9c0] group-hover:text-[#aef6da] transition-all duration-300 ${serifFontClass}`}>
+          <span className={`font-medium text-sm transition-all duration-300 ${serifFontClass} ${
+            activeView === "worldbook" 
+              ? "text-[#aef6da]" 
+              : "text-[#8de9c0] group-hover:text-[#aef6da]"
+          }`}>
             {t("characterChat.worldBook")}
           </span>
         </button>
@@ -126,14 +143,23 @@ export default function CharacterChatHeader({
         <button
           onClick={() => {
             trackButtonClick("page", "切换正则编辑器");
-            onToggleRegexEditor();
+            if (activeView === "regex") {
+              onSwitchToView("chat");
+            } else {
+              onSwitchToView("regex");
+            }
           }}
-          className="group ml-2 px-3 py-1 flex items-center rounded-md border border-[#403a33]
-            bg-gradient-to-br from-[#1f1c1a] to-[#13100e] hover:from-[#282521] hover:to-[#1a1613]
-            transition-all duration-300 shadow-md hover:shadow-[0_0_12px_rgba(248,183,88,0.2)]
-            relative overflow-hidden"
+          className={`group ml-2 px-3 py-1 flex items-center rounded-md border transition-all duration-300 shadow-md relative overflow-hidden ${
+            activeView === "regex"
+              ? "border-[#d39a59]/60 bg-gradient-to-br from-[#282521] to-[#1a1613] shadow-[0_0_12px_rgba(248,183,88,0.3)]"
+              : "border-[#403a33] bg-gradient-to-br from-[#1f1c1a] to-[#13100e] hover:from-[#282521] hover:to-[#1a1613] hover:shadow-[0_0_12px_rgba(248,183,88,0.2)]"
+          }`}
         >
-          <div className="relative w-6 h-6 mr-2 flex items-center justify-center text-[#d39a59] group-hover:text-[#f6daae] transition-colors">
+          <div className={`relative w-6 h-6 mr-2 flex items-center justify-center transition-colors ${
+            activeView === "regex" 
+              ? "text-[#f6daae]" 
+              : "text-[#d39a59] group-hover:text-[#f6daae]"
+          }`}>
             <svg
               xmlns="http://www.w3.org/2000/svg"
               viewBox="0 0 24 24"
@@ -151,7 +177,11 @@ export default function CharacterChatHeader({
             <span className="absolute inset-0 rounded-full border border-[#d39a59]/40 group-hover:border-[#f6daae]/60 animate-ring-pulse pointer-events-none"></span>
             <span className="absolute w-3 h-3 rounded-full bg-[#f6daae]/40 blur-sm animate-ping-fast top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none"></span>
           </div>
-          <span className={`font-medium text-sm text-[#c08d59] group-hover:text-[#f6daae] transition-all duration-300 ${serifFontClass}`}>
+          <span className={`font-medium text-sm transition-all duration-300 ${serifFontClass} ${
+            activeView === "regex" 
+              ? "text-[#f6daae]" 
+              : "text-[#c08d59] group-hover:text-[#f6daae]"
+          }`}>
             {t("characterChat.regex")}
           </span>
         </button>

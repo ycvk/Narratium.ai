@@ -54,6 +54,10 @@ export default function CharacterPage() {
     "scene-setting": false,
   });
 
+  const switchToView = (targetView: "chat" | "worldbook" | "regex") => {
+    setActiveView(targetView);
+  };
+
   const toggleView = () => {
     setActiveView(prev => prev === "chat" ? "worldbook" : "chat");
   };
@@ -492,7 +496,9 @@ export default function CharacterPage() {
           character={character}
           serifFontClass={serifFontClass}
           sidebarCollapsed={sidebarCollapsed}
+          activeView={activeView}
           toggleSidebar={toggleSidebar}
+          onSwitchToView={switchToView}
           onToggleView={toggleView}
           onToggleRegexEditor={toggleRegexEditor}
         />
