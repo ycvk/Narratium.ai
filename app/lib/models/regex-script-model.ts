@@ -1,5 +1,6 @@
 export interface RegexScript {
-  id: string;
+  scriptKey: string;
+  id?: string; 
   scriptName: string;
   findRegex: string;
   replaceString: string;

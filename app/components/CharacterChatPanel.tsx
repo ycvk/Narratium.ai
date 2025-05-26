@@ -165,7 +165,6 @@ export default function CharacterChatPanel({
                       isLoading={
                         isSending && index === messages.length - 1 && message.content.trim() === ""
                       }
-                      serifFontClass={serifFontClass}
                     />
                   </div>
                 );

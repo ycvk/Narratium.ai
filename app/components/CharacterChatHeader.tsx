@@ -152,7 +152,7 @@ export default function CharacterChatHeader({
             <span className="absolute w-3 h-3 rounded-full bg-[#f6daae]/40 blur-sm animate-ping-fast top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none"></span>
           </div>
           <span className={`font-medium text-sm text-[#c08d59] group-hover:text-[#f6daae] transition-all duration-300 ${serifFontClass}`}>
-            Regex
+            {t("characterChat.regex")}
           </span>
         </button>
       </div>
