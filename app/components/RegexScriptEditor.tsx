@@ -385,7 +385,7 @@ export default function RegexScriptEditor({ onClose, characterName, characterId 
       </div>
 
       <div className="flex-1 overflow-hidden">
-        <div className="h-full overflow-y-auto p-4 space-y-4">
+        <div className="h-full overflow-y-auto p-4 pb-8 space-y-4">
           {Object.keys(scripts).length === 0 ? (
             <div className="flex flex-col items-center justify-center h-64 text-[#a18d6f]">
               <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="mb-4 opacity-50">
@@ -396,7 +396,7 @@ export default function RegexScriptEditor({ onClose, characterName, characterId 
               <p className={`text-sm opacity-70 ${fontClass}`}>{t("regexScriptEditor.noScriptsDescription")}</p>
             </div>
           ) : (
-            <div className="space-y-3">
+            <div className="space-y-3 pb-12">
               {sortedScripts.map(([scriptId, script], index) => {
                 const isExpanded = expandedScripts.has(scriptId);
                 return (
@@ -512,10 +512,10 @@ export default function RegexScriptEditor({ onClose, characterName, characterId 
                       
                       {!isExpanded && (
                         <div className={`text-sm ${fontClass}`}>
-                          <span className="text-[#a18d6f]">{t("regexScriptEditor.replace")}:</span>
-                          <code className="ml-2 px-2 py-1 bg-[#1a1816] rounded text-[#93c5fd] font-mono text-xs cursor-pointer hover:bg-[#252220] transition-colors"
+                          <span className="text-[#a18d6f]">{t("regexScriptEditor.findRegex")}:</span>
+                          <code className="ml-2 px-2 py-1 bg-[#1a1816] rounded text-[#f9c86d] font-mono text-xs cursor-pointer hover:bg-[#252220] transition-colors"
                             onClick={() => toggleScriptExpansion(scriptId)}>
-                            {truncateText(script.replaceString)}
+                            {truncateText(script.findRegex)}
                           </code>
                         </div>
                       )}
