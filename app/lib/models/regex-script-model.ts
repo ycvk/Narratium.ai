@@ -20,3 +20,9 @@ export interface RegexReplacementResult {
   appliedScripts: string[];
   success: boolean;
 }
+
+export interface RegexScriptSettings {
+  enabled: boolean;
+  applyToPrompt: boolean;
+  applyToResponse: boolean;
+}

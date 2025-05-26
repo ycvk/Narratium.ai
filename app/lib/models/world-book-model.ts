@@ -4,6 +4,7 @@ interface WorldBookEntryExtensions {
 }
 
 export interface WorldBookEntry {
+  entry_id?: string;
   id?: number;
   content: string;
   keys: string[];

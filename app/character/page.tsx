@@ -12,6 +12,7 @@ import { handleCharacterChatRequest } from "@/app/function/dialogue/chat";
 import { switchDialogueBranch } from "@/app/function/dialogue/truncate";
 import CharacterChatPanel from "@/app/components/CharacterChatPanel";
 import WorldBookEditor from "@/app/components/WorldBookEditor";
+import RegexScriptEditor from "@/app/components/RegexScriptEditor";
 import CharacterChatHeader from "@/app/components/CharacterChatHeader";
 
 interface Character {
@@ -43,7 +44,7 @@ export default function CharacterPage() {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [suggestedInputs, setSuggestedInputs] = useState<string[]>([]);
   const initializationRef = useRef(false);
-  const [activeView, setActiveView] = useState<"chat" | "worldbook">("chat");
+  const [activeView, setActiveView] = useState<"chat" | "worldbook" | "regex">("chat");
   const [activeModes, setActiveModes] = useState<Record<string, any>>({
     "story-progress": false,
     "perspective": {
@@ -55,6 +56,10 @@ export default function CharacterPage() {
 
   const toggleView = () => {
     setActiveView(prev => prev === "chat" ? "worldbook" : "chat");
+  };
+
+  const toggleRegexEditor = () => {
+    setActiveView(prev => prev === "regex" ? "chat" : "regex");
   };
 
   const truncateMessagesAfter = async (nodeId: string) => {
@@ -489,6 +494,7 @@ export default function CharacterPage() {
           sidebarCollapsed={sidebarCollapsed}
           toggleSidebar={toggleSidebar}
           onToggleView={toggleView}
+          onToggleRegexEditor={toggleRegexEditor}
         />
 
         {activeView === "chat" ? (
@@ -508,8 +514,14 @@ export default function CharacterPage() {
             activeModes={activeModes}
             setActiveModes={setActiveModes}
           />
-        ) : (
+        ) : activeView === "worldbook" ? (
           <WorldBookEditor
+            onClose={() => setActiveView("chat")}
+            characterName={character?.name || ""}
+            characterId={characterId || ""}
+          />
+        ) : (
+          <RegexScriptEditor
             onClose={() => setActiveView("chat")}
             characterName={character?.name || ""}
             characterId={characterId || ""}

@@ -13,6 +13,7 @@ interface Props {
   sidebarCollapsed: boolean;
   toggleSidebar: () => void;
   onToggleView: () => void;
+  onToggleRegexEditor: () => void;
 }
 
 export default function CharacterChatHeader({
@@ -21,6 +22,7 @@ export default function CharacterChatHeader({
   sidebarCollapsed,
   toggleSidebar,
   onToggleView,
+  onToggleRegexEditor,
 }: Props) {
   const { t } = useLanguage();
 
@@ -118,6 +120,39 @@ export default function CharacterChatHeader({
           </div>
           <span className={`font-medium text-sm text-[#8de9c0] group-hover:text-[#aef6da] transition-all duration-300 ${serifFontClass}`}>
             {t("characterChat.worldBook")}
+          </span>
+        </button>
+        
+        <button
+          onClick={() => {
+            trackButtonClick("page", "切换正则编辑器");
+            onToggleRegexEditor();
+          }}
+          className="group ml-2 px-3 py-1 flex items-center rounded-md border border-[#403a33]
+            bg-gradient-to-br from-[#1f1c1a] to-[#13100e] hover:from-[#282521] hover:to-[#1a1613]
+            transition-all duration-300 shadow-md hover:shadow-[0_0_12px_rgba(248,183,88,0.2)]
+            relative overflow-hidden"
+        >
+          <div className="relative w-6 h-6 mr-2 flex items-center justify-center text-[#d39a59] group-hover:text-[#f6daae] transition-colors">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="h-5 w-5"
+            >
+              <path d="M12 2L2 7l10 5 10-5-10-5z" />
+              <path d="M2 17l10 5 10-5" />
+              <path d="M2 12l10 5 10-5" />
+            </svg>
+            <span className="absolute inset-0 rounded-full border border-[#d39a59]/40 group-hover:border-[#f6daae]/60 animate-ring-pulse pointer-events-none"></span>
+            <span className="absolute w-3 h-3 rounded-full bg-[#f6daae]/40 blur-sm animate-ping-fast top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none"></span>
+          </div>
+          <span className={`font-medium text-sm text-[#c08d59] group-hover:text-[#f6daae] transition-all duration-300 ${serifFontClass}`}>
+            Regex
           </span>
         </button>
       </div>
