@@ -1,4 +1,3 @@
-  
 export function adaptText(text: string, language: "en" | "zh", username?: string, charName?: string): string {
   let parsed = text.replace(/<br\s*\/?>/gi, "\n");
   const userReplacement = username ?? (language === "zh" ? "我" : "I");
