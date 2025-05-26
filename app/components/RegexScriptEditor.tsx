@@ -37,6 +37,7 @@ export default function RegexScriptEditor({ onClose, characterName, characterId 
 
   useEffect(() => {
     loadScriptsAndSettings();
+    
     const timer = setTimeout(() => setAnimationComplete(true), 100);
     return () => clearTimeout(timer);
   }, [characterId]);
@@ -64,10 +65,29 @@ export default function RegexScriptEditor({ onClose, characterName, characterId 
       const scriptKey = script.scriptKey;
       if (scriptKey) {
         await updateRegexScript(characterId, scriptKey, script);
+
+        setScripts(prev => ({
+          ...prev,
+          [scriptKey]: {
+            ...prev[scriptKey],
+            ...script,
+          },
+        }));
       } else {
-        await addRegexScript(characterId, script as RegexScript);
+        const newScriptKey = await addRegexScript(characterId, script as RegexScript);
+        
+        if (newScriptKey) {
+          setScripts(prev => ({
+            ...prev,
+            [newScriptKey]: {
+              ...script as RegexScript,
+              scriptKey: newScriptKey,
+            },
+          }));
+        } else {
+          await loadScriptsAndSettings();
+        }
       }
-      await loadScriptsAndSettings();
     } catch (error) {
       console.error("Error saving script:", error);
       throw error;
@@ -81,7 +101,18 @@ export default function RegexScriptEditor({ onClose, characterName, characterId 
 
     try {
       await deleteRegexScript(characterId, scriptId);
-      await loadScriptsAndSettings();
+      
+      setScripts(prev => {
+        const newScripts = { ...prev };
+        delete newScripts[scriptId];
+        return newScripts;
+      });
+      
+      setExpandedScripts(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(scriptId);
+        return newSet;
+      });
     } catch (error) {
       console.error("Error deleting script:", error);
       alert(t("regexScriptEditor.deleteError") || "Failed to delete script");
@@ -92,12 +123,28 @@ export default function RegexScriptEditor({ onClose, characterName, characterId 
     const script = scripts[scriptId];
     if (!script) return;
 
+    const newDisabledState = !script.disabled;
+    
+    setScripts(prev => ({
+      ...prev,
+      [scriptId]: {
+        ...prev[scriptId],
+        disabled: newDisabledState,
+      },
+    }));
+
     try {
       await updateRegexScript(characterId, scriptId, {
-        disabled: !script.disabled,
+        disabled: newDisabledState,
       });
-      await loadScriptsAndSettings();
     } catch (error) {
+      setScripts(prev => ({
+        ...prev,
+        [scriptId]: {
+          ...prev[scriptId],
+          disabled: !newDisabledState,
+        },
+      }));
       console.error("Error toggling script:", error);
     }
   };
@@ -149,9 +196,6 @@ export default function RegexScriptEditor({ onClose, characterName, characterId 
         break;
       case "name":
         comparison = (a.scriptName || "").localeCompare(b.scriptName || "");
-        break;
-      case "status":
-        comparison = (a.disabled ? 1 : 0) - (b.disabled ? 1 : 0);
         break;
       default:
         comparison = (a.placement?.[0] || 999) - (b.placement?.[0] || 999);
@@ -309,7 +353,6 @@ export default function RegexScriptEditor({ onClose, characterName, characterId 
               >
                 <option value="priority" className="bg-[#1a1816] text-[#eae6db]">{t("regexScriptEditor.priority")}</option>
                 <option value="name" className="bg-[#1a1816] text-[#eae6db]">{t("regexScriptEditor.name")}</option>
-                <option value="status" className="bg-[#1a1816] text-[#eae6db]">{t("regexScriptEditor.status")}</option>
               </select>
               <div className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
                 <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-[#a18d6f]">
