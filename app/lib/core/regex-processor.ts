@@ -23,9 +23,7 @@ export class RegexProcessor {
       appliedScripts: [],
       success: false,
     };
-
-    console.log("allScripts", allScripts);
-
+    
     const settings = await RegexScriptOperations.getRegexScriptSettings(ownerId);
     if (!settings.enabled) {
       return result;
@@ -58,7 +56,7 @@ export class RegexProcessor {
               processedText = processedText.replace(regex, script.replaceString);
               
               if (prevText !== processedText) {
-                result.appliedScripts.push(script.id);
+                result.appliedScripts.push(script.scriptKey);
                 result.success = true;
               }
               
@@ -101,7 +99,7 @@ export class RegexProcessor {
           processedText = processedText.replace(regex, script.replaceString);
           
           if (prevText !== processedText) {
-            result.appliedScripts.push(script.id);
+            result.appliedScripts.push(script.scriptKey);
             result.success = true;
           }
         }
