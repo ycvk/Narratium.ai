@@ -3,7 +3,7 @@
 import { ReactNode, useEffect, useState } from "react";
 import { DEFAULT_LANGUAGE, Language, LANGUAGES, LanguageContext, getTranslation, getClientLanguage } from "./index";
 import { getLanguageFont, getLanguageTitleFont, getLanguageSerifFont } from "./fonts";
-import LoadingTransition from "@/app/components/LoadingTransition";
+import LoadingTransition from "@/components/LoadingTransition";
 
 interface LanguageProviderProps {
   children: ReactNode;

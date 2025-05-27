@@ -3,17 +3,17 @@
 import { useState, useEffect, useRef } from "react";
 import { useSearchParams } from "next/navigation";
 import { useLanguage } from "@/app/i18n";
-import CharacterSidebar from "@/app/components/CharacterSidebar";
-import { PromptType } from "@/app/lib/models/character-prompts-model";
+import CharacterSidebar from "@/components/CharacterSidebar";
+import { PromptType } from "@/lib/models/character-prompts-model";
 import { v4 as uuidv4 } from "uuid";
-import { initCharacterDialogue } from "@/app/function/dialogue/init";
-import { getCharacterDialogue } from "@/app/function/dialogue/info";
-import { handleCharacterChatRequest } from "@/app/function/dialogue/chat";
-import { switchDialogueBranch } from "@/app/function/dialogue/truncate";
-import CharacterChatPanel from "@/app/components/CharacterChatPanel";
-import WorldBookEditor from "@/app/components/WorldBookEditor";
-import RegexScriptEditor from "@/app/components/RegexScriptEditor";
-import CharacterChatHeader from "@/app/components/CharacterChatHeader";
+import { initCharacterDialogue } from "@/function/dialogue/init";
+import { getCharacterDialogue } from "@/function/dialogue/info";
+import { handleCharacterChatRequest } from "@/function/dialogue/chat";
+import { switchDialogueBranch } from "@/function/dialogue/truncate";
+import CharacterChatPanel from "@/components/CharacterChatPanel";
+import WorldBookEditor from "@/components/WorldBookEditor";
+import RegexScriptEditor from "@/components/RegexScriptEditor";
+import CharacterChatHeader from "@/components/CharacterChatHeader";
 
 interface Character {
   id: string;
