@@ -29,7 +29,6 @@ export async function handleCharacterChatRequest(payload: {
       baseUrl,
       apiKey,
       llmType = "openai",
-      streaming = true,
       language = "zh",
       promptType = PromptType.EXPLICIT,
       number = 200,
@@ -55,7 +54,7 @@ export async function handleCharacterChatRequest(payload: {
       baseUrl,
       llmType: llmType as "openai" | "ollama",
       temperature: 0.7,
-      streaming,
+      streaming: false,
       language,
       promptType,
     });
@@ -88,129 +87,87 @@ export async function handleCharacterChatRequest(payload: {
       }
     };
     
-    if (!streaming) {
-      return new Response(JSON.stringify({ error: "Streaming required for this endpoint" }), { status: 400 });
+    try {
+      const { response, result, success } = await dialogue.sendMessage(number, message, username);
+      
+      if (!response) throw new Error("No response returned from LLM");
+      
+      const fullResult = result;
+      const fullResponse = response;
+
+      const screenContent = fullResponse.match(/<screen>([\s\S]*?)<\/screen>/)?.[1]?.trim() || "";
+
+      let nextPrompts: string[] = [];
+      const promptsMatch = fullResult.match(/<next_prompts>([\s\S]*?)<\/next_prompts>/);
+      if (promptsMatch) {
+        nextPrompts = promptsMatch[1]
+          .trim()
+          .split("\n")
+          .map((l) => l.trim())
+          .filter((l) => /^[-*]/.test(l))
+          .map((l) => l.replace(/^[-*]\s*/, "").replace(/^\[|\]$/g, "").trim());
+      }
+
+      const event = fullResponse.match(/<event>([\s\S]*?)<\/event>/)?.[1]?.trim() || "";
+
+      await processPostResponseAsync({ characterId, message, screenContent, event, nextPrompts, nodeId })
+        .catch((e) => console.error("Post-processing error:", e));
+
+      return new Response(JSON.stringify({
+        type: "complete",
+        success: true,
+        content: screenContent,
+        parsedContent: { nextPrompts },
+        isRegexProcessed: true,
+      }), {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+    } catch (error: any) {
+      console.error("Processing error:", error);
+      return new Response(JSON.stringify({
+        type: "error",
+        message: error.message || "Unknown error",
+        success: false,
+      }), { 
+        status: 500,
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
     }
-
-    const stream = new ReadableStream({
-      async start(controller) {
-        try {
-          controller.enqueue(JSON.stringify({ type: "start", success: true }) + "\n");
-
-          const { response, result, success } = await dialogue.sendMessage(number, message, username);
-          
-          if (!response) throw new Error("No response returned from LLM");
-          
-          const fullResult = result;
-          const fullResponse = response;
-
-          let chunkIndex = 0;
-          let nextPrompts: string[] = [];
-
-          const screenMatch = fullResult.match(/<screen>([\s\S]*?)<\/screen>/);
-          let screenContent = "";
-          if (screenMatch) {
-            screenContent = screenMatch[0];
-          }
-
-          if (success) {
-            controller.enqueue(JSON.stringify({ 
-              type: "chunk", 
-              content: screenContent,
-              step: "0",
-              isRegexProcessed: true,
-            }) + "\n");
-          } else {
-            if (screenContent) {
-              const chunkSize = 20;
-              const chunks = [];
-              
-              let i = 0;
-              while (i < screenContent.length) {
-                let end = Math.min(i + chunkSize, screenContent.length);
-                if (end < screenContent.length && screenContent[end] !== " " && screenContent[end] !== "\n") {
-                  while (end > i && screenContent[end] !== " " && screenContent[end] !== "\n") {
-                    end--;
-                  }
-                  if (end === i) end = i + chunkSize;
-                }
-                
-                chunks.push(screenContent.substring(i, end));
-                i = end;
-              }
-              
-              for (const chunk of chunks) {
-                controller.enqueue(JSON.stringify({ type: "chunk", content: chunk, step: `${chunkIndex++}` }) + "\n");
-                await new Promise(resolve => setTimeout(resolve, 50));
-              }
-            }
-          }
-
-          const promptsMatch = fullResult.match(/<next_prompts>([\s\S]*?)<\/next_prompts>/);
-          if (promptsMatch) {
-            nextPrompts = promptsMatch[1]
-              .trim()
-              .split("\n")
-              .map((l) => l.trim())
-              .filter((l) => /^[-*]/.test(l))
-              .map((l) => l.replace(/^[-*]\s*/, "").replace(/^\[|\]$/g, "").trim());
-          }
-
-          await processPostResponseAsync({ characterId, message, fullResponse, nextPrompts, nodeId })
-            .catch((e) => console.error("Post-processing error:", e));
-
-          controller.enqueue(JSON.stringify({
-            type: "complete",
-            success: true,
-            parsedContent: { nextPrompts },
-          }) + "\n");
-          controller.close();
-
-        } catch (error: any) {
-          console.error("Streaming error:", error);
-          controller.enqueue(JSON.stringify({
-            type: "error",
-            message: error.message || "Unknown error",
-            success: false,
-          }) + "\n");
-          controller.close();
-        }
-      },
-    });
-
-    return new Response(stream, {
-      headers: {
-        "Content-Type": "text/event-stream",
-        "Cache-Control": "no-cache",
-        "Connection": "keep-alive",
-      },
-    });
 
   } catch (error: any) {
     console.error("Fatal error:", error);
-    return new Response(JSON.stringify({ error: `Failed to process request: ${error.message}`, success: false }), { status: 500 });
+    return new Response(JSON.stringify({ error: `Failed to process request: ${error.message}`, success: false }), { 
+      status: 500,
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
   }
 }
 
 async function processPostResponseAsync({
   characterId,
   message,
-  fullResponse,
+  screenContent,
+  event,
   nextPrompts,
   nodeId,
 }: {
   characterId: string;
   message: string;
-  fullResponse: string;
+  screenContent: string;
+  event: string;
   nextPrompts: string[];
   nodeId: string;
 }) {
   try {
-    const screen = fullResponse.match(/<screen>([\s\S]*?)<\/screen>/)?.[1]?.trim() || "";
-    const event = fullResponse.match(/<event>([\s\S]*?)<\/event>/)?.[1]?.trim() || "";
-
     const parsed: ParsedResponse = {
-      regexResult: screen,
+      regexResult: screenContent,
       nextPrompts,
       event,
     };
@@ -222,7 +179,7 @@ async function processPostResponseAsync({
       characterId,
       parentNodeId,
       message,
-      screen,
+      screenContent,
       "",
       parsed,
       nodeId,

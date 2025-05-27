@@ -20,6 +20,7 @@ interface APIConfig {
   model: string;
   apiKey?: string;
 }
+
 const DEFAULT_DEEPSEEK_CONFIG: APIConfig = {
   id: "deepseek_default",
   name: "【1】deepseek-v3.1",
