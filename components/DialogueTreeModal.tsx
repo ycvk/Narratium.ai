@@ -48,6 +48,7 @@ function DialogueNodeComponent({ id, data }: NodeProps<DialogueNode["data"]>) {
   const { t, fontClass, serifFontClass } = useLanguage();
   const [isExpanded, setIsExpanded] = useState(false);
   const [isJumping, setIsJumping] = useState(false);
+  const [showRootTooltip, setShowRootTooltip] = useState(false);
   
   const steps = data.label
     .split("——>")
@@ -65,6 +66,14 @@ function DialogueNodeComponent({ id, data }: NodeProps<DialogueNode["data"]>) {
   
   const handleJumpClick = async (event: React.MouseEvent) => {
     event.stopPropagation();
+
+    if (id === "root") {
+      setShowRootTooltip(true);
+      setTimeout(() => {
+        setShowRootTooltip(false);
+      }, 3000);
+      return;
+    }
     
     if (isJumping) return;
     
@@ -76,17 +85,43 @@ function DialogueNodeComponent({ id, data }: NodeProps<DialogueNode["data"]>) {
     }
   };
 
-  const borderColor = data.isCurrentPath ? "border-[#534741]" : "border-[#3a3633]";
-  const hoverBorderColor = data.isCurrentPath ? "hover:border-[#d1a35c]" : "hover:border-[#6b635d]";
-  const textColor = data.isCurrentPath ? "text-[#f4e8c1]" : "text-[#a8a095]";
-  const expandIconColor = data.isCurrentPath ? "text-amber-400" : "text-amber-700";
-  const jumpButtonColor = data.isCurrentPath ? "text-amber-400 hover:text-amber-300" : "text-amber-700 hover:text-amber-600";
+  let borderColor, hoverBorderColor, textColor, expandIconColor, jumpButtonColor;
+  
+  if (id === "root") {
+    borderColor = "border-purple-700";
+    hoverBorderColor = "hover:border-purple-500";
+    textColor = "text-purple-200";
+    expandIconColor = "text-purple-400";
+    jumpButtonColor = "text-purple-400 hover:text-purple-300";
+  }
+  else if (data.isCurrentPath) {
+    borderColor = "border-red-800";
+    hoverBorderColor = "hover:border-red-600";
+    textColor = "text-red-200";
+    expandIconColor = "text-red-400";
+    jumpButtonColor = "text-red-400 hover:text-red-300";
+  } 
+  else {
+    borderColor = "border-[#3a3633]";
+    hoverBorderColor = "hover:border-[#6b635d]";
+    textColor = "text-[#a8a095]";
+    expandIconColor = "text-amber-700";
+    jumpButtonColor = "text-amber-700 hover:text-amber-600";
+  }
 
   return (
     <div 
       className={`fantasy-bg border ${borderColor} rounded-md p-3 shadow-md w-72 ${hoverBorderColor} transition-all duration-300 relative cursor-pointer ${fontClass} ${data.isCurrentPath ? "bg-opacity-100" : "bg-opacity-70"}`}
       onClick={handleNodeClick}
     >
+      {showRootTooltip && (
+        <div className="absolute -top-14 right-0 z-20 bg-[#1c1c1c] border border-amber-700 rounded-md p-2 shadow-lg max-w-[200px] text-xs text-amber-400 animate-fade-in">
+          <div className="relative">
+            {t("dialogue.rootNodeCannotJump") || "根节点是对话的起点，无法跳转"}
+            <div className="absolute -bottom-6 right-4 w-0 h-0 border-8 border-transparent border-t-amber-700"></div>
+          </div>
+        </div>
+      )}
       <div className="absolute top-2 right-2 z-10">
         <button
           onClick={(e) => {trackButtonClick("DialogueTreeModal", "跳转到节点");handleJumpClick(e);}}
@@ -108,10 +143,22 @@ function DialogueNodeComponent({ id, data }: NodeProps<DialogueNode["data"]>) {
         type="target" 
         position={Position.Top} 
         id="a" 
-        className={`w-2 h-2 ${data.isCurrentPath ? "!bg-amber-500 !border-amber-700" : "!bg-amber-700 !border-amber-900"}`}
+        className={`w-2 h-2 ${
+          id === "root" 
+            ? "!bg-purple-500 !border-purple-700" 
+            : data.isCurrentPath 
+              ? "!bg-red-500 !border-red-700" 
+              : "!bg-amber-700 !border-amber-900"
+        }`}
       />
       <div 
-        className={`${textColor} text-sm ${serifFontClass} ${data.isCurrentPath ? "hover:text-amber-400" : "hover:text-amber-700"} transition-colors duration-300 flex items-center`}
+        className={`${textColor} text-sm ${serifFontClass} ${
+          id === "root" 
+            ? "hover:text-purple-300" 
+            : data.isCurrentPath 
+              ? "hover:text-red-300" 
+              : "hover:text-amber-700"
+        } transition-colors duration-300 flex items-center`}
         onClick={handleToggleExpand}
       >
         <div className={`w-5 h-5 mr-2 flex-shrink-0 ${expandIconColor} bg-[#1c1c1c] rounded-full border ${borderColor} flex items-center justify-center`}>
@@ -151,7 +198,13 @@ function DialogueNodeComponent({ id, data }: NodeProps<DialogueNode["data"]>) {
         type="source" 
         position={Position.Bottom} 
         id="b" 
-        className={`w-2 h-2 ${data.isCurrentPath ? "!bg-amber-500 !border-amber-700" : "!bg-amber-700 !border-amber-900"}`}
+        className={`w-2 h-2 ${
+          id === "root" 
+            ? "!bg-purple-500 !border-purple-700" 
+            : data.isCurrentPath 
+              ? "!bg-red-500 !border-red-700" 
+              : "!bg-amber-700 !border-amber-900"
+        }`}
       />
     </div>
   );
@@ -162,15 +215,54 @@ const DialogueFlowStyles = () => (
     .react-flow__node {
       transition: all 0.3s ease !important;
     }
-    
+
     .react-flow__edge path {
-      strokeDasharray: 5, 5 !important;
-      animation: flowLine 30s linear infinite !important;
+      stroke-dasharray: none;
+      animation: none;
     }
     
-    @keyframes flowLine {
+    .react-flow__edge.root-source path {
+      stroke-dasharray: 10, 5 !important;
+      animation: flowLineRoot 1.5s linear infinite !important;
+      filter: drop-shadow(0 0 2px rgba(167, 139, 250, 0.5)) !important;
+    }
+    
+    .react-flow__edge.current-path path {
+      stroke-dasharray: 8, 4 !important;
+      animation: flowLineCurrent 1.8s linear infinite !important;
+      filter: drop-shadow(0 0 2px rgba(239, 68, 68, 0.5)) !important;
+    }
+    
+    .react-flow__edge.other-path path {
+      stroke-dasharray: 6, 4 !important;
+      animation: flowLineOther 2s linear infinite !important;
+      opacity: 0.8 !important;
+    }
+    
+    @keyframes flowLineRoot {
+      from {
+        stroke-dashoffset: 0;
+      }
       to {
-        strokeDashoffset: -1000;
+        stroke-dashoffset: -45;
+      }
+    }
+    
+    @keyframes flowLineCurrent {
+      from {
+        stroke-dashoffset: 0;
+      }
+      to {
+        stroke-dashoffset: -40;
+      }
+    }
+    
+    @keyframes flowLineOther {
+      from {
+        stroke-dashoffset: 0;
+      }
+      to {
+        stroke-dashoffset: -30;
       }
     }
   `}</style>
@@ -197,7 +289,8 @@ export default function DialogueTreeModal({ isOpen, onClose, characterId, onDial
   
   const defaultEdgeOptions = useMemo(() => ({
     type: "smoothstep", 
-    style: { stroke: "#d1a35c", strokeWidth: 3 },
+    style: { stroke: "#ef4444", strokeWidth: 3 },
+    animated: true,
   }), []);
 
   const reactFlowInstanceRef = useRef<ReactFlowInstance | null>(null);
@@ -383,12 +476,11 @@ export default function DialogueTreeModal({ isOpen, onClose, characterId, onDial
         if (node.node_id === "root") {
           label = "root";
         } else if (node.parent_node_id === "root") {
-          const rootChildrenCount = allNodes.filter((n: any) => n.parent_node_id === "root").length;
-          const rootChildIndex = allNodes
-            .filter((n: any) => n.parent_node_id === "root")
-            .findIndex((n: any) => n.node_id === node.node_id);
+          const rootChildren = allNodes.filter((n: any) => n.parent_node_id === "root");
+          const rootChildIndex = rootChildren.findIndex((n: any) => n.node_id === node.node_id);
+          const rootChildrenCount = rootChildren.length;
           
-          label = `${t("dialogue.startingPoint")}${rootChildIndex + 1}${rootChildrenCount > 1 ? `/${rootChildrenCount}` : ""}`;
+          label = `${t("dialogue.startingPoint")}${rootChildrenCount - rootChildIndex}${rootChildrenCount > 1 ? `/${rootChildrenCount}` : ""}`;
         } else if (node.assistant_response) {
           if (node.response_summary) {
             label = node.response_summary;
@@ -432,6 +524,30 @@ export default function DialogueTreeModal({ isOpen, onClose, characterId, onDial
           if (nodeMap[sourceId] && nodeMap[targetId]) {
             const isCurrentPathEdge = currentPathNodeIds.includes(sourceId) && currentPathNodeIds.includes(targetId);
             
+            const isRootSource = sourceId === "root";
+            let edgeStroke, edgeLabelStroke, edgeLabelFill;
+            
+            if (isRootSource) {
+              edgeStroke = "#a78bfa";
+              edgeLabelStroke = "#7c3aed";
+              edgeLabelFill = "#ddd6fe";
+            } else if (isCurrentPathEdge) {
+              edgeStroke = "#ef4444";
+              edgeLabelStroke = "#991b1b";
+              edgeLabelFill = "#fecaca";
+            } else {
+              edgeStroke = "#8a7a64";
+              edgeLabelStroke = "#3a3633";
+              edgeLabelFill = "#a8a095";
+            }
+            
+            let edgeClass = "other-path";
+            if (isRootSource) {
+              edgeClass = "root-source";
+            } else if (isCurrentPathEdge) {
+              edgeClass = "current-path";
+            }
+
             newEdges.push({
               id: `edge-${sourceId}-${targetId}`,
               source: sourceId,
@@ -442,18 +558,19 @@ export default function DialogueTreeModal({ isOpen, onClose, characterId, onDial
               labelBgStyle: { 
                 fill: "#1e1c1b", 
                 fillOpacity: 0.8, 
-                stroke: isCurrentPathEdge ? "#534741" : "#3a3633", 
+                stroke: edgeLabelStroke, 
               },
               labelStyle: { 
-                fill: isCurrentPathEdge ? "#f4e8c1" : "#a8a095", 
+                fill: edgeLabelFill, 
                 fontFamily: "inherit", 
                 fontSize: 12, 
               },
               style: { 
-                stroke: isCurrentPathEdge ? "#d1a35c" : "#8a7a64", 
-                strokeWidth: isCurrentPathEdge ? 3 : 2, 
+                stroke: edgeStroke, 
+                strokeWidth: isCurrentPathEdge || isRootSource ? 3 : 2, 
               },
-              animated: isCurrentPathEdge,
+              animated: false,
+              className: edgeClass,
               type: "smoothstep",
             });
           }
