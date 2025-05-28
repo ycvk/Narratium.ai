@@ -52,7 +52,7 @@ MVP 2.0 (supports world books and regular expressions, logic refinement in progr
       </td>
       <td align="center" style="padding: 10px;">
         <img src="public/show_5.png" width="300" alt="screenshot 5"/>
-        <br/><em>Story Branch Manager</em>
+        <br/><em>Story Branch</em>
       </td>
       <td align="center" style="padding: 10px;">
         <img src="public/show_6.png" width="300" alt="screenshot 6"/>
