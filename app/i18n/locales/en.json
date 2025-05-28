@@ -514,6 +514,7 @@
     "memorySummary": "Memory Summary",
     "nodeId": "Node ID",
     "startingPoint": "Opening Scene",
+    "rootNodeCannotJump": "Root node is the starting point of the dialogue and cannot be jumped to",
     "editResponsePlaceholder": "Edit assistant response content...",
     "speechPlaceholder": "What the character says...",
     "thoughtPlaceholder": "Character's inner thoughts...",

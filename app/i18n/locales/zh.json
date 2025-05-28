@@ -324,6 +324,7 @@
     "memorySummary": "记忆摘要",
     "nodeId": "节点ID",
     "startingPoint": "开局",
+    "rootNodeCannotJump": "根节点是对话的起点，不能跳转",
     "editResponsePlaceholder": "编辑助手回复内容...",
     "speechPlaceholder": "角色说的话...",
     "thoughtPlaceholder": "角色的内心独白...",
