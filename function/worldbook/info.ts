@@ -22,7 +22,7 @@ export async function getWorldBookEntries(characterId: string) {
         use_regex: entry.use_regex !== undefined ? entry.use_regex : false,
         depth: entry.depth || 1,
         comment: entry.comment || "",
-        tokens: entry.tokens || undefined,
+        tokens: entry.content ? entry.content.length : 0,
         extensions: entry.extensions || {},
         primaryKey: Array.isArray(entry.keys) && entry.keys.length > 0 ? entry.keys[0] : "",
         keyCount: Array.isArray(entry.keys) ? entry.keys.length : 0,
