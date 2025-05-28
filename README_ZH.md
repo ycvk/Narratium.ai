@@ -33,11 +33,11 @@ MVP 2.0 体验版本(支持世界书、正则，正在完善逻辑)：[Narratium
       </td>
       <td align="center" style="padding: 10px;">
         <img src="public/show_2.png" width="300" alt="screenshot 2" style="border: 2px solid #ddd; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);"/>
-        <br/><em>角色对话</em>
+        <br/><em>角色卡</em>
       </td>
       <td align="center" style="padding: 10px;">
         <img src="public/show_3.png" width="300" alt="screenshot 3" style="border: 2px solid #ddd; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);"/>
-        <br/><em>设置界面</em>
+        <br/><em>对话界面</em>
       </td>
     </tr>
     <tr>
@@ -47,9 +47,11 @@ MVP 2.0 体验版本(支持世界书、正则，正在完善逻辑)：[Narratium
       </td>
       <td align="center" style="padding: 10px;">
         <img src="public/show_5.png" width="300" alt="screenshot 5" style="border: 2px solid #ddd; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);"/>
-        <br/><em>剧情管理</em>
+        <br/><em>剧情分支管理</em>
       </td>
       <td align="center" style="padding: 10px;">
+        <img src="public/show_6.png" width="300" alt="screenshot 5" style="border: 2px solid #ddd; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);"/>
+        <br/><em>正则化编辑</em>
       </td>
     </tr>
   </table>
