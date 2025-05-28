@@ -252,7 +252,7 @@
     "expandSidebar": "展开侧边栏",
     "collapseSidebar": "收起侧边栏",
     "backToCharacters": "返回角色列表",
-    "Conversation": "上下文管理",
+    "Conversation": "剧情分支管理",
     "noPersonality": "未定义性格",
     "typeMessage": "输入消息...",
     "startConversation": "开始对话...",
@@ -308,7 +308,7 @@
     "regex": "正则脚本"
   },
   "dialogue": {
-    "treeVisualization": "上下文管理",
+    "treeVisualization": "剧情分支管理",
     "node": "对话节点",
     "systemMessage": "系统消息",
     "jumpToNode": "跳转到节点",
@@ -323,6 +323,7 @@
     "startConversation": "开始对话以创建对话树",
     "memorySummary": "记忆摘要",
     "nodeId": "节点ID",
+    "startingPoint": "开局",
     "editResponsePlaceholder": "编辑助手回复内容...",
     "speechPlaceholder": "角色说的话...",
     "thoughtPlaceholder": "角色的内心独白...",

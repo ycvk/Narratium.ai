@@ -513,6 +513,7 @@
     "startConversation": "Start a conversation to create a dialogue tree",
     "memorySummary": "Memory Summary",
     "nodeId": "Node ID",
+    "startingPoint": "Opening Scene",
     "editResponsePlaceholder": "Edit assistant response content...",
     "speechPlaceholder": "What the character says...",
     "thoughtPlaceholder": "Character's inner thoughts...",
