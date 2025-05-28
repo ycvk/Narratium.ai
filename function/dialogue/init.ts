@@ -83,7 +83,7 @@ export async function initCharacterDialogue(options: InitCharacterDialogueOption
         
         const processedMessage = regexResult.replacedText;
         
-        if (message !== messagesToProcess[0]) {
+        if (message !== messagesToProcess[messagesToProcess.length - 1]) {
           adaptedMessages.push(adaptedMessage);
           processedMessages.push(processedMessage);
         }
