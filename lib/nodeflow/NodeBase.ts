@@ -1,6 +1,6 @@
 import { NodeConfig, NodeInput, NodeOutput, NodeExecutionConfig, NodeExecutionStatus, NodeExecutionResult } from "@/lib/nodeflow/types";
 import { NodeContext } from "@/lib/nodeflow/NodeContext";
-import { NodeTool, NodeToolRegistry, ToolMetadata } from "@/lib/nodeflow/NodeTool";
+import { NodeTool, NodeToolRegistry } from "@/lib/nodeflow/NodeTool";
 
 export abstract class NodeBase {
   protected id: string;
@@ -43,18 +43,9 @@ export abstract class NodeBase {
     return await this.toolClass.executeMethod(methodName, ...params);
   }
 
-  getToolMetadata(): ToolMetadata | undefined {
-    return this.toolClass?.getMetadata();
-  }
-
-  hasToolMethod(methodName: string): boolean {
-    if (!this.toolClass) return false;
-    return this.toolClass.getAvailableMethods().includes(methodName);
-  }
-
   getAvailableToolMethods(): string[] {
     return this.toolClass?.getAvailableMethods() || [];
-  }
+  } 
 
   getId(): string {
     return this.id;
@@ -72,14 +63,7 @@ export abstract class NodeBase {
     return [...this.next];
   }
 
-  getMetadata(): Record<string, any> {
-    return { ...this.metadata };
-  }
-
   async init(): Promise<void> {
-  }
-
-  async destroy(): Promise<void> {
   }
 
   abstract _call(input: NodeInput, config?: NodeExecutionConfig): Promise<NodeOutput>;
@@ -109,8 +93,7 @@ export abstract class NodeBase {
       result.output = output;
     } catch (error) {
       result.status = NodeExecutionStatus.FAILED;
-      result.error = error as Error;
-      await this.onError(error as Error, context);
+      result.error = error as Error;  
     } finally {
       result.endTime = new Date();
       context.addExecutionResult(result);
@@ -125,13 +108,12 @@ export abstract class NodeBase {
   protected async afterExecute(output: NodeOutput, context: NodeContext): Promise<void> {
   }
 
-  protected async onError(error: Error, context: NodeContext): Promise<void> {
-  }
-
-  protected validateInput(input: NodeInput): void {
-  }
-
-  protected validateOutput(output: NodeOutput): void {
+  getStatus(): Record<string, any> {
+    return {
+      id: this.id,
+      name: this.name,
+      type: this.type,
+    };
   }
 
   toJSON(): NodeConfig {

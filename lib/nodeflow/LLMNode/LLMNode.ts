@@ -123,66 +123,7 @@ export class LLMNode extends NodeBase {
     }
   }
 
-  async destroy(): Promise<void> {
-    try {
-      this.llm = null;
-      this.chatChain = null;
-      this.initialized = false;
-      
-      if (this.apiKey) {
-        this.apiKey = undefined;
-      }
-      
-      console.log(`LLMNode ${this.id} destroyed`);
-    } catch (error) {
-      console.error(`Failed to destroy LLMNode ${this.id}:`, error);
-    }
-  }
-
-  protected validateInput(input: LLMNodeInput): void {
-    if (!input.operation) {
-      throw new Error("Operation is required for LLMNode");
-    }
-
-    const validOperations = ["generate", "chat", "complete", "stream"];
-    if (!validOperations.includes(input.operation)) {
-      throw new Error(`Invalid operation: ${input.operation}. Valid operations: ${validOperations.join(", ")}`);
-    }
-
-    if (!this.initialized || !this.llm) {
-      throw new Error("LLM not initialized. Call init() first.");
-    }
-
-    switch (input.operation) {
-    case "generate":
-      if (!input.systemMessage && !input.userMessage) {
-        throw new Error("Either systemMessage or userMessage is required for 'generate' operation");
-      }
-      break;
-    case "chat":
-      if (!input.messages && !input.userMessage) {
-        throw new Error("Either messages array or userMessage is required for 'chat' operation");
-      }
-      break;
-    case "complete":
-      if (!input.prompt) {
-        throw new Error("Prompt is required for 'complete' operation");
-      }
-      break;
-    }
-
-    if (input.temperature !== undefined && (input.temperature < 0 || input.temperature > 2)) {
-      throw new Error("Temperature must be between 0 and 2");
-    }
-    
-    if (input.maxTokens !== undefined && input.maxTokens < 1) {
-      throw new Error("MaxTokens must be greater than 0");
-    }
-  }
-
-  protected async beforeExecute(input: LLMNodeInput, context: NodeContext): Promise<void> {
-    this.validateInput(input);
-    
+  protected async beforeExecute(input: LLMNodeInput, context: NodeContext): Promise<void> { 
     const params = {
       operation: input.operation,
       hasSystemMessage: !!input.systemMessage,
@@ -206,27 +147,6 @@ export class LLMNode extends NodeBase {
       usage,
       timestamp: new Date(),
     });
-  }
-
-  protected async onError(error: Error, context: NodeContext): Promise<void> {
-    console.error(`LLMNode ${this.id} execution failed:`, error.message);
-    
-    const executionParams = context.getData(`${this.id}_execution_params`);
-    context.setData(`${this.id}_last_error`, {
-      message: error.message,
-      timestamp: new Date(),
-      executionParams,
-      llmStatus: this.getStatus(),
-    });
-
-    if (error.message.includes("connection") || error.message.includes("timeout")) {
-      console.log(`Attempting to reinitialize LLM for ${this.id}...`);
-      try {
-        await this.initializeLLM();
-      } catch (reinitError) {
-        console.error("Failed to reinitialize LLM:", reinitError);
-      }
-    }
   }
 
   private async initializeLLM(): Promise<void> {

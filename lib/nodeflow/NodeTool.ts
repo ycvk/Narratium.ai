@@ -10,14 +10,6 @@ export abstract class NodeTool {
     return this.version;
   }
 
-  protected static validateParams(params: Record<string, any>, requiredParams: string[]): void {
-    for (const param of requiredParams) {
-      if (params[param] === undefined || params[param] === null) {
-        throw new Error(`Missing required parameter: ${param}`);
-      }
-    }
-  }
-
   protected static logExecution(methodName: string, params?: any): void {
     if (process.env.NODE_ENV === "development") {
       console.log(`[${this.getToolType()}Tool] Executing ${methodName}`, params);
@@ -30,19 +22,11 @@ export abstract class NodeTool {
     throw enhancedError;
   }
 
-  static getMetadata(): ToolMetadata {
-    return {
-      type: this.getToolType(),
-      version: this.getVersion(),
-      methods: this.getAvailableMethods(),
-    };
-  }
-
   static getAvailableMethods(): string[] {
     const methods = Object.getOwnPropertyNames(NodeTool)
       .filter(name => typeof NodeTool[name as keyof typeof NodeTool] === "function")
       .filter(name => !name.startsWith("_") && !["constructor", "prototype"].includes(name))
-      .filter(name => !["getToolType", "getVersion", "validateParams", "logExecution", "handleError", "getMetadata", "getAvailableMethods"].includes(name));
+      .filter(name => !["getToolType", "getVersion", "logExecution", "handleError", "getMetadata", "getAvailableMethods"].includes(name));
     
     return methods;
   }
@@ -120,15 +104,5 @@ export class NodeToolRegistry {
 
   static getRegisteredTypes(): string[] {
     return Array.from(this.tools.keys());
-  }
-
-  static getAllMetadata(): Record<string, ToolMetadata> {
-    const metadata: Record<string, ToolMetadata> = {};
-    
-    for (const [type, toolClass] of this.tools) {
-      metadata[type] = toolClass.getMetadata();
-    }
-    
-    return metadata;
   }
 }

@@ -1,6 +1,7 @@
 import { DialogueStory } from "@/lib/nodeflow/ContextNode/ContextNodeModel";
 import { DialogueMessage } from "@/lib/models/character-dialogue-model";
-import { NodeTool, ToolMethod, ToolParameterDescriptor } from "@/lib/nodeflow/NodeTool";
+import { NodeTool, ToolMethod } from "@/lib/nodeflow/NodeTool";
+import { LocalCharacterDialogueOperations } from "@/lib/data/character-dialogue-operation";
 
 export class ContextNodeTools extends NodeTool {
   protected static readonly toolType: string = "context";
@@ -12,7 +13,6 @@ export class ContextNodeTools extends NodeTool {
   ])
   static getRecentHistory(dialogue: DialogueStory, memLen: number): string {
     try {
-      this.validateParams({ dialogue, memLen }, ["dialogue", "memLen"]);
       this.logExecution("getRecentHistory", { memLen });
       
       return dialogue.getStory(
@@ -30,7 +30,6 @@ export class ContextNodeTools extends NodeTool {
   ])
   static getCompressedHistory(dialogue: DialogueStory, memLen: number): string {
     try {
-      this.validateParams({ dialogue, memLen }, ["dialogue", "memLen"]);
       this.logExecution("getCompressedHistory", { memLen });
       
       return dialogue.getStory(
@@ -47,7 +46,6 @@ export class ContextNodeTools extends NodeTool {
   ])
   static getMessages(dialogue: DialogueStory): DialogueMessage[] {
     try {
-      this.validateParams({ dialogue }, ["dialogue"]);
       this.logExecution("getMessages");
       
       const messages: DialogueMessage[] = [];
@@ -74,8 +72,7 @@ export class ContextNodeTools extends NodeTool {
           });
         }
       }
-      
-      // Handle case where user input is longer than responses
+
       if (dialogue.userInput.length > dialogue.responses.length) {
         const lastUserIndex = dialogue.userInput.length - 1;
         messages.push({
@@ -96,7 +93,6 @@ export class ContextNodeTools extends NodeTool {
   ])
   static getSystemMessage(systemMessage: string): string {
     try {
-      this.validateParams({ systemMessage }, ["systemMessage"]);
       this.logExecution("getSystemMessage");
       
       return systemMessage;
@@ -110,7 +106,6 @@ export class ContextNodeTools extends NodeTool {
   ])
   static getSampleStatus(status: string): string {
     try {
-      this.validateParams({ status }, ["status"]);
       this.logExecution("getSampleStatus");
       
       return status;
@@ -126,7 +121,6 @@ export class ContextNodeTools extends NodeTool {
   ])
   static addToDialogue(dialogue: DialogueStory, message?: string, response?: string): void {
     try {
-      this.validateParams({ dialogue }, ["dialogue"]);
       this.logExecution("addToDialogue", { hasMessage: !!message, hasResponse: !!response });
       
       if (message) {
@@ -145,7 +139,6 @@ export class ContextNodeTools extends NodeTool {
   ])
   static clearDialogue(dialogue: DialogueStory): void {
     try {
-      this.validateParams({ dialogue }, ["dialogue"]);
       this.logExecution("clearDialogue");
       
       dialogue.userInput = [];
@@ -160,12 +153,68 @@ export class ContextNodeTools extends NodeTool {
   ])
   static createDialogueStory(language: string): DialogueStory {
     try {
-      this.validateParams({ language }, ["language"]);
       this.logExecution("createDialogueStory", { language });
       
       return new DialogueStory(language);
     } catch (error) {
       this.handleError(error as Error, "createDialogueStory");
+    }
+  }
+
+  @ToolMethod("Load and initialize dialogue history", [
+    { name: "characterId", type: "string", required: true, description: "Character ID" },
+    { name: "language", type: "string", required: true, description: "Language for the dialogue" },
+    { name: "systemMessage", type: "string", required: false, description: "Initial system message" },
+  ])
+  static async loadAndInitializeHistory(
+    characterId: string,
+    language: string,
+    systemMessage?: string,
+  ): Promise<{
+    systemMessage: string;
+    recentDialogue: DialogueStory;
+    historyDialogue: DialogueStory;
+  }> {
+    try {
+      this.logExecution("loadAndInitializeHistory", { characterId, language });
+
+      const recentDialogue = new DialogueStory(language);
+      const historyDialogue = new DialogueStory(language);
+      let currentSystemMessage = systemMessage || "";
+
+      const dialogueTree = await LocalCharacterDialogueOperations.getDialogueTreeById(characterId);
+      if (!dialogueTree) {
+        console.warn(`Dialogue tree not found for character ${characterId}`);
+        return { systemMessage: currentSystemMessage, recentDialogue, historyDialogue };
+      }
+
+      const nodePath = dialogueTree.current_node_id !== "root"
+        ? await LocalCharacterDialogueOperations.getDialoguePathToNode(characterId, dialogueTree.current_node_id)
+        : [];
+      
+      for (const node of nodePath) {
+        if (node.parent_node_id === "root" && node.assistant_response) {
+          currentSystemMessage = node.assistant_response;
+          continue;
+        }
+        if (node.user_input) {
+          recentDialogue.userInput.push(node.user_input);
+          historyDialogue.userInput.push(node.user_input);
+        }
+        if (node.assistant_response) {
+          recentDialogue.responses.push(node.assistant_response);
+          historyDialogue.responses.push(node.parsed_content?.compressedContent || node.assistant_response || "");
+        }
+      }
+
+      return { systemMessage: currentSystemMessage, recentDialogue, historyDialogue };
+    } catch (error) {
+      this.handleError(error as Error, "loadAndInitializeHistory");
+      return { 
+        systemMessage: systemMessage || "", 
+        recentDialogue: new DialogueStory(language), 
+        historyDialogue: new DialogueStory(language),
+      };
     }
   }
 } 

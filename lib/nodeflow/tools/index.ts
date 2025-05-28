@@ -100,10 +100,6 @@ export async function initializeNodeTools(): Promise<void> {
   await registerAllNodeTools();
 }
 
-export function getAllToolMetadata() {
-  return NodeToolRegistry.getAllMetadata();
-}
-
 export async function getContextNodeTools() {
   const { ContextNodeTools } = await import("@/lib/nodeflow/ContextNode/ContextNodeTools");
   return ContextNodeTools;

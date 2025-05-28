@@ -25,6 +25,7 @@ export class DialogueWorkflowExample {
       language: "en",
       systemMessage: "You are a helpful assistant.",
       memoryLength: 10,
+      characterId: "default_char_id",
     });
 
     this.promptNode = new PromptNode({
@@ -308,19 +309,6 @@ export class DialogueWorkflowExample {
       throw error;
     }
   }
-
-  async destroy(): Promise<void> {
-    try {
-      await this.contextNode.destroy();
-      await this.promptNode.destroy();
-      await this.llmNode.destroy();
-      
-      this.context.markComplete();
-      console.log("Workflow destroyed successfully");
-    } catch (error) {
-      console.error("Error during workflow destruction:", error);
-    }
-  }
 }
 
 export async function runDialogueWorkflowExample(): Promise<void> {
@@ -360,7 +348,5 @@ export async function runDialogueWorkflowExample(): Promise<void> {
 
   } catch (error) {
     console.error("Workflow example failed:", error);
-  } finally {
-    await workflow.destroy();
-  }
+  } 
 } 

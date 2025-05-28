@@ -3,8 +3,10 @@ import { NodeConfig, NodeInput, NodeOutput, NodeExecutionConfig } from "@/lib/no
 import { DialogueMessage } from "@/lib/models/character-dialogue-model";
 import { WorldBookEntry } from "@/lib/models/world-book-model";
 import { NodeContext } from "@/lib/nodeflow/NodeContext";
+import { WorldBookOperations } from "@/lib/data/world-book-operation";
 
 interface PromptNodeConfig extends NodeConfig {
+  characterId?: string;
   language: string;
   baseSystemMessage: string;
   enableWorldBook: boolean;
@@ -35,15 +37,18 @@ interface PromptNodeOutput extends NodeOutput {
 }
 
 export class PromptNode extends NodeBase {
+  private characterId?: string;
   private language: string;
   private baseSystemMessage: string;
   private enableWorldBook: boolean;
   private contextWindow: number;
   private username?: string;
   private charName?: string;
+  private cachedWorldBook?: Record<string, WorldBookEntry>;
 
   constructor(config: PromptNodeConfig) {
     super(config);
+    this.characterId = config.characterId;
     this.language = config.language || "en";
     this.baseSystemMessage = config.baseSystemMessage || "";
     this.enableWorldBook = config.enableWorldBook ?? true;
@@ -65,16 +70,38 @@ export class PromptNode extends NodeBase {
     }
   }
 
-  async destroy(): Promise<void> {
-    try {
-      this.baseSystemMessage = "";
-      this.username = undefined;
-      this.charName = undefined;
-      
-      console.log(`PromptNode ${this.id} destroyed`);
-    } catch (error) {
-      console.error(`Failed to destroy PromptNode ${this.id}:`, error);
+  private async loadWorldBook(): Promise<Record<string, WorldBookEntry> | null> {
+    if (!this.characterId) {
+      console.warn(`PromptNode ${this.id}: No characterId specified, cannot load worldbook`);
+      return null;
     }
+
+    if (this.cachedWorldBook) {
+      return this.cachedWorldBook;
+    }
+
+    try {
+      console.log(`PromptNode ${this.id}: Loading worldbook for character ${this.characterId}`);
+      const worldBook = await WorldBookOperations.getWorldBook(this.characterId);
+      
+      if (worldBook) {
+        this.cachedWorldBook = worldBook;
+        const entryCount = Object.keys(worldBook).length;
+        console.log(`PromptNode ${this.id}: Loaded ${entryCount} worldbook entries`);
+      } else {
+        console.log(`PromptNode ${this.id}: No worldbook found for character ${this.characterId}`);
+      }
+      
+      return worldBook;
+    } catch (error) {
+      console.error(`PromptNode ${this.id}: Failed to load worldbook:`, error);
+      return null;
+    }
+  }
+
+  public clearWorldBookCache(): void {
+    this.cachedWorldBook = undefined;
+    console.log(`PromptNode ${this.id}: Worldbook cache cleared`);
   }
 
   protected validateInput(input: PromptNodeInput): void {
@@ -182,19 +209,31 @@ export class PromptNode extends NodeBase {
   private async enhanceWithWorldBook(input: PromptNodeInput): Promise<PromptNodeOutput> {
     const basicPrompt = await this.generateBasicPrompt(input);
     
-    if (!this.enableWorldBook || !input.worldBook) {
+    if (!this.enableWorldBook) {
+      return basicPrompt;
+    }
+
+    let worldBook = input.worldBook;
+    if (!worldBook && this.characterId) {
+      console.log(`PromptNode ${this.id}: No worldbook provided, loading from database`);
+      worldBook = await this.executeTool("loadWorldBookForCharacter", this.characterId) || undefined;
+    }
+
+    if (!worldBook) {
+      console.log(`PromptNode ${this.id}: No worldbook available for enhancement`);
       return basicPrompt;
     }
 
     const matchingEntries = await this.executeTool(
       "findMatchingEntries",
-      input.worldBook,
+      worldBook,
       input.currentUserInput || "",
       input.chatHistory || [],
       { contextWindow: this.contextWindow },
     );
 
     if (matchingEntries.length === 0) {
+      console.log(`PromptNode ${this.id}: No matching worldbook entries found`);
       return basicPrompt;
     }
 
@@ -251,7 +290,7 @@ export class PromptNode extends NodeBase {
   private async assembleCompletePrompt(input: PromptNodeInput): Promise<PromptNodeOutput> {
     const basicPrompt = await this.generateBasicPrompt(input);
 
-    if (this.enableWorldBook && input.worldBook) {
+    if (this.enableWorldBook && (input.worldBook || this.characterId)) {
       const enhancedInput = {
         ...input,
         baseSystemMessage: basicPrompt.systemMessage,
@@ -264,6 +303,12 @@ export class PromptNode extends NodeBase {
   }
 
   updateConfiguration(newConfig: Partial<PromptNodeConfig>): void {
+    if (newConfig.characterId !== undefined) {
+      if (this.characterId !== newConfig.characterId) {
+        this.clearWorldBookCache();
+      }
+      this.characterId = newConfig.characterId;
+    }
     if (newConfig.language !== undefined) {
       this.language = newConfig.language;
     }
@@ -285,6 +330,7 @@ export class PromptNode extends NodeBase {
   }
 
   getStatus(): {
+    characterId?: string;
     language: string;
     enableWorldBook: boolean;
     contextWindow: number;
@@ -292,6 +338,7 @@ export class PromptNode extends NodeBase {
     hasUserContext: boolean;
     } {
     return {
+      characterId: this.characterId,
       language: this.language,
       enableWorldBook: this.enableWorldBook,
       contextWindow: this.contextWindow,
@@ -305,6 +352,7 @@ export class PromptNode extends NodeBase {
   static version = "1.0.0";
   
   static defaultConfig: Partial<PromptNodeConfig> = {
+    characterId: undefined,
     language: "en",
     baseSystemMessage: "",
     enableWorldBook: true,

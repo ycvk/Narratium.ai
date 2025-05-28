@@ -3,7 +3,7 @@ import { ChatOllama } from "@langchain/ollama";
 import { ChatPromptTemplate } from "@langchain/core/prompts";
 import { StringOutputParser } from "@langchain/core/output_parsers";
 import { RunnablePassthrough } from "@langchain/core/runnables";
-import { NodeTool, ToolMethod, ToolParameterDescriptor } from "@/lib/nodeflow/NodeTool";
+import { NodeTool, ToolMethod } from "@/lib/nodeflow/NodeTool";
 
 export class LLMNodeTools extends NodeTool {
   protected static readonly toolType: string = "llm";
@@ -32,7 +32,6 @@ export class LLMNodeTools extends NodeTool {
     repeatPenalty?: number;
   }): Promise<void> {
     try {
-      this.validateParams({ config }, ["config"]);
       this.logExecution("createLLMInstance", { 
         llmType: config.llmType, 
         modelName: config.modelName,
@@ -105,7 +104,6 @@ export class LLMNodeTools extends NodeTool {
     enableSystemMessage?: boolean;
   } = {}): Promise<any> {
     try {
-      this.validateParams({ llm }, ["llm"]);
       this.logExecution("createChatChain", { 
         hasLLM: !!llm,
         enableSystemMessage: options.enableSystemMessage ?? true, 
@@ -154,7 +152,6 @@ export class LLMNodeTools extends NodeTool {
     };
   }): Promise<any> {
     try {
-      this.validateParams({ params }, ["params"]);
       this.logExecution("generateWithMessages", { 
         hasSystemMessage: !!params.systemMessage,
         hasUserMessage: !!params.userMessage,
@@ -217,7 +214,6 @@ export class LLMNodeTools extends NodeTool {
     };
   }): Promise<any> {
     try {
-      this.validateParams({ params }, ["params"]);
       this.logExecution("chatWithMessages", { 
         messageCount: params.messages.length,
         hasOverrides: !!params.overrides, 
@@ -260,7 +256,6 @@ export class LLMNodeTools extends NodeTool {
     };
   }): Promise<any> {
     try {
-      this.validateParams({ params }, ["params"]);
       this.logExecution("completePrompt", { 
         promptLength: params.prompt.length,
         hasOverrides: !!params.overrides, 
@@ -301,7 +296,6 @@ export class LLMNodeTools extends NodeTool {
     stopSequences?: string[];
   }): any {
     try {
-      this.validateParams({ baseLLM, overrides }, ["baseLLM", "overrides"]);
       this.logExecution("createLLMWithOverrides", { 
         hasTemperature: overrides.temperature !== undefined,
         hasMaxTokens: overrides.maxTokens !== undefined,
@@ -338,7 +332,6 @@ export class LLMNodeTools extends NodeTool {
   ])
   static validateLLMConfig(config: any): { isValid: boolean; errors: string[] } {
     try {
-      this.validateParams({ config }, ["config"]);
       this.logExecution("validateLLMConfig", { llmType: config.llmType });
 
       const errors: string[] = [];
@@ -382,7 +375,6 @@ export class LLMNodeTools extends NodeTool {
     contextWindow: number;
   } {
     try {
-      this.validateParams({ llmType, modelName }, ["llmType", "modelName"]);
       this.logExecution("getLLMCapabilities", { llmType, modelName });
 
       const defaults = {

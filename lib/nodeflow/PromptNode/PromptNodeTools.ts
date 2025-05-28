@@ -1,11 +1,35 @@
 import { DialogueMessage } from "@/lib/models/character-dialogue-model";
 import { WorldBookEntry } from "@/lib/models/world-book-model";
-import { NodeTool, ToolMethod, ToolParameterDescriptor } from "@/lib/nodeflow/NodeTool";
+import { NodeTool, ToolMethod } from "@/lib/nodeflow/NodeTool";
 import { adaptText } from "@/lib/adapter/tagReplacer";
+import { WorldBookOperations } from "@/lib/data/world-book-operation";
 
 export class PromptNodeTools extends NodeTool {
   protected static readonly toolType: string = "prompt";
   protected static readonly version: string = "1.0.0";
+
+  @ToolMethod("Load worldbook data for a specific character", [
+    { name: "characterId", type: "string", required: true, description: "Character ID to load worldbook for" },
+  ])
+  static async loadWorldBookForCharacter(characterId: string): Promise<Record<string, WorldBookEntry> | null> {
+    try {
+      this.logExecution("loadWorldBookForCharacter", { characterId });
+      
+      const worldBook = await WorldBookOperations.getWorldBook(characterId);
+      
+      if (worldBook) {
+        const entryCount = Object.keys(worldBook).length;
+        console.log(`Loaded ${entryCount} worldbook entries for character ${characterId}`);
+      } else {
+        console.log(`No worldbook found for character ${characterId}`);
+      }
+      
+      return worldBook;
+    } catch (error) {
+      this.handleError(error as Error, "loadWorldBookForCharacter");
+      return null;
+    }
+  }
 
   @ToolMethod("Format system message with basic text processing", [
     { name: "systemMessage", type: "string", required: true, description: "Raw system message" },
@@ -20,7 +44,6 @@ export class PromptNodeTools extends NodeTool {
     charName?: string,
   ): string {
     try {
-      this.validateParams({ systemMessage, language }, ["systemMessage", "language"]);
       this.logExecution("formatSystemMessage", { language, hasUsername: !!username, hasCharName: !!charName });
       
       let formatted = adaptText(systemMessage, language as "zh" | "en", username, charName);
@@ -41,7 +64,6 @@ export class PromptNodeTools extends NodeTool {
   ])
   static formatUserMessage(userMessage: string, language: string, username?: string): string {
     try {
-      this.validateParams({ userMessage, language }, ["userMessage", "language"]);
       this.logExecution("formatUserMessage", { language, hasUsername: !!username });
       
       let formatted = adaptText(userMessage, language as "zh" | "en", username);
@@ -68,7 +90,6 @@ export class PromptNodeTools extends NodeTool {
     options: { contextWindow?: number } = {},
   ): WorldBookEntry[] {
     try {
-      this.validateParams({ worldBook, currentInput, chatHistory }, ["worldBook", "currentInput", "chatHistory"]);
       this.logExecution("findMatchingEntries", { 
         inputLength: currentInput.length, 
         historyLength: chatHistory.length,
@@ -113,7 +134,6 @@ export class PromptNodeTools extends NodeTool {
   ])
   static organizeEntriesByPosition(entries: WorldBookEntry[]): Record<number, WorldBookEntry[]> {
     try {
-      this.validateParams({ entries }, ["entries"]);
       this.logExecution("organizeEntriesByPosition", { entryCount: entries.length });
       
       const positionGroups: Record<number, WorldBookEntry[]> = {
@@ -168,8 +188,6 @@ export class PromptNodeTools extends NodeTool {
     language: string = "en",
   ): { systemMessage: string; userMessage: string } {
     try {
-      this.validateParams({ positionGroups, systemMessage, userMessage, language }, 
-        ["positionGroups", "systemMessage", "userMessage", "language"]);
       this.logExecution("insertWorldBookContent", { 
         language, 
         hasUsername: !!username, 
@@ -246,9 +264,7 @@ export class PromptNodeTools extends NodeTool {
     contextData?: any,
     language: string = "en",
   ): { systemMessage: string; userMessage: string } {
-    try {
-      this.validateParams({ systemMessage, userMessage, language }, 
-        ["systemMessage", "userMessage", "language"]);
+    try { 
       this.logExecution("applyAdvancedFormatting", { language, hasContext: !!contextData });
       
       let formattedSystem = systemMessage;
