@@ -382,6 +382,13 @@ export default function DialogueTreeModal({ isOpen, onClose, characterId, onDial
         let label = "";
         if (node.node_id === "root") {
           label = "root";
+        } else if (node.parent_node_id === "root") {
+          const rootChildrenCount = allNodes.filter((n: any) => n.parent_node_id === "root").length;
+          const rootChildIndex = allNodes
+            .filter((n: any) => n.parent_node_id === "root")
+            .findIndex((n: any) => n.node_id === node.node_id);
+          
+          label = `${t("dialogue.startingPoint")}${rootChildIndex + 1}${rootChildrenCount > 1 ? `/${rootChildrenCount}` : ""}`;
         } else if (node.assistant_response) {
           if (node.response_summary) {
             label = node.response_summary;
