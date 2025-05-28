@@ -29,10 +29,36 @@ MVP 2.0 (supports world books and regular expressions, logic refinement in progr
 
 ## 🖼️ Page Preview
 
-<p align="center"> <img src="public/show_1.png" width="100%" alt="screenshot 1"/> </p> 
-<p align="center"> <img src="public/show_2.png" width="100%" alt="screenshot 2"/> </p>
-<p align="center"> <img src="public/show_3.png" width="100%" alt="screenshot 3"/> </p>
-<p align="center"> <img src="public/show_4.png" width="100%" alt="screenshot 4"/> </p>
+<div align="center">
+  <table>
+    <tr>
+      <td align="center" style="padding: 10px;">
+        <img src="public/show_1.png" width="300" alt="screenshot 1" style="border: 2px solid #ddd; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);"/>
+        <br/><em>Main Interface</em>
+      </td>
+      <td align="center" style="padding: 10px;">
+        <img src="public/show_2.png" width="300" alt="screenshot 2" style="border: 2px solid #ddd; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);"/>
+        <br/><em>Character Dialogue</em>
+      </td>
+      <td align="center" style="padding: 10px;">
+        <img src="public/show_3.png" width="300" alt="screenshot 3" style="border: 2px solid #ddd; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);"/>
+        <br/><em>Settings</em>
+      </td>
+    </tr>
+    <tr>
+      <td align="center" style="padding: 10px;">
+        <img src="public/show_4.png" width="300" alt="screenshot 4" style="border: 2px solid #ddd; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);"/>
+        <br/><em>World Book Editor</em>
+      </td>
+      <td align="center" style="padding: 10px;">
+        <img src="public/show_5.png" width="300" alt="screenshot 5" style="border: 2px solid #ddd; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);"/>
+        <br/><em>Story Management</em>
+      </td>
+      <td align="center" style="padding: 10px;">
+      </td>
+    </tr>
+  </table>
+</div>
 
 ## 🚀 Features
 
