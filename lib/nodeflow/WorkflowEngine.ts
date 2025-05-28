@@ -33,7 +33,6 @@ export class WorkflowEngine {
     }
   }
 
-  // 获取入口节点（没有其他节点指向的节点）
   private getEntryNodes(): NodeBase[] {
     const targetNodes = new Set<string>();
     this.config.nodes.forEach(node => {
@@ -48,7 +47,6 @@ export class WorkflowEngine {
       .filter(Boolean);
   }
 
-  // 获取节点的所有后继节点
   private getNextNodes(nodeId: string): NodeBase[] {
     const node = this.nodes.get(nodeId);
     if (!node) return [];
@@ -57,7 +55,6 @@ export class WorkflowEngine {
       .filter(Boolean) as NodeBase[];
   }
 
-  // 执行单个节点
   private async executeNode(
     node: NodeBase,
     input: NodeInput,
@@ -71,7 +68,6 @@ export class WorkflowEngine {
     return result.output!;
   }
 
-  // 并行执行节点
   private async executeParallel(
     nodes: NodeBase[],
     input: NodeInput,
@@ -83,7 +79,6 @@ export class WorkflowEngine {
     );
   }
 
-  // 执行工作流
   async execute(
     input: NodeInput,
     context?: NodeContext,
@@ -100,26 +95,21 @@ export class WorkflowEngine {
     };
 
     try {
-      // 获取入口节点
       const entryNodes = this.getEntryNodes();
       if (entryNodes.length === 0) {
         throw new Error("No entry nodes found in workflow");
       }
 
-      // 并行执行入口节点
       const entryOutputs = await this.executeParallel(entryNodes, input, ctx, config);
 
-      // 使用 Set 来跟踪已处理的节点
       const processedNodes = new Set<string>();
       entryNodes.forEach(node => processedNodes.add(node.getId()));
 
-      // 执行队列 - 每个元素包含一组可以并行执行的节点
       const queue: Array<{
         nodes: NodeBase[];
         input: NodeOutput;
       }> = [];
 
-      // 将入口节点的后继节点添加到队列
       const nextNodesMap = new Map<string, NodeBase[]>();
       entryNodes.forEach((node, index) => {
         const nextNodes = this.getNextNodes(node.getId());
@@ -135,20 +125,16 @@ export class WorkflowEngine {
         }
       });
 
-      // 执行所有节点
       while (queue.length > 0) {
         const current = queue.shift()!;
         const parallelNodes = current.nodes.filter(node => !processedNodes.has(node.getId()));
         
         if (parallelNodes.length === 0) continue;
 
-        // 并行执行当前层级的节点
         const outputs = await this.executeParallel(parallelNodes, current.input, ctx, config);
 
-        // 标记节点为已处理
         parallelNodes.forEach(node => processedNodes.add(node.getId()));
 
-        // 收集所有后继节点
         const nextNodesMap = new Map<string, NodeBase[]>();
         parallelNodes.forEach((node, index) => {
           const nextNodes = this.getNextNodes(node.getId());
@@ -180,7 +166,6 @@ export class WorkflowEngine {
     return result;
   }
 
-  // 异步迭代器支持
   async *executeAsync(
     input: NodeInput,
     context?: NodeContext,
@@ -197,27 +182,22 @@ export class WorkflowEngine {
     };
 
     try {
-      // 获取入口节点
       const entryNodes = this.getEntryNodes();
       if (entryNodes.length === 0) {
         throw new Error("No entry nodes found in workflow");
       }
 
-      // 并行执行入口节点并产出结果
       const entryOutputs = await this.executeParallel(entryNodes, input, ctx, config);
       yield entryOutputs;
 
-      // 使用 Set 来跟踪已处理的节点
       const processedNodes = new Set<string>();
       entryNodes.forEach(node => processedNodes.add(node.getId()));
 
-      // 执行队列 - 每个元素包含一组可以并行执行的节点
       const queue: Array<{
         nodes: NodeBase[];
         input: NodeOutput;
       }> = [];
 
-      // 将入口节点的后继节点添加到队列
       entryNodes.forEach((node, index) => {
         const nextNodes = this.getNextNodes(node.getId());
         if (nextNodes.length > 0) {
@@ -225,23 +205,18 @@ export class WorkflowEngine {
         }
       });
 
-      // 执行所有节点
       while (queue.length > 0) {
         const current = queue.shift()!;
         const parallelNodes = current.nodes.filter(node => !processedNodes.has(node.getId()));
         
         if (parallelNodes.length === 0) continue;
 
-        // 并行执行当前层级的节点
         const outputs = await this.executeParallel(parallelNodes, current.input, ctx, config);
         
-        // 产出当前层级的结果
         yield outputs;
 
-        // 标记节点为已处理
         parallelNodes.forEach(node => processedNodes.add(node.getId()));
 
-        // 收集所有后继节点
         parallelNodes.forEach((node, index) => {
           const nextNodes = this.getNextNodes(node.getId());
           if (nextNodes.length > 0) {
@@ -265,9 +240,7 @@ export class WorkflowEngine {
     return result;
   }
 
-  // 工作流验证
   validate(): boolean {
-    // 检查节点引用的完整性
     const nodeIds = new Set(this.config.nodes.map(n => n.id));
     for (const node of this.config.nodes) {
       if (node.next) {
@@ -279,13 +252,11 @@ export class WorkflowEngine {
       }
     }
 
-    // 检查是否有环
     this.detectCycles();
 
     return true;
   }
 
-  // 环检测
   private detectCycles(): void {
     const visited = new Set<string>();
     const recursionStack = new Set<string>();
@@ -308,7 +279,6 @@ export class WorkflowEngine {
       recursionStack.delete(nodeId);
     };
 
-    // 从所有入口节点开始DFS
     const entryNodes = this.getEntryNodes();
     for (const node of entryNodes) {
       if (!visited.has(node.getId())) {

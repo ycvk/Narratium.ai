@@ -1,5 +1,6 @@
 import { NodeConfig, NodeInput, NodeOutput, NodeExecutionConfig, NodeExecutionStatus, NodeExecutionResult } from "@/lib/nodeflow/types";
 import { NodeContext } from "@/lib/nodeflow/NodeContext";
+import { NodeTool, NodeToolRegistry, ToolMetadata } from "@/lib/nodeflow/NodeTool";
 
 export abstract class NodeBase {
   protected id: string;
@@ -9,6 +10,7 @@ export abstract class NodeBase {
   protected params: Record<string, any>;
   protected next: string[];
   protected metadata: Record<string, any>;
+  protected toolClass?: typeof NodeTool;
 
   constructor(config: NodeConfig) {
     this.id = config.id;
@@ -18,9 +20,42 @@ export abstract class NodeBase {
     this.params = config.params || {};
     this.next = config.next || [];
     this.metadata = config.metadata || {};
+    
+    this.initializeTools();
   }
 
-  // Getters
+  protected initializeTools(): void {
+    this.toolClass = NodeToolRegistry.get(this.type);
+    if (!this.toolClass) {
+      console.warn(`No tool class found for node type: ${this.type}`);
+    }
+  }
+
+  protected getToolClass(): typeof NodeTool | undefined {
+    return this.toolClass;
+  }
+
+  protected async executeTool(methodName: string, ...params: any[]): Promise<any> {
+    if (!this.toolClass) {
+      throw new Error(`No tool class available for node type: ${this.type}`);
+    }
+    
+    return await this.toolClass.executeMethod(methodName, ...params);
+  }
+
+  getToolMetadata(): ToolMetadata | undefined {
+    return this.toolClass?.getMetadata();
+  }
+
+  hasToolMethod(methodName: string): boolean {
+    if (!this.toolClass) return false;
+    return this.toolClass.getAvailableMethods().includes(methodName);
+  }
+
+  getAvailableToolMethods(): string[] {
+    return this.toolClass?.getAvailableMethods() || [];
+  }
+
   getId(): string {
     return this.id;
   }
@@ -41,23 +76,14 @@ export abstract class NodeBase {
     return { ...this.metadata };
   }
 
-  // 生命周期方法
   async init(): Promise<void> {
-    // 子类可以重写此方法以进行初始化
   }
 
   async destroy(): Promise<void> {
-    // 子类可以重写此方法以进行清理
   }
 
-  // 核心执行方法
   abstract _call(input: NodeInput, config?: NodeExecutionConfig): Promise<NodeOutput>;
 
-  async invoke(input: NodeInput, config?: NodeExecutionConfig): Promise<NodeOutput> {
-    return this._call(input, config);
-  }
-
-  // 节点执行包装器
   async execute(input: NodeInput, context: NodeContext, config?: NodeExecutionConfig): Promise<NodeExecutionResult> {
     const startTime = new Date();
     const result: NodeExecutionResult = {
@@ -65,20 +91,20 @@ export abstract class NodeBase {
       status: NodeExecutionStatus.RUNNING,
       input,
       startTime,
-      metadata: { ...config?.metadata },
+      metadata: { 
+        ...config?.metadata,
+        toolClass: this.toolClass?.getToolType(),
+        availableTools: this.getAvailableToolMethods(),
+      },
     };
 
     try {
-      // 执行前处理
       await this.beforeExecute(input, context);
 
-      // 执行节点逻辑
       const output = await this._call(input, config);
 
-      // 执行后处理
       await this.afterExecute(output, context);
 
-      // 更新执行结果
       result.status = NodeExecutionStatus.COMPLETED;
       result.output = output;
     } catch (error) {
@@ -93,29 +119,21 @@ export abstract class NodeBase {
     return result;
   }
 
-  // 执行钩子方法
   protected async beforeExecute(input: NodeInput, context: NodeContext): Promise<void> {
-    // 子类可以重写此方法以添加执行前逻辑
   }
 
   protected async afterExecute(output: NodeOutput, context: NodeContext): Promise<void> {
-    // 子类可以重写此方法以添加执行后逻辑
   }
 
   protected async onError(error: Error, context: NodeContext): Promise<void> {
-    // 子类可以重写此方法以添加错误处理逻辑
   }
 
-  // 工具方法
   protected validateInput(input: NodeInput): void {
-    // 子类可以重写此方法以添加输入验证逻辑
   }
 
   protected validateOutput(output: NodeOutput): void {
-    // 子类可以重写此方法以添加输出验证逻辑
   }
 
-  // 序列化方法
   toJSON(): NodeConfig {
     return {
       id: this.id,
@@ -124,7 +142,11 @@ export abstract class NodeBase {
       description: this.description,
       params: this.params,
       next: this.next,
-      metadata: this.metadata,
+      metadata: {
+        ...this.metadata,
+        toolClass: this.toolClass?.getToolType(),
+        toolVersion: this.toolClass?.getVersion(),
+      },
     };
   }
 } 

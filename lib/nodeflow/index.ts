@@ -6,40 +6,20 @@ export { NodeBase } from "@/lib/nodeflow/NodeBase";
 export { NodeContext } from "@/lib/nodeflow/NodeContext";
 export { WorkflowEngine } from "@/lib/nodeflow/WorkflowEngine";
 
-// 内置节点
-export { LLMNode } from "@/lib/nodeflow/BuiltinNodes/LLMNode";
-export { PromptNode } from "@/lib/nodeflow/BuiltinNodes/PromptNode";
-export { RegexNode } from "@/lib/nodeflow/BuiltinNodes/RegexNode";
+export { ContextNode } from "@/lib/nodeflow/ContextNode/ContextNode";
 
 // 默认节点注册表
 import { NodeRegistry } from "@/lib/nodeflow/types";
-import { LLMNode } from "@/lib/nodeflow/BuiltinNodes/LLMNode";
-import { PromptNode } from "@/lib/nodeflow/BuiltinNodes/PromptNode";
-import { RegexNode } from "@/lib/nodeflow/BuiltinNodes/RegexNode";
+import { ContextNode } from "@/lib/nodeflow/ContextNode/ContextNode";
 
 export const defaultRegistry: NodeRegistry = {
-  llm: {
-    nodeClass: LLMNode,
+
+  context: {
+    nodeClass: ContextNode,
     metadata: {
-      description: "Language Model node for text generation",
-      category: "AI",
-      icon: "🤖",
-    },
-  },
-  prompt: {
-    nodeClass: PromptNode,
-    metadata: {
-      description: "Prompt template processing node",
-      category: "Text",
-      icon: "📝",
-    },
-  },
-  regex: {
-    nodeClass: RegexNode,
-    metadata: {
-      description: "Regular expression processing node",
-      category: "Text",
-      icon: "��",
+      description: "Manages conversation context and history",
+      category: "Context",
+      icon: "💬",
     },
   },
 }; 
