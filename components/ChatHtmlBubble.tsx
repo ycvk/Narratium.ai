@@ -10,18 +10,24 @@ function convertMarkdown(str: string): string {
     imagePlaceholders.push(`<img src="${url}" alt="Image" />`);
     return placeholder;
   });
+
   str = str.replace(/^---$/gm, "");
   str = str.replace(/```[\s\S]*?```/g, (match) => {
     const content = match.replace(/^```\w*\n?/, "").replace(/```$/, "");
     return `<pre>${content}</pre>`;
   });
+
   str = str.replace(/^>\s*(.+)$/gm, "<blockquote>$1</blockquote>");
   str = str.replace(/<\/blockquote>\s*<blockquote>/g, "\n");
+
   str = str.replace(/!\[\]\(([^)]+)\)/g, "<img src=\"$1\" alt=\"Image\" />");
   str = str.replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>");
   str = str.replace(/\*([^*]+)\*/g, "<em>$1</em>");
-  str = str.replace(/"([^"]+)"/g, "<span class=\"dialogue\">\"$1\"</span>");
-  str = str.replace(/“([^”]+)”/g, "<span class=\"dialogue\">“$1”</span>");
+
+  str = str.replace(/(<[^>]+>)|(["“][^"”]+["”])/g, (match, tag, quote) => {
+    if (tag) return tag;
+    return `<span class="dialogue">${quote}</span>`;
+  });
 
   imagePlaceholders.forEach((html, i) => {
     str = str.replace(`__IMAGE_PLACEHOLDER_${i}__`, html);
