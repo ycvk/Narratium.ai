@@ -1,5 +1,5 @@
 import { NodeBase } from "@/lib/nodeflow/NodeBase";
-import { NodeConfig, NodeInput, NodeOutput, NodeExecutionConfig } from "@/lib/nodeflow/types";
+import { NodeConfig, NodeInput, NodeOutput, NodeExecutionConfig, NodeCategory } from "@/lib/nodeflow/types";
 import { DialogueMessage } from "@/lib/models/character-dialogue-model";
 import { DialogueStory } from "@/lib/nodeflow/ContextNode/ContextNodeModel";
 import { NodeContext } from "../NodeContext";
@@ -90,7 +90,7 @@ export class ContextNode extends NodeBase {
     await super.afterExecute(output, context);
     const messageCount = output.messages?.length || 0;
     console.log(`ContextNode ${this.id} completed. Messages: ${messageCount}`);
-    context.setData(`${this.id}_last_output`, output);
+    context.setOutputData(`${this.id}_last_output`, output);
   }
 
   async _call(input: ContextNodeInput, config?: NodeExecutionConfig): Promise<ContextNodeOutput> {
@@ -159,5 +159,9 @@ export class ContextNode extends NodeBase {
       hasSystemMessage: !!this.systemMessage,
       characterId: this.characterId,
     };
+  }
+
+  protected getDefaultCategory(): NodeCategory {
+    return NodeCategory.MIDDLE;
   }
 }
