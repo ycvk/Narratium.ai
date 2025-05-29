@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import ChatHtmlBubble from "@/components/ChatHtmlBubble";
 import { CharacterAvatarBackground } from "@/components/CharacterAvatarBackground";
 import { trackButtonClick, trackFormSubmit } from "@/lib/utils/google-analytics";
@@ -59,6 +59,9 @@ export default function CharacterChatPanel({
     if (!el) return;
     el.scrollTo({ top: el.scrollHeight, behavior: "smooth" });
   };  
+  
+  // 添加推荐输入区域的折叠状态
+  const [suggestionsCollapsed, setSuggestionsCollapsed] = useState(false);
 
   useEffect(() => {
     const id = setTimeout(() => scrollToBottom(), 300);
@@ -188,22 +191,48 @@ export default function CharacterChatPanel({
 
       <div className="sticky bottom-0 bg-[#1a1816] border-t border-[#534741] pt-6 pb-6 px-5 z-5 mt-4 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.2)]">
         {suggestedInputs.length > 0 && !isSending && (
-          <div className="flex flex-wrap gap-2.5 mb-6 max-w-4xl mx-auto">
-            {suggestedInputs.map((input, index) => (
-              <button
-                key={index}
-                onClick={() => {
-                  trackButtonClick("page", "建议输入");
-                  onSuggestedInput(input);
-                }}
-                disabled={isSending}
-                className={`bg-[#2a261f] hover:bg-[#342f25] text-[#c0a480] hover:text-[#f4e8c1] py-1.5 px-4 rounded-md text-xs border border-[#534741] hover:border-[#a18d6f] transition-all duration-300 shadow-sm hover:shadow menu-item ${
-                  isSending ? "opacity-50 cursor-not-allowed" : ""
-                } ${fontClass}`}
-              >
-                {input}
-              </button>
-            ))}
+          <div className="relative max-w-4xl mx-auto">
+            <button
+              onClick={() => setSuggestionsCollapsed(!suggestionsCollapsed)}
+              className="absolute -top-10 right-0 bg-[#2a261f] hover:bg-[#342f25] text-[#c0a480] hover:text-[#f4e8c1] p-1.5 rounded-md border border-[#534741] hover:border-[#a18d6f] transition-all duration-300 shadow-sm hover:shadow z-10"
+              aria-label={suggestionsCollapsed ? "展开建议" : "收起建议"}
+            >
+              {suggestionsCollapsed ? (
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
+                </svg>
+              ) : (
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z" clipRule="evenodd" />
+                </svg>
+              )}
+            </button>
+            
+            <div  
+              className={`transition-all duration-300 ease-in-out overflow-hidden ${
+                suggestionsCollapsed 
+                  ? "max-h-0 opacity-0 mb-0" 
+                  : "max-h-40 opacity-100 mb-6"
+              }`}
+            >
+              <div className="flex flex-wrap gap-2.5">
+                {suggestedInputs.map((input, index) => (
+                  <button
+                    key={index}
+                    onClick={() => {
+                      trackButtonClick("page", "建议输入");
+                      onSuggestedInput(input);
+                    }}
+                    disabled={isSending}
+                    className={`bg-[#2a261f] hover:bg-[#342f25] text-[#c0a480] hover:text-[#f4e8c1] py-1.5 px-4 rounded-md text-xs border border-[#534741] hover:border-[#a18d6f] transition-all duration-300 shadow-sm hover:shadow menu-item ${
+                      isSending ? "opacity-50 cursor-not-allowed" : ""
+                    } ${fontClass}`}
+                  >
+                    {input}
+                  </button>
+                ))}
+              </div>
+            </div>
           </div>
         )}
         <form
