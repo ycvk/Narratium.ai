@@ -74,8 +74,9 @@ function isNodeToolClass(obj: any): boolean {
   return (
     typeof obj === "function" &&
     obj.prototype &&
-    typeof obj.getMetadata === "function" &&
-    typeof obj.prototype.execute === "function"
+    typeof obj.getToolType === "function" &&
+    typeof obj.getVersion === "function" &&
+    typeof obj.executeMethod === "function"
   );
 }
 
@@ -89,6 +90,10 @@ async function fallbackManualRegistration(): Promise<void> {
     
     const { LLMNodeTools } = await import("@/lib/nodeflow/LLMNode/LLMNodeTools");
     NodeToolRegistry.register(LLMNodeTools);
+
+    // Register OutputNodeTools
+    const { OutputNodeTools } = await import("@/lib/nodeflow/OutputNode/OutputNodeTools");
+    NodeToolRegistry.register(OutputNodeTools);
 
     console.log("Fallback registration completed");
   } catch (error) {
@@ -115,10 +120,19 @@ export async function getLLMNodeTools() {
   return LLMNodeTools;
 }
 
+export async function getOutputNodeTools() {
+  const { OutputNodeTools } = await import("@/lib/nodeflow/OutputNode/OutputNodeTools");
+  return OutputNodeTools;
+}
+
 export { NodeToolRegistry } from "@/lib/nodeflow/NodeTool";
 
 export function registerKnownNodeTools(): void {
   import("@/lib/nodeflow/ContextNode/ContextNodeTools").then(({ ContextNodeTools }) => {
     NodeToolRegistry.register(ContextNodeTools);
+  });
+  
+  import("@/lib/nodeflow/OutputNode/OutputNodeTools").then(({ OutputNodeTools }) => {
+    NodeToolRegistry.register(OutputNodeTools);
   });
 } 

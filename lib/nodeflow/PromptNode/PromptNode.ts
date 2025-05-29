@@ -142,17 +142,17 @@ export class PromptNode extends NodeBase {
     const { worldBookMatches = 0, historyLength = 0 } = output.contextInfo || {};
     console.log(`PromptNode ${this.id} completed. WorldBook matches: ${worldBookMatches}, History length: ${historyLength}`);
     
-    context.setData(`${this.id}_last_output`, output);
-    context.setData(`${this.id}_context_info`, output.contextInfo);
+    context.setOutputData(`${this.id}_last_output`, output);
+    context.setOutputData(`${this.id}_context_info`, output.contextInfo);
   }
 
   protected async onError(error: Error, context: NodeContext): Promise<void> {
     console.error(`PromptNode ${this.id} execution failed:`, error.message);
     
-    context.setData(`${this.id}_last_error`, {
+    context.setOutputData(`${this.id}_last_error`, {
       message: error.message,
       timestamp: new Date(),
-      operation: context.getData(`${this.id}_current_operation`),
+      operation: context.getInputData(`${this.id}_current_operation`),
     });
   }
 

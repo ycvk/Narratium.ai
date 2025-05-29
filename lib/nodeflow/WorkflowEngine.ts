@@ -24,9 +24,9 @@ export class WorkflowEngine {
 
   private initializeNodes(): void {
     for (const nodeConfig of this.config.nodes) {
-      const registryEntry = this.registry[nodeConfig.type];
+      const registryEntry = this.registry[nodeConfig.name];
       if (!registryEntry) {
-        throw new Error(`Node type '${nodeConfig.type}' not found in registry`);
+        throw new Error(`Node type '${nodeConfig.name}' not found in registry`);
       }
       const node = new registryEntry.nodeClass(nodeConfig);
       this.nodes.set(nodeConfig.id, node);
@@ -34,6 +34,13 @@ export class WorkflowEngine {
   }
 
   private getEntryNodes(): NodeBase[] {
+    const entryNodesByCategory = Array.from(this.nodes.values())
+      .filter(node => node.isEntryNode());
+    
+    if (entryNodesByCategory.length > 0) {
+      return entryNodesByCategory;
+    }
+
     const targetNodes = new Set<string>();
     this.config.nodes.forEach(node => {
       if (node.next) {
@@ -80,7 +87,7 @@ export class WorkflowEngine {
   }
 
   async execute(
-    input: NodeInput,
+    initialWorkflowInput: NodeInput,
     context?: NodeContext,
     config?: NodeExecutionConfig,
   ): Promise<WorkflowExecutionResult> {
@@ -91,83 +98,75 @@ export class WorkflowEngine {
       status: NodeExecutionStatus.RUNNING,
       results: [],
       startTime,
-      metadata: { ...config?.metadata },
     };
 
     try {
+      for (const key in initialWorkflowInput) {
+        ctx.set(key, initialWorkflowInput[key]);
+      }
+
       const entryNodes = this.getEntryNodes();
       if (entryNodes.length === 0) {
         throw new Error("No entry nodes found in workflow");
       }
-
-      const entryOutputs = await this.executeParallel(entryNodes, input, ctx, config);
+      
+      const entryOutputs = await this.executeParallel(entryNodes, {}, ctx, config);
 
       const processedNodes = new Set<string>();
       entryNodes.forEach(node => processedNodes.add(node.getId()));
 
       const queue: Array<{
         nodes: NodeBase[];
-        input: NodeOutput;
       }> = [];
-
-      const nextNodesMap = new Map<string, NodeBase[]>();
-      entryNodes.forEach((node, index) => {
-        const nextNodes = this.getNextNodes(node.getId());
-        if (nextNodes.length > 0) {
-          nextNodes.forEach(nextNode => {
-            const nodeId = nextNode.getId();
-            if (!nextNodesMap.has(nodeId)) {
-              nextNodesMap.set(nodeId, []);
-            }
-            nextNodesMap.get(nodeId)!.push(nextNode);
-          });
-          queue.push({ nodes: nextNodes, input: entryOutputs[index] });
-        }
-      });
-
-      while (queue.length > 0) {
-        const current = queue.shift()!;
-        const parallelNodes = current.nodes.filter(node => !processedNodes.has(node.getId()));
-        
-        if (parallelNodes.length === 0) continue;
-
-        const outputs = await this.executeParallel(parallelNodes, current.input, ctx, config);
-
-        parallelNodes.forEach(node => processedNodes.add(node.getId()));
-
-        const nextNodesMap = new Map<string, NodeBase[]>();
-        parallelNodes.forEach((node, index) => {
-          const nextNodes = this.getNextNodes(node.getId());
-          if (nextNodes.length > 0) {
-            nextNodes.forEach(nextNode => {
-              const nodeId = nextNode.getId();
-              if (!nextNodesMap.has(nodeId)) {
-                nextNodesMap.set(nodeId, []);
-              }
-              nextNodesMap.get(nodeId)!.push(nextNode);
-            });
-            queue.push({ nodes: nextNodes, input: outputs[index] });
+      
+      const nextLevelNodesSet = new Set<NodeBase>();
+      entryNodes.forEach(node => {
+        this.getNextNodes(node.getId()).forEach(nextNode => {
+          if (!processedNodes.has(nextNode.getId())) {
+            nextLevelNodesSet.add(nextNode);
           }
         });
+      });
+      if (nextLevelNodesSet.size > 0) {
+        queue.push({ nodes: Array.from(nextLevelNodesSet) });
+      }
+
+      while (queue.length > 0) {
+        const currentBatch = queue.shift()!;
+        const nodesToExecuteInBatch = currentBatch.nodes.filter(node => !processedNodes.has(node.getId()));
+        
+        if (nodesToExecuteInBatch.length === 0) continue;
+
+        const outputs = await this.executeParallel(nodesToExecuteInBatch, {}, ctx, config);
+
+        nodesToExecuteInBatch.forEach(node => processedNodes.add(node.getId()));
+
+        const nextLevelNodesSet = new Set<NodeBase>();
+        nodesToExecuteInBatch.forEach((node, index) => {
+          this.getNextNodes(node.getId()).forEach(nextNode => {
+            if (!processedNodes.has(nextNode.getId())) {
+              nextLevelNodesSet.add(nextNode);
+            }
+          });
+        });
+        if (nextLevelNodesSet.size > 0) {
+          queue.push({ nodes: Array.from(nextLevelNodesSet) });
+        }
       }
 
       result.status = NodeExecutionStatus.COMPLETED;
     } catch (error) {
       result.status = NodeExecutionStatus.FAILED;
-      result.metadata = {
-        ...result.metadata,
-        error: error instanceof Error ? error.message : "Unknown error",
-      };
     } finally {
       result.endTime = new Date();
-      result.results = ctx.getExecutionHistory();
+      result.results = [];
     }
 
     return result;
   }
 
   async *executeAsync(
-    input: NodeInput,
+    initialWorkflowInput: NodeInput,
     context?: NodeContext,
     config?: NodeExecutionConfig,
   ): AsyncGenerator<NodeOutput[], WorkflowExecutionResult, undefined> {
@@ -178,16 +177,19 @@ export class WorkflowEngine {
       status: NodeExecutionStatus.RUNNING,
       results: [],
       startTime,
-      metadata: { ...config?.metadata },
     };
 
     try {
+      for (const key in initialWorkflowInput) {
+        ctx.set(key, initialWorkflowInput[key]);
+      }
+
       const entryNodes = this.getEntryNodes();
       if (entryNodes.length === 0) {
         throw new Error("No entry nodes found in workflow");
       }
 
-      const entryOutputs = await this.executeParallel(entryNodes, input, ctx, config);
+      const entryOutputs = await this.executeParallel(entryNodes, {}, ctx, config);
       yield entryOutputs;
 
       const processedNodes = new Set<string>();
@@ -195,46 +197,49 @@ export class WorkflowEngine {
 
       const queue: Array<{
         nodes: NodeBase[];
-        input: NodeOutput;
       }> = [];
-
-      entryNodes.forEach((node, index) => {
-        const nextNodes = this.getNextNodes(node.getId());
-        if (nextNodes.length > 0) {
-          queue.push({ nodes: nextNodes, input: entryOutputs[index] });
-        }
-      });
-
-      while (queue.length > 0) {
-        const current = queue.shift()!;
-        const parallelNodes = current.nodes.filter(node => !processedNodes.has(node.getId()));
-        
-        if (parallelNodes.length === 0) continue;
-
-        const outputs = await this.executeParallel(parallelNodes, current.input, ctx, config);
-        
-        yield outputs;
-
-        parallelNodes.forEach(node => processedNodes.add(node.getId()));
-
-        parallelNodes.forEach((node, index) => {
-          const nextNodes = this.getNextNodes(node.getId());
-          if (nextNodes.length > 0) {
-            queue.push({ nodes: nextNodes, input: outputs[index] });
+      
+      const nextLevelNodesSet = new Set<NodeBase>();
+      entryNodes.forEach(node => {
+        this.getNextNodes(node.getId()).forEach(nextNode => {
+          if (!processedNodes.has(nextNode.getId())) {
+            nextLevelNodesSet.add(nextNode);
           }
         });
+      });
+      if (nextLevelNodesSet.size > 0) {
+        queue.push({ nodes: Array.from(nextLevelNodesSet) });
+      }
+
+      while (queue.length > 0) {
+        const currentBatch = queue.shift()!;
+        const nodesToExecuteInBatch = currentBatch.nodes.filter(node => !processedNodes.has(node.getId()));
+        
+        if (nodesToExecuteInBatch.length === 0) continue;
+
+        const outputs = await this.executeParallel(nodesToExecuteInBatch, {}, ctx, config);
+        yield outputs;
+
+        nodesToExecuteInBatch.forEach(node => processedNodes.add(node.getId()));
+
+        const nextLevelNodesSet = new Set<NodeBase>();
+        nodesToExecuteInBatch.forEach((node) => {
+          this.getNextNodes(node.getId()).forEach(nextNode => {
+            if (!processedNodes.has(nextNode.getId())) {
+              nextLevelNodesSet.add(nextNode);
+            }
+          });
+        });
+        if (nextLevelNodesSet.size > 0) {
+          queue.push({ nodes: Array.from(nextLevelNodesSet) });
+        }
       }
 
       result.status = NodeExecutionStatus.COMPLETED;
     } catch (error) {
       result.status = NodeExecutionStatus.FAILED;
-      result.metadata = {
-        ...result.metadata,
-        error: error instanceof Error ? error.message : "Unknown error",
-      };
     } finally {
       result.endTime = new Date();
-      result.results = ctx.getExecutionHistory();
     }
 
     return result;
