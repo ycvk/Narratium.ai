@@ -186,9 +186,9 @@ export default function CharacterChatPanel({
         </div>
       </div>
 
-      <div className="sticky bottom-0 bg-[#1a1816] border-t border-[#534741] p-4 z-5">
+      <div className="sticky bottom-0 bg-[#1a1816] border-t border-[#534741] pt-6 pb-6 px-5 z-5 mt-4 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.2)]">
         {suggestedInputs.length > 0 && !isSending && (
-          <div className="flex flex-wrap gap-2 mb-4 max-w-4xl mx-auto">
+          <div className="flex flex-wrap gap-2.5 mb-6 max-w-4xl mx-auto">
             {suggestedInputs.map((input, index) => (
               <button
                 key={index}
@@ -197,7 +197,7 @@ export default function CharacterChatPanel({
                   onSuggestedInput(input);
                 }}
                 disabled={isSending}
-                className={`bg-[#2a261f] hover:bg-[#342f25] text-[#c0a480] hover:text-[#f4e8c1] py-1 px-3 rounded text-xs border border-[#534741] transition-colors menu-item ${
+                className={`bg-[#2a261f] hover:bg-[#342f25] text-[#c0a480] hover:text-[#f4e8c1] py-1.5 px-4 rounded-md text-xs border border-[#534741] hover:border-[#a18d6f] transition-all duration-300 shadow-sm hover:shadow menu-item ${
                   isSending ? "opacity-50 cursor-not-allowed" : ""
                 } ${fontClass}`}
               >
@@ -213,14 +213,15 @@ export default function CharacterChatPanel({
           }}
           className="max-w-4xl mx-auto"
         >
-          <div className="flex gap-2">
-            <div className="flex-grow magical-input">
+          <div className="flex gap-3">
+            <div className="flex-grow magical-input relative group">
+              <div className="absolute -inset-0.5 bg-gradient-to-r from-amber-400/20 via-amber-500/5 to-amber-400/10 rounded-lg blur opacity-0 group-hover:opacity-100 transition duration-300"></div>
               <input
                 type="text"
                 value={userInput}
                 onChange={(e) => setUserInput(e.target.value)}
                 placeholder={t("characterChat.typeMessage") || "Type a message..."}
-                className="w-full bg-[#2a261f] border border-[#534741] rounded py-2 px-3 text-[#f4e8c1] text-sm leading-tight focus:outline-none focus:border-[#c0a480] transition-colors"
+                className="w-full bg-[#2a261f] border border-[#534741] rounded-lg py-2.5 px-4 text-[#f4e8c1] text-sm leading-tight focus:outline-none focus:border-[#c0a480] shadow-inner relative z-1 transition-all duration-300 group-hover:border-[#a18d6f]"
                 disabled={isSending}
               />
             </div>
@@ -233,7 +234,7 @@ export default function CharacterChatPanel({
               <button
                 type="submit"
                 disabled={!userInput.trim()}
-                className={`portal-button bg-[#2a261f] hover:bg-[#342f25] text-[#c0a480] hover:text-[#f4e8c1] py-1 px-3 rounded text-sm border border-[#534741] transition-colors ${
+                className={`portal-button relative overflow-hidden bg-[#2a261f] hover:bg-[#342f25] text-[#c0a480] hover:text-[#f4e8c1] py-2 px-4 rounded-lg text-sm border border-[#534741] hover:border-[#a18d6f] shadow-md transition-all duration-300 ${
                   !userInput.trim() ? "opacity-50 cursor-not-allowed" : ""
                 }`}
               >
@@ -242,7 +243,7 @@ export default function CharacterChatPanel({
             )}
           </div>
 
-          <div className="mt-3 flex justify-start gap-3 max-w-4xl mx-auto">
+          <div className="mt-5 flex justify-start gap-3 max-w-4xl mx-auto">
             <button
               type="button"
               onClick={() => {
@@ -252,10 +253,10 @@ export default function CharacterChatPanel({
                   "story-progress": !prev["story-progress"],
                 }));
               }}
-              className={`px-3 py-1 text-xs rounded-full border transition-all duration-300 ${
+              className={`px-4 py-1.5 text-xs rounded-full border transition-all duration-300 ${
                 activeModes["story-progress"]
                   ? "bg-[#d1a35c] text-[#2a261f] border-[#d1a35c] shadow-[0_0_8px_rgba(209,163,92,0.5)]"
-                  : "bg-[#2a261f] text-[#d1a35c] border-[#534741] hover:border-[#d1a35c]"
+                  : "bg-[#2a261f] text-[#d1a35c] border-[#534741] hover:border-[#d1a35c] shadow-sm hover:shadow-md"
               }`}
             >
               <span className="flex items-center">
@@ -314,9 +315,9 @@ export default function CharacterChatPanel({
                   };
                 });
               }}
-              className={`px-3 py-1 text-xs rounded-full border transition-all duration-300 ${
+              className={`px-4 py-1.5 text-xs rounded-full border transition-all duration-300 ${
                 !activeModes["perspective"].active
-                  ? "bg-[#2a261f] text-[#56b3b4] border-[#534741] hover:border-[#56b3b4]"
+                  ? "bg-[#2a261f] text-[#56b3b4] border-[#534741] hover:border-[#56b3b4] shadow-sm hover:shadow-md"
                   : activeModes["perspective"].mode === "novel"
                     ? "bg-[#56b3b4] text-[#2a261f] border-[#56b3b4] shadow-[0_0_8px_rgba(86,179,180,0.5)]"
                     : "bg-[#378384] text-[#2a261f] border-[#378384] shadow-[0_0_8px_rgba(55,131,132,0.5)]"
@@ -356,10 +357,10 @@ export default function CharacterChatPanel({
                   "scene-setting": !prev["scene-setting"],
                 }));
               }}
-              className={`px-3 py-1 text-xs rounded-full border transition-all duration-300 ${
+              className={`px-4 py-1.5 text-xs rounded-full border transition-all duration-300 ${
                 activeModes["scene-setting"]
                   ? "bg-[#c093ff] text-[#2a261f] border-[#c093ff] shadow-[0_0_8px_rgba(192,147,255,0.5)]"
-                  : "bg-[#2a261f] text-[#c093ff] border-[#534741] hover:border-[#c093ff]"
+                  : "bg-[#2a261f] text-[#c093ff] border-[#534741] hover:border-[#c093ff] shadow-sm hover:shadow-md"
               }`}
             >
               <span className="flex items-center">
