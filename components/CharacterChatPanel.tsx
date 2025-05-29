@@ -186,7 +186,7 @@ export default function CharacterChatPanel({
         </div>
       </div>
 
-      <div className="sticky bottom-0 bg-[#1a1816] border-t border-[#534741] p-4 z-10">
+      <div className="sticky bottom-0 bg-[#1a1816] border-t border-[#534741] p-4 z-5">
         {suggestedInputs.length > 0 && !isSending && (
           <div className="flex flex-wrap gap-2 mb-4 max-w-4xl mx-auto">
             {suggestedInputs.map((input, index) => (

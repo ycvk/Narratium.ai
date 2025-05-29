@@ -44,7 +44,7 @@ export default function CharacterChatHeader({
           
           <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-transparent via-amber-500/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 animate-pulse"></div>
           
-          <div className="relative z-10 text-[#a18d6f] group-hover:text-amber-300 transition-all duration-300 flex items-center justify-center cursor-pointer">
+          <div className="relative z-5 text-[#a18d6f] group-hover:text-amber-300 transition-all duration-300 flex items-center justify-center cursor-pointer">
             <svg 
               xmlns="http://www.w3.org/2000/svg" 
               width="16" 
