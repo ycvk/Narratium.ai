@@ -302,7 +302,8 @@ function checkSizeChanges() {
     if(Math.abs(h - lastHeight) > 5 || Math.abs(w - lastWidth) > 5) {
       lastHeight = h;
       lastWidth = w;
-      parent.postMessage({__chatBubbleHeight: h + 2, __chatBubbleWidth: w}, '*');
+      // Add a fixed buffer of 20px to avoid layout jumps during sidebar transitions
+      parent.postMessage({__chatBubbleHeight: h + 20, __chatBubbleWidth: w}, '*');
     }
   } catch(e) {
     console.error('Height calculation error:', e);
@@ -366,7 +367,7 @@ window.addEventListener('message', function(e) {
         frameRef.current!.style.height = `${e.data.__chatBubbleHeight}px`;
         
         const currentWidth = frameRef.current.parentElement?.clientWidth || 0;
-        if (containerWidthRef.current && Math.abs(currentWidth - containerWidthRef.current) > (containerWidthRef.current * 0.3)) {
+        if (containerWidthRef.current && Math.abs(currentWidth - containerWidthRef.current) > (containerWidthRef.current * 0.1)) {
           containerWidthRef.current = currentWidth;
           frameRef.current.contentWindow?.postMessage({ __recalculateHeight: true }, "*");
         }
