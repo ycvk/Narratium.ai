@@ -134,15 +134,15 @@ export class LLMNode extends NodeBase {
     
     console.log(`LLMNode ${this.id} executing:`, params);
     
-    context.setData(`${this.id}_execution_params`, params);
+    context.setInputData(`${this.id}_execution_params`, params);
   }
 
   protected async afterExecute(output: LLMNodeOutput, context: NodeContext): Promise<void> {
     const { processingTime, model, usage } = output;
     console.log(`LLMNode ${this.id} completed in ${processingTime}ms, model: ${model}, tokens: ${usage?.totalTokens || "unknown"}`);
     
-    context.setData(`${this.id}_last_output`, output);
-    context.setData(`${this.id}_usage_stats`, {
+    context.setOutputData(`${this.id}_last_output`, output);
+    context.setOutputData(`${this.id}_usage_stats`, {
       processingTime,
       usage,
       timestamp: new Date(),
