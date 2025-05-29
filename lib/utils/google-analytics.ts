@@ -41,7 +41,7 @@ export const event = ({ action, category, label, value }: {
 
 export const trackButtonClick = (buttonId: string, buttonName: string) => {
   event({
-    action: "button_click",
+    action: buttonName,
     category: buttonId,
     label: buttonName,
   });
@@ -49,17 +49,8 @@ export const trackButtonClick = (buttonId: string, buttonName: string) => {
 
 export const trackFormSubmit = (formId: string, formName: string) => {
   event({
-    action: "form_submit",
+    action: formName,
     category: formId,
     label: formName,
-  });
-};
-
-export const trackTimeSpent = (pageName: string, timeInSeconds: number) => {
-  event({
-    action: "time_spent",
-    category: pageName,
-    label: pageName,
-    value: timeInSeconds,
   });
 };

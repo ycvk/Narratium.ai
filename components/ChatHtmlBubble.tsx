@@ -278,10 +278,85 @@ export default memo(function ChatHtmlBubble({
   const html = convertMarkdown(rawHtml);
   const processedHtml = replaceTags(html).replace(/^[\s\r\n]+|[\s\r\n]+$/g, "");
 
-  const srcDoc = `<!DOCTYPE html><html><head><meta charset="utf-8"><style>*,*::before,*::after{box-sizing:border-box;max-width:100%}html,body{margin:0;padding:0;color:#f4e8c1;font:16px/${1.5} serif;background:transparent;word-wrap:break-word;overflow-wrap:break-word;hyphens:auto;white-space:pre-wrap;}img,video,iframe{max-width:100%;height:auto;display:block;margin:0 auto}table{width:100%;border-collapse:collapse;overflow-x:auto;display:block}code,pre{font-family:monospace;font-size:0.9rem;white-space:pre-wrap;background:rgba(40,40,40,0.8);padding:4px 8px;border-radius:4px;border:1px solid rgba(255,255,255,0.1);}pre{background:rgba(40,40,40,0.8);padding:12px;border-radius:6px;border:1px solid rgba(255,255,255,0.1);margin:8px 0;}blockquote{margin:8px 0;padding:8px 12px;border-left:4px solid #93c5fd;background:rgba(147,197,253,0.08);border-radius:0 4px 4px 0;font-style:italic;color:#93c5fd;}strong{color:#fb7185;font-weight:bold;}em{color:#c4b5fd;font-style:italic;}.dialogue{color:#fda4af;}a{color:#93c5fd}.tag-styled{white-space:inherit;}</style></head><body>${processedHtml}<script>let lastHeight=0;function postHeight(){try{const h=Math.max(document.documentElement.scrollHeight||0,document.body.scrollHeight||0,document.documentElement.offsetHeight||0,document.body.offsetHeight||0);if(h!==lastHeight){lastHeight=h;parent.postMessage({__chatBubbleHeight:h+10},'*');}}catch(e){}}function delayedHeight(){setTimeout(postHeight,50);}window.addEventListener('load',delayedHeight);document.addEventListener('DOMContentLoaded',delayedHeight);setTimeout(postHeight,100);setTimeout(postHeight,300);new ResizeObserver(postHeight).observe(document.body);</script></body></html>`;
+  const srcDoc = `<!DOCTYPE html><html><head><meta charset="utf-8"><style>*,*::before,*::after{box-sizing:border-box;max-width:100%}html,body{margin:0;padding:0;color:#f4e8c1;font:16px/${1.5} serif;background:transparent;word-wrap:break-word;overflow-wrap:break-word;hyphens:auto;white-space:pre-wrap;}img,video,iframe{max-width:100%;height:auto;display:block;margin:0 auto}table{width:100%;border-collapse:collapse;overflow-x:auto;display:block}code,pre{font-family:monospace;font-size:0.9rem;white-space:pre-wrap;background:rgba(40,40,40,0.8);padding:4px 8px;border-radius:4px;border:1px solid rgba(255,255,255,0.1);}pre{background:rgba(40,40,40,0.8);padding:12px;border-radius:6px;border:1px solid rgba(255,255,255,0.1);margin:8px 0;}blockquote{margin:8px 0;padding:8px 12px;border-left:4px solid #93c5fd;background:rgba(147,197,253,0.08);border-radius:0 4px 4px 0;font-style:italic;color:#93c5fd;}strong{color:#fb7185;font-weight:bold;}em{color:#c4b5fd;font-style:italic;}.dialogue{color:#fda4af;}a{color:#93c5fd}.tag-styled{white-space:inherit;}</style></head><body><div id="content-wrapper">${processedHtml}</div><script>let lastHeight=0;let lastWidth=0;let calculationCount = 0;const MAX_CALCULATIONS = 10; // 限制计算次数，防止无限计算
+const contentWrapper = document.getElementById('content-wrapper');
+
+function getAccurateHeight() {
+  // 使用更精确的高度计算方法，只考虑内容高度
+  return contentWrapper ? contentWrapper.offsetHeight : Math.max(
+    document.documentElement.scrollHeight,
+    document.body.scrollHeight,
+    document.documentElement.offsetHeight,
+    document.body.offsetHeight
+  );
+}
+
+function checkSizeChanges() {
+  try {
+    if(calculationCount > MAX_CALCULATIONS) return;
+    calculationCount++;
+    
+    const w = document.body.clientWidth;
+    const h = getAccurateHeight();
+
+    if(Math.abs(h - lastHeight) > 5 || Math.abs(w - lastWidth) > 5) {
+      lastHeight = h;
+      lastWidth = w;
+      parent.postMessage({__chatBubbleHeight: h + 2, __chatBubbleWidth: w}, '*');
+    }
+  } catch(e) {
+    console.error('Height calculation error:', e);
+  }
+}
+
+function delayedChecks() {
+  setTimeout(checkSizeChanges, 50);
+  setTimeout(checkSizeChanges, 200);
+  setTimeout(checkSizeChanges, 500);
+}
+
+window.addEventListener('load', function() {
+  calculationCount = 0;
+  checkSizeChanges();
+  delayedChecks();
+});
+
+document.addEventListener('DOMContentLoaded', function() {
+  calculationCount = 0;
+  checkSizeChanges();
+});
+
+window.addEventListener('resize', function() {
+  calculationCount = 0;
+  checkSizeChanges();
+});
+
+const resizeObserver = new ResizeObserver(function() {
+  calculationCount = 0;
+  checkSizeChanges();
+});
+resizeObserver.observe(document.body);
+if(contentWrapper) {
+  resizeObserver.observe(contentWrapper);
+}
+
+window.addEventListener('message', function(e) {
+  if(e.data && e.data.__recalculateHeight) {
+    calculationCount = 0;
+    checkSizeChanges();
+    delayedChecks();
+  }
+});</script></body></html>`;
+
+  const containerWidthRef = useRef<number | null>(null);
 
   useEffect(() => {
     if (showLoader) return;
+    
+    if (frameRef.current) {
+      containerWidthRef.current = frameRef.current.parentElement?.clientWidth || null;
+    }
+    
     const handler = (e: MessageEvent) => {
       if (
         e.source === frameRef.current?.contentWindow &&
@@ -289,10 +364,29 @@ export default memo(function ChatHtmlBubble({
         e.data.__chatBubbleHeight
       ) {
         frameRef.current!.style.height = `${e.data.__chatBubbleHeight}px`;
+        
+        const currentWidth = frameRef.current.parentElement?.clientWidth || 0;
+        if (containerWidthRef.current && Math.abs(currentWidth - containerWidthRef.current) > (containerWidthRef.current * 0.3)) {
+          containerWidthRef.current = currentWidth;
+          frameRef.current.contentWindow?.postMessage({ __recalculateHeight: true }, "*");
+        }
       }
     };
+    
     window.addEventListener("message", handler);
-    return () => window.removeEventListener("message", handler);
+    
+    const resizeHandler = () => {
+      if (frameRef.current && frameRef.current.contentWindow) {
+        frameRef.current.contentWindow.postMessage({ __recalculateHeight: true }, "*");
+      }
+    };
+    
+    window.addEventListener("resize", resizeHandler);
+    
+    return () => {
+      window.removeEventListener("message", handler);
+      window.removeEventListener("resize", resizeHandler);
+    };
   }, [showLoader]);
 
   if (showLoader) {
@@ -304,11 +398,31 @@ export default memo(function ChatHtmlBubble({
   }
 
   return (
-    <iframe
-      ref={frameRef}
-      sandbox="allow-scripts allow-same-origin"
-      srcDoc={srcDoc}
-      style={{ width: "100%", border: 0, overflow: "hidden", height: "150px", background: "transparent" }}
-    />
+    <div className="chat-bubble-container" style={{ maxWidth: "calc(100% - 10px)", margin: "0 auto" }}>
+      <style jsx>{`
+        .chat-bubble-container {
+          width: 100%;
+          position: relative;
+          max-width: 780px;
+        }
+        @media (max-width: 880px) {
+          .chat-bubble-container {
+            max-width: 100%;
+          }
+        }
+      `}</style>
+      <iframe
+        ref={frameRef}
+        sandbox="allow-scripts allow-same-origin"
+        srcDoc={srcDoc}
+        style={{ 
+          width: "100%", 
+          border: 0, 
+          overflow: "hidden", 
+          height: "150px", 
+          background: "transparent",
+        }}
+      />
+    </div>
   );
 });
