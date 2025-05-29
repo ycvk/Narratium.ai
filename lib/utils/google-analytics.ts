@@ -1,56 +1,54 @@
 export const GA_MEASUREMENT_ID = "G-KDEPSL9CJG";
 
+declare global {
+  interface Window {
+    gtag: (...args: any[]) => void;
+    dataLayer: any[];
+  }
+}
+
 export const initGA = () => {
   if (!GA_MEASUREMENT_ID || typeof window === "undefined") return;
 
-  if ((window as any).dataLayer) return;
+  if (window.dataLayer) return;
 
-  (window as any).dataLayer = (window as any).dataLayer || [];
-  (window as any).gtag = function() {
-    (window as any).dataLayer.push(arguments);
+  window.dataLayer = window.dataLayer || [];
+  window.gtag = function() {
+    window.dataLayer.push(arguments);
   };
 
-  (window as any).gtag("js", new Date());
+  window.gtag("js", new Date());
   
-  (window as any).gtag("config", GA_MEASUREMENT_ID, {
+  window.gtag("config", GA_MEASUREMENT_ID, {
     page_path: window.location.pathname,
     anonymize_ip: true,
   });
 };
 
 export const pageview = (url: string) => {
-  if (!GA_MEASUREMENT_ID || typeof window === "undefined") return;
-  (window as any).gtag("config", GA_MEASUREMENT_ID, {
+  if (!GA_MEASUREMENT_ID || typeof window === "undefined" || typeof window.gtag !== "function") return;
+  window.gtag("config", GA_MEASUREMENT_ID, {
     page_path: url,
   });
 };
 
-export const event = ({ action, category, label, value }: {
-  action: string;
-  category: string;
-  label?: string;
-  value?: number;
-}) => {
-  if (!GA_MEASUREMENT_ID || typeof window === "undefined") return;
-  (window as any).gtag("event", action, {
-    event_category: category,
-    event_label: label,
-    value: value,
-  });
+export const gtagEvent = (eventName: string, params: Record<string, any>) => {
+  if (!GA_MEASUREMENT_ID || typeof window === "undefined" || typeof window.gtag !== "function") return;
+  window.gtag("event", eventName, params);
 };
 
 export const trackButtonClick = (buttonId: string, buttonName: string) => {
-  event({
-    action: buttonName,
-    category: buttonId,
-    label: buttonName,
+  gtagEvent("button_click", {
+    button_id: buttonId,
+    button_name: buttonName,
+    context: "UserInteraction",
   });
 };
 
 export const trackFormSubmit = (formId: string, formName: string) => {
-  event({
-    action: formName,
-    category: formId,
-    label: formName,
+  gtagEvent("form_submit", {
+    form_id: formId,
+    form_name: formName,
+    context: "UserInteraction",
   });
 };
