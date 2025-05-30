@@ -347,7 +347,7 @@ export default function CharacterPage() {
         apiKey,
         llmType,
         language: language as "zh" | "en",
-        streaming: false,
+        streaming: true,
         promptType: promptType as PromptType,
         number: responseLength,
         nodeId,
@@ -490,7 +490,7 @@ export default function CharacterPage() {
       />
 
       <div
-        className={`${sidebarCollapsed ? "w-full" : "w-3/4 md:w-3/4"} fantasy-bg h-full transition-all duration-300 ease-in-out flex flex-col `}
+        className={`${sidebarCollapsed ? "w-full" : "w-3/4 md:w-3/4"} fantasy-bg h-full transition-all duration-300 ease-in-out flex flex-col`}
       >
         <CharacterChatHeader
           character={character}
