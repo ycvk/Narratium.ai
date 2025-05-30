@@ -58,15 +58,87 @@ export async function handleCharacterChatRequest(payload: {
       language,
       promptType,
     });
+    
+    // try {
+    //   console.log("测试完整工作流...");
+    //   const { NodeContext } = await import("@/lib/nodeflow/NodeContext");
+    //   const { ContextNode } = await import("@/lib/nodeflow/ContextNode/ContextNode");
+    //   const { UserInputNode } = await import("@/lib/nodeflow/UserInputNode/UserInputNode");
+    //   const { OutputNode } = await import("@/lib/nodeflow/OutputNode/OutputNode");
+    //   const { WorkflowEngine } = await import("@/lib/nodeflow/WorkflowEngine");
+    //   const { NodeCategory } = await import("@/lib/nodeflow/types");
+    //   console.log("所有模块已导入");
+
+    //   const workflowContext = new NodeContext();
+      
+    //   const registry = {
+    //     "userInput": {
+    //       nodeClass: UserInputNode,
+    //     },
+    //     "context": {
+    //       nodeClass: ContextNode,
+    //     },
+    //     "output": {
+    //       nodeClass: OutputNode,
+    //     },
+    //   };
+
+    //   const workflowConfig = {
+    //     id: "simple-context-workflow",
+    //     name: "Simple Context Workflow",
+    //     nodes: [
+    //       {
+    //         id: "user-input-1",
+    //         name: "userInput",
+    //         category: NodeCategory.ENTRY,
+    //         next: ["context-1"],
+    //         initParams: ["userInput", "characterId"],
+    //         inputFields: [],
+    //         outputFields: ["userInput", "characterId"],
+    //       },
+    //       {
+    //         id: "context-1",
+    //         name: "context",
+    //         category: NodeCategory.MIDDLE,
+    //         next: ["output-1"],
+    //         initParams: [],
+    //         inputFields: ["characterId"],
+    //         outputFields: ["recentHistory", "compressedHistory", "systemMessage", "messages"],
+    //       },
+    //       {
+    //         id: "output-1",
+    //         name: "output",
+    //         category: NodeCategory.EXIT,
+    //         next: [],
+    //         initParams: [],
+    //         inputFields: ["recentHistory", "compressedHistory", "systemMessage", "messages"],
+    //         outputFields: ["recentHistory", "compressedHistory", "systemMessage", "messages"],
+    //       },
+    //     ],
+    //   };
+
+    //   console.log("初始化工作流引擎...");
+    //   const engine = new WorkflowEngine(workflowConfig, registry, workflowContext);
+      
+    //   console.log("执行工作流...");
+    //   const workflowResult = await engine.execute({
+    //     userInput: message,
+    //     characterId: characterId,
+    //   }, workflowContext);
+      
+    //   console.log("工作流执行完成:", workflowResult.status);
+    //   console.log("工作流结果:", JSON.stringify(workflowResult, null, 2));
+    //   console.log("工作流上下文:", JSON.stringify(workflowContext.toJSON(), null, 2));
+
+    // } catch (error) {
+    //   console.error("工作流测试失败:", error);
+    // }
 
     dialogue.history.systemMessage = "";
-    dialogue.history.sampleStatus = "";
     dialogue.history.recentDialogue.userInput = [];
     dialogue.history.recentDialogue.responses = [];
-    dialogue.history.recentDialogue.status = [];
     dialogue.history.historyDialogue.userInput = [];
     dialogue.history.historyDialogue.responses = [];
-    dialogue.history.historyDialogue.status = [];
 
     const nodePath = dialogueTree.current_node_id !== "root"
       ? await LocalCharacterDialogueOperations.getDialoguePathToNode(characterId, dialogueTree.current_node_id)
@@ -81,19 +153,20 @@ export async function handleCharacterChatRequest(payload: {
         dialogue.history.recentDialogue.userInput.push(node.user_input);
         dialogue.history.historyDialogue.userInput.push(node.user_input);
       }
-      if (node.assistant_response) {
-        dialogue.history.recentDialogue.responses.push(node.assistant_response);
+      if (node.full_response) {
+        dialogue.history.recentDialogue.responses.push(node.full_response);
         dialogue.history.historyDialogue.responses.push(node.parsed_content?.compressedContent || "");
       }
-    };
-    
+    }
+
     try {
-      const { response, result, success } = await dialogue.sendMessage(number, message, username);
+      const { response, result } = await dialogue.sendMessage(number, message, username);
       
       if (!response) throw new Error("No response returned from LLM");
       
       const fullResult = result;
-      const fullResponse = response;
+      const screenStartIndex = response.indexOf("<screen>");
+      const fullResponse = screenStartIndex >= 0 ? response.substring(screenStartIndex) : response;
 
       const screenContent = fullResponse.match(/<screen>([\s\S]*?)<\/screen>/)?.[1]?.trim() || "";
 
@@ -110,7 +183,7 @@ export async function handleCharacterChatRequest(payload: {
 
       const event = fullResponse.match(/<event>([\s\S]*?)<\/event>/)?.[1]?.trim() || "";
 
-      await processPostResponseAsync({ characterId, message, screenContent, event, nextPrompts, nodeId })
+      await processPostResponseAsync({ characterId, message, fullResponse,screenContent, event, nextPrompts, nodeId })
         .catch((e) => console.error("Post-processing error:", e));
 
       return new Response(JSON.stringify({
@@ -153,6 +226,7 @@ export async function handleCharacterChatRequest(payload: {
 async function processPostResponseAsync({
   characterId,
   message,
+  fullResponse,
   screenContent,
   event,
   nextPrompts,
@@ -160,6 +234,7 @@ async function processPostResponseAsync({
 }: {
   characterId: string;
   message: string;
+  fullResponse: string;
   screenContent: string;
   event: string;
   nextPrompts: string[];
@@ -180,6 +255,7 @@ async function processPostResponseAsync({
       parentNodeId,
       message,
       screenContent,
+      fullResponse,
       "",
       parsed,
       nodeId,
