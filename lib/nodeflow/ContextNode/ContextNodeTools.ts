@@ -1,5 +1,5 @@
 import { DialogueStory } from "@/lib/nodeflow/ContextNode/ContextNodeModel";
-import { NodeTool, ToolMethod } from "@/lib/nodeflow/NodeTool";
+import { NodeTool } from "@/lib/nodeflow/NodeTool";
 import { LocalCharacterDialogueOperations } from "@/lib/data/character-dialogue-operation";
 import { DialogueMessage } from "@/lib/models/character-dialogue-model";
 
@@ -7,9 +7,33 @@ export class ContextNodeTools extends NodeTool {
   protected static readonly toolType: string = "context";
   protected static readonly version: string = "1.0.0";
 
-  @ToolMethod("Load character dialogue history from database", [
-    { name: "characterId", type: "string", required: true, description: "Character ID" },
-  ])
+  static getToolType(): string {
+    return this.toolType;
+  }
+
+  static async executeMethod(methodName: string, ...params: any[]): Promise<any> {
+    console.log(`ContextNodeToolsSimple.executeMethod 被调用: 方法=${methodName}`);
+    
+    const method = (this as any)[methodName];
+    console.log("在 ContextNodeToolsSimple 中找到的方法:", typeof method);
+    
+    if (typeof method !== "function") {
+      console.error(`方法查找失败: ${methodName} 在 ContextNodeToolsSimple 中不存在`);
+      console.log("可用方法:", Object.getOwnPropertyNames(this).filter(name => 
+        typeof (this as any)[name] === "function" && !name.startsWith("_"),
+      ));
+      throw new Error(`Method ${methodName} not found in ${this.getToolType()}Tool`);
+    }
+
+    try {
+      console.log(`执行方法: ${methodName}`);
+      return await (method as Function).apply(this, params);
+    } catch (error) {
+      console.error(`方法执行失败: ${methodName}`, error);
+      throw error;
+    }
+  }
+
   static async loadCharacterHistory(
     characterId: string,
   ): Promise<{
@@ -61,10 +85,6 @@ export class ContextNodeTools extends NodeTool {
     }
   }
 
-  @ToolMethod("Get recent dialogue history within memory length", [
-    { name: "dialogue", type: "DialogueStory", required: true, description: "The dialogue story instance" },
-    { name: "memLen", type: "number", required: true, description: "Memory length limit" },
-  ])
   static getRecentHistory(dialogue: DialogueStory, memLen: number): string {
     try {
       this.logExecution("getRecentHistory", { memLen });
@@ -79,10 +99,6 @@ export class ContextNodeTools extends NodeTool {
     }
   }
 
-  @ToolMethod("Get compressed historical dialogue excluding recent memory", [
-    { name: "dialogue", type: "DialogueStory", required: true, description: "The dialogue story instance" },
-    { name: "memLen", type: "number", required: true, description: "Memory length limit" },
-  ])
   static getCompressedHistory(dialogue: DialogueStory, memLen: number): string {
     try {
       this.logExecution("getCompressedHistory", { memLen });
@@ -97,9 +113,6 @@ export class ContextNodeTools extends NodeTool {
     }
   }
   
-  @ToolMethod("Convert dialogue story to structured message format", [
-    { name: "dialogue", type: "DialogueStory", required: true, description: "The dialogue story instance" },
-  ])
   static getMessages(dialogue: DialogueStory): DialogueMessage[] {
     try {
       this.logExecution("getMessages");
@@ -140,6 +153,7 @@ export class ContextNodeTools extends NodeTool {
       return messages;
     } catch (error) {
       this.handleError(error as Error, "getMessages");
+      return [];
     }
   }
 } 

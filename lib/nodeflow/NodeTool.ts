@@ -32,10 +32,15 @@ export abstract class NodeTool {
   }
 
   static async executeMethod(methodName: string, ...params: any[]): Promise<any> {
-    const method = NodeTool[methodName as keyof typeof NodeTool];
+    console.log(`executeMethod 被调用: 方法=${methodName}, this.getToolType()=${this.getToolType()}`);
+    console.log("this 对象:", this.name);
+    
+    const method = (this as any)[methodName];
+    console.log("找到的方法:", typeof method, method?.name);
     
     if (typeof method !== "function") {
-      throw new Error(`Method ${methodName} not found in ${NodeTool.getToolType()}Tool`);
+      console.error(`方法查找失败: ${methodName} 在 ${this.getToolType()}Tool 中不存在`);
+      throw new Error(`Method ${methodName} not found in ${this.getToolType()}Tool`);
     }
 
     try {
@@ -69,25 +74,28 @@ export interface ToolParameterDescriptor {
 }
 
 export function ToolMethod(description: string, parameters: ToolParameterDescriptor[] = []) {
-  return function <T extends (...args: any[]) => any>(
-    target: T,
-    context: ClassMethodDecoratorContext,
-  ): T {
-    const className = context.name as string;
+  return function(target: any, propertyKey?: string | symbol, descriptor?: PropertyDescriptor) {
+    let methodName: string;
     
-    const constructor = target.constructor as any;
+    if (typeof propertyKey === "string") {
+      methodName = propertyKey;
+    } else if (typeof propertyKey === "symbol") {
+      methodName = propertyKey.toString();
+    } else {
+      methodName = "unknownMethod";
+      console.warn("ToolMethod: Unable to determine method name");
+    }
+    const constructor = target.constructor || target;
     if (!constructor._toolMethods) {
       constructor._toolMethods = new Map();
     }
-    
-    constructor._toolMethods.set(className, {
-      name: className,
+    constructor._toolMethods.set(methodName, {
+      name: methodName,
       description,
       parameters,
       returnType: "any",
     });
-    
-    return target;
+    return descriptor ? descriptor.value : target;
   };
 }
 
@@ -100,6 +108,10 @@ export class NodeToolRegistry {
 
   static get(toolType: string): typeof NodeTool | undefined {
     return this.tools.get(toolType);
+  }
+
+  static isRegistered(toolClass: typeof NodeTool): boolean {
+    return this.tools.has(toolClass.getToolType());
   }
 
   static getRegisteredTypes(): string[] {

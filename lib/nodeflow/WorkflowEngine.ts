@@ -28,7 +28,7 @@ export class WorkflowEngine {
   private initializeNodes(context: NodeContext): void {
     for (const nodeConfig of this.config.nodes) {
       const registryEntry = this.registry[nodeConfig.name];
-      const node = new registryEntry.nodeClass(nodeConfig, context);
+      const node = new registryEntry.nodeClass(nodeConfig);
       this.nodes.set(nodeConfig.id, node);
     }
   }
@@ -175,7 +175,8 @@ export class WorkflowEngine {
 
     try {
       for (const key in initialWorkflowInput) {
-        ctx.setInput(key, initialWorkflowInput[key]);      }
+        ctx.setInput(key, initialWorkflowInput[key]);
+      }
 
       const entryNodes = this.getEntryNodes();
       if (entryNodes.length === 0) {

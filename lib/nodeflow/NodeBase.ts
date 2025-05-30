@@ -22,7 +22,6 @@ export abstract class NodeBase {
       inputFields: config.inputFields || [],
       outputFields: config.outputFields || [],
     };
-    
     this.initializeTools();
   }
 
@@ -72,9 +71,15 @@ export abstract class NodeBase {
   }
   
   protected initializeTools(): void {
-    this.toolClass = NodeToolRegistry.get(this.getName());
-    if (!this.toolClass) {
-      console.warn(`No tool class found for node type: ${this.getName()}`);
+    try {
+      const registeredToolClass = NodeToolRegistry.get(this.getName());
+      if (registeredToolClass) {
+        this.toolClass = registeredToolClass;
+      } else {
+        console.warn(`找不到节点类型的工具类: ${this.getName()}`);
+      }
+    } catch (error: any) {
+      console.warn(`查找工具类失败: ${error?.message || "未知错误"}`);
     }
   }
 
@@ -82,7 +87,6 @@ export abstract class NodeBase {
     if (!this.toolClass) {
       throw new Error(`No tool class available for node type: ${this.getName()}`);
     }
-    
     return await this.toolClass.executeMethod(methodName, ...params);
   }
 
@@ -150,11 +154,11 @@ export abstract class NodeBase {
       input: {},
       startTime,
     };
-
     try {
       const resolvedNodeInput = await this.resolveInput(context);
+      await this.beforeExecute(resolvedNodeInput, context);
       result.input = resolvedNodeInput;
-
+      
       const output = await this._call(resolvedNodeInput);
       await this.publishOutput(output, context);
 
@@ -179,7 +183,6 @@ export abstract class NodeBase {
   }
 
   protected async _call(input: NodeInput): Promise<NodeOutput>{
-    console.log(`Node ${this.id}: Processing workflow _call`);
     const outputFields = this.getOutputFields();
     const output: NodeOutput = {};
     

@@ -3,6 +3,8 @@ import { NodeConfig, NodeInput, NodeOutput, NodeCategory } from "@/lib/nodeflow/
 import { DialogueMessage } from "@/lib/models/character-dialogue-model";
 import { DialogueStory } from "@/lib/nodeflow/ContextNode/ContextNodeModel";
 import { NodeContext } from "../NodeContext";
+import { ContextNodeTools } from "./ContextNodeTools";
+import { NodeToolRegistry } from "../NodeTool";
 
 export class ContextNode extends NodeBase {
   static readonly nodeName = "context";
@@ -10,7 +12,9 @@ export class ContextNode extends NodeBase {
   static readonly version = "1.0.0";
 
   constructor(config: NodeConfig) {
+    NodeToolRegistry.register(ContextNodeTools);
     super(config);
+    this.toolClass = ContextNodeTools;
     this.initializeDialogueStories();
   }
   
@@ -27,13 +31,11 @@ export class ContextNode extends NodeBase {
 
   protected async beforeExecute(input: NodeInput, context: NodeContext): Promise<void> {
     await super.beforeExecute(input, context);
-
-    const characterId = this.getConfigValue<string>("characterId");
+    const characterId = context.getCache("characterId");
+    console.log("characterId",characterId);
 
     try {
       if (characterId) {
-        console.log(`ContextNode ${this.id}: Loading history for character ${characterId}`);
-        
         const historyData = await this.executeTool(
           "loadCharacterHistory",
           characterId,
@@ -43,11 +45,13 @@ export class ContextNode extends NodeBase {
           this.setState("systemMessage", historyData.systemMessage);
           this.setState("recentDialogue", historyData.recentDialogue);
           this.setState("historyDialogue", historyData.historyDialogue);
-          console.log(`ContextNode ${this.id}: History loaded for character`);
+          console.log(`ContextNodeSimple ${this.id}: History loaded for character`);
         }
+      } else {
+        console.warn(`ContextNodeSimple ${this.id}: No characterId provided in input`);
       }
     } catch (error) {
-      console.error(`ContextNode ${this.id}: Failed to load history:`, error);
+      console.error(`ContextNodeSimple ${this.id}: Failed to load history:`, error);
     }
   }
 
@@ -68,4 +72,4 @@ export class ContextNode extends NodeBase {
       messages,
     };
   }
-}
+} 

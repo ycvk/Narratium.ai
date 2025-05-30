@@ -1,6 +1,5 @@
 import { NodeBase } from "@/lib/nodeflow/NodeBase";
 import { NodeConfig, NodeInput, NodeOutput, NodeCategory } from "@/lib/nodeflow/types";
-import { NodeContext } from "@/lib/nodeflow/NodeContext";
 
 export class OutputNode extends NodeBase {
   static readonly nodeName = "output";
