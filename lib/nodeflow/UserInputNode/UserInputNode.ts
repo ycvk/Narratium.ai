@@ -11,18 +11,6 @@ export class UserInputNode extends NodeBase {
     super(config);
   }
 
-  protected getInitParams(): string[] {
-    return ["userInput"];
-  }
-
-  protected getInputFields(): string[] {
-    return [];
-  }
-  
-  protected getOutputFields(): string[] {
-    return ["userInput"];
-  }
-
   protected getDefaultCategory(): NodeCategory {
     return NodeCategory.ENTRY;
   }
@@ -36,10 +24,6 @@ export class UserInputNode extends NodeBase {
   }
 
   protected async _call(input: NodeInput): Promise<NodeOutput> {
-    await super._call(input);
-    console.log("input", input);
-    return {
-      userInput: input.userInput,
-    };
+    return await super._call(input);
   }
 }

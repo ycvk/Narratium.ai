@@ -10,9 +10,9 @@ import {
 } from "@/lib/nodeflow/types";
 
 export class WorkflowEngine {
-  private nodes: Map<string, NodeBase>;
-  private registry: NodeRegistry;
   private config: WorkflowConfig;
+  private registry: NodeRegistry;
+  private nodes: Map<string, NodeBase>;
 
   constructor(
     config: WorkflowConfig,

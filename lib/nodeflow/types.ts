@@ -9,6 +9,9 @@ export interface NodeConfig {
   name: string;
   category: NodeCategory;
   next?: string[];
+  initParams?: string[];
+  inputFields?: string[];
+  outputFields?: string[];
 }
 
 export type NodeInput = Record<string, any>;

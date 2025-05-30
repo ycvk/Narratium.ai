@@ -8,22 +8,50 @@ export abstract class NodeBase {
   protected category: NodeCategory;
   protected next: string[];
   protected toolClass?: typeof NodeTool;
-  protected initParams: Record<string, any>;
+  protected params: Record<string, any>;
+  protected state: Record<string, any> = {};
 
   constructor(config: NodeConfig) {
     this.id = config.id;
     this.name = config.name;
     this.category = this.getDefaultCategory();
     this.next = config.next || [];
-    this.initParams = {};
+    
+    this.params = {
+      initParams: config.initParams || [],
+      inputFields: config.inputFields || [],
+      outputFields: config.outputFields || [],
+    };
+    
     this.initializeTools();
   }
 
-  protected abstract getInitParams(): string[];
+  protected getInitParams(): string[] {
+    return this.getConfigValue("initParams") || [];
+  }
   
-  protected abstract getInputFields(): string[];
+  protected getInputFields(): string[] {
+    return this.getConfigValue("inputFields") || [];
+  }
 
-  protected abstract getOutputFields(): string[];
+  protected getOutputFields(): string[] {
+    return this.getConfigValue("outputFields") || [];
+  }
+  
+  protected getConfigValue<T>(key: string, defaultValue?: T): T | undefined {
+    if (this.params && this.params[key] !== undefined) {
+      return this.params[key] as T;
+    }
+    return defaultValue;
+  }
+
+  protected getState<T>(key: string, defaultValue?: T): T | undefined {
+    return (this.state[key] as T) ?? defaultValue;
+  }
+
+  protected setState<T>(key: string, value: T): void {
+    this.state[key] = value;
+  }
 
   protected abstract getDefaultCategory(): NodeCategory;
 
@@ -76,9 +104,7 @@ export abstract class NodeBase {
     const initParams = this.getInitParams();
 
     for (const fieldName of initParams) {
-      console.log("fieldName", fieldName);
       if (context.hasInput(fieldName)) {
-        console.log("find");
         resolvedInput[fieldName] = context.getInput(fieldName);
       } else {
         console.warn(`Node ${this.id}: Required input '${fieldName}' not found in Input`);
@@ -128,10 +154,8 @@ export abstract class NodeBase {
     try {
       const resolvedNodeInput = await this.resolveInput(context);
       result.input = resolvedNodeInput;
-      
-      await this.beforeExecute(resolvedNodeInput, context);
+
       const output = await this._call(resolvedNodeInput);
-      await this.afterExecute(output, context);
       await this.publishOutput(output, context);
 
       result.status = NodeExecutionStatus.COMPLETED;
@@ -156,7 +180,20 @@ export abstract class NodeBase {
 
   protected async _call(input: NodeInput): Promise<NodeOutput>{
     console.log(`Node ${this.id}: Processing workflow _call`);
-    return {};
+    const outputFields = this.getOutputFields();
+    const output: NodeOutput = {};
+    
+    if (outputFields.length === 0) {
+      return { ...input };
+    }
+    
+    for (const field of outputFields) {
+      if (input[field] !== undefined) {
+        output[field] = input[field];
+      }
+    }
+    
+    return output;
   }
 
   getStatus(): Record<string, any> {
