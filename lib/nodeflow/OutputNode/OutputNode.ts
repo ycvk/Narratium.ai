@@ -39,7 +39,6 @@ export class OutputNode extends NodeBase {
   static readonly description = "Standard output node for workflow results";
   static readonly version = "1.0.0";
 
-  private outputFields: string[];
   private outputFormat: "json" | "text" | "custom";
   private includeMetadata: boolean;
   private template?: string;
@@ -50,12 +49,28 @@ export class OutputNode extends NodeBase {
   constructor(config: OutputNodeConfig) {
     super(config);
     
-    this.outputFields = config.params.outputFields || [];
     this.outputFormat = config.params.outputFormat || "json";
     this.includeMetadata = config.params.includeMetadata || false;
     this.template = config.params.template;
     this.clearContextAfterOutput = config.params.clearContextAfterOutput || false;
     this.customFormatConfig = config.params.customFormatConfig;
+  }
+
+  // 实现获取输入字段的抽象方法
+  protected getInputFields(): string[] {
+    // 输出节点可以接收directOutput和其他全局数据
+    return ["directOutput"];
+  }
+  
+  // 实现获取输出字段的抽象方法
+  protected getOutputFields(): string[] {
+    // 输出节点产生标准化的输出字段
+    return ["finalOutput", "extractedData", "executionSummary", ...this.getConfiguredOutputFields()];
+  }
+  
+  // 从配置中获取输出字段
+  private getConfiguredOutputFields(): string[] {
+    return this.params.outputFields || [];
   }
 
   async init(): Promise<void> {
@@ -104,12 +119,13 @@ export class OutputNode extends NodeBase {
   private async extractDataFromContext(input: OutputNodeInput, context: NodeContext): Promise<Record<string, any>> {
     if (input.directOutput) return input.directOutput;
     
-    if (this.outputFields.length === 0) {
+    const configuredFields = this.getConfiguredOutputFields();
+    if (configuredFields.length === 0) {
       return await this.executeTool("extractAllContextData", context);
     }
     
     const extractedData: Record<string, any> = {};
-    for (const field of this.outputFields) {
+    for (const field of configuredFields) {
       const value = await this.executeTool("extractContextField", context, field);
       if (value !== undefined) extractedData[field] = value;
     }
@@ -118,10 +134,10 @@ export class OutputNode extends NodeBase {
 
   private async formatOutput(data: Record<string, any>): Promise<any> {
     switch (this.outputFormat) {
-      case "json": return data;
-      case "text": return this.formatAsText(data);
-      case "custom": return await this.executeTool("customFormat", data, this.customFormatConfig);
-      default: return data;
+    case "json": return data;
+    case "text": return this.formatAsText(data);
+    case "custom": return await this.executeTool("customFormat", data, this.customFormatConfig);
+    default: return data;
     }
   }
 
@@ -179,7 +195,7 @@ export class OutputNode extends NodeBase {
   }> {
     return await this.executeTool("validateOutputConfig", {
       outputFormat: this.outputFormat,
-      outputFields: this.outputFields,
+      outputFields: this.getConfiguredOutputFields(),
       template: this.template,
       includeMetadata: this.includeMetadata,
       clearContextAfterOutput: this.clearContextAfterOutput,
@@ -195,7 +211,7 @@ export class OutputNode extends NodeBase {
     } {
     return {
       outputFormat: this.outputFormat,
-      fieldsCount: this.outputFields.length,
+      fieldsCount: this.getConfiguredOutputFields().length,
       includesMetadata: this.includeMetadata,
       hasTemplate: !!this.template,
       willClearContext: this.clearContextAfterOutput,

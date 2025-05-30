@@ -1,6 +1,3 @@
-import { RunnableConfig } from "@langchain/core/runnables";
-import { BaseMessage } from "@langchain/core/messages";
-
 export enum NodeCategory {
   ENTRY = "entry",
   MIDDLE = "middle", 
@@ -10,19 +7,12 @@ export enum NodeCategory {
 export interface NodeConfig {
   id: string;
   name: string;
-  category?: NodeCategory;
-  params?: Record<string, any>;
+  category: NodeCategory;
   next?: string[];
-  inputMappings?: NodeInputOutputMapping[];
-  outputMappings?: NodeInputOutputMapping[];
 }
 
 export type NodeInput = Record<string, any>;
 export type NodeOutput = Record<string, any>;
-
-export interface NodeExecutionConfig extends RunnableConfig {
-  runName?: string;
-}
 
 export enum NodeExecutionStatus {
   PENDING = "pending",
@@ -42,14 +32,9 @@ export interface NodeExecutionResult {
   endTime?: Date;
 }
 
-export interface Message extends BaseMessage {
-  metadata?: Record<string, any>;
-}
-
 export interface WorkflowConfig {
   id: string;
   name: string;
-  description?: string;
   nodes: NodeConfig[];
 }
 
@@ -66,10 +51,3 @@ export interface NodeRegistryEntry {
 }
 
 export type NodeRegistry = Record<string, NodeRegistryEntry>;
-
-export interface NodeInputOutputMapping {
-  nodeKey: string;
-  contextKey: string;
-  required?: boolean;
-  defaultValue?: any;
-} 
