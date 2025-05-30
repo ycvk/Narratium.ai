@@ -173,7 +173,7 @@ export default function CharacterChatPanel({
               })}
 
               {isSending && (
-                <div className="flex items-center space-x-2 text-[#c0a480] mb-4">
+                <div className="flex items-center space-x-2 text-[#c0a480] mb-8 pb-4 pt-2 min-h-[40px]">
                   <div className="relative w-6 h-6 flex items-center justify-center">
                     <div className="absolute inset-0 rounded-full border-2 border-t-[#f9c86d] border-r-[#c0a480] border-b-[#a18d6f] border-l-transparent animate-spin"></div>
                     <div className="absolute inset-1 rounded-full border-2 border-t-[#a18d6f] border-r-[#f9c86d] border-b-[#c0a480] border-l-transparent animate-spin-slow"></div>
