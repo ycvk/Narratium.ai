@@ -20,7 +20,7 @@ export class LocalCharacterDialogueOperations {
     filteredDialogues.push(dialogueTree); 
     await writeData(CHARACTER_DIALOGUES_FILE, filteredDialogues);
 
-    await this.addNodeToDialogueTree(characterId, "", "", "", "", undefined, "root");
+    await this.addNodeToDialogueTree(characterId, "", "", "", "","", undefined, "root");
     return dialogueTree;
   }
   
@@ -39,6 +39,7 @@ export class LocalCharacterDialogueOperations {
         node.branch_id,
         node.user_input,
         node.assistant_response,
+        node.full_response,
         node.response_summary,
         node.parsed_content,
         node.created_at,
@@ -55,6 +56,7 @@ export class LocalCharacterDialogueOperations {
     parentNodeId: string,
     userInput: string,
     assistantResponse: string,
+    fullResponse: string,
     responseSummary: string = "",
     parsedContent?: ParsedResponse,
     nodeId?: string,
@@ -80,6 +82,7 @@ export class LocalCharacterDialogueOperations {
       branch_id,
       userInput,
       assistantResponse,
+      fullResponse,
       responseSummary,
       parsedContent,
     );
