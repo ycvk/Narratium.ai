@@ -6,6 +6,7 @@ export class DialogueNode {
   branch_id: number;
   user_input: string;
   assistant_response: string;
+  full_response: string;
   response_summary: string;
   parsed_content?: ParsedResponse;
   created_at: string;
@@ -16,6 +17,7 @@ export class DialogueNode {
     branch_id: number ,
     user_input: string,
     assistant_response: string,
+    full_response: string,
     response_summary: string = "",
     parsed_content?: ParsedResponse,
     created_at: string = new Date().toISOString(),
@@ -25,6 +27,7 @@ export class DialogueNode {
     this.branch_id = branch_id;
     this.user_input = user_input;
     this.assistant_response = assistant_response;
+    this.full_response = full_response;
     this.response_summary = response_summary;
     this.parsed_content = parsed_content;
     this.created_at = created_at;
