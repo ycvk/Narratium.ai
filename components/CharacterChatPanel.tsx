@@ -59,8 +59,7 @@ export default function CharacterChatPanel({
     if (!el) return;
     el.scrollTo({ top: el.scrollHeight, behavior: "smooth" });
   };  
-  
-  // 添加推荐输入区域的折叠状态
+
   const [suggestionsCollapsed, setSuggestionsCollapsed] = useState(false);
 
   useEffect(() => {

@@ -15,14 +15,30 @@ export class WorkflowEngine {
   private registry: NodeRegistry;
   private config: WorkflowConfig;
 
-  constructor(config: WorkflowConfig, registry: NodeRegistry) {
-    this.config = config;
-    this.registry = registry;
-    this.nodes = new Map();
-    this.initializeNodes();
+  constructor(
+    configOrNodes: WorkflowConfig | Map<string, NodeBase>,
+    registry?: NodeRegistry
+  ) {
+    if (configOrNodes instanceof Map) {
+      this.nodes = configOrNodes;
+      this.config = this.buildConfigFromNodes(configOrNodes);
+      this.registry = {};
+    } else {
+      if (!registry) {
+        throw new Error('Node registry is required when initializing from config');
+      }
+      this.config = configOrNodes;
+      this.registry = registry;
+      this.nodes = new Map();
+      this.initializeNodes();
+    }
   }
 
   private initializeNodes(): void {
+    if (!this.registry) {
+      throw new Error('Node registry is required when initializing from config');
+    }
+    
     for (const nodeConfig of this.config.nodes) {
       const registryEntry = this.registry[nodeConfig.name];
       if (!registryEntry) {
@@ -31,6 +47,16 @@ export class WorkflowEngine {
       const node = new registryEntry.nodeClass(nodeConfig);
       this.nodes.set(nodeConfig.id, node);
     }
+  }
+
+  private buildConfigFromNodes(nodes: Map<string, NodeBase>): WorkflowConfig {
+    const nodeConfigs = Array.from(nodes.values()).map(node => node.toJSON());
+    
+    return {
+      id: `workflow_${Date.now()}`,
+      name: "Generated Workflow",
+      nodes: nodeConfigs
+    };
   }
 
   private getEntryNodes(): NodeBase[] {
@@ -64,11 +90,10 @@ export class WorkflowEngine {
 
   private async executeNode(
     node: NodeBase,
-    input: NodeInput,
     context: NodeContext,
     config?: NodeExecutionConfig,
   ): Promise<NodeOutput> {
-    const result = await node.execute(input, context, config);
+    const result = await node.execute(context, config);
     if (result.status === NodeExecutionStatus.FAILED) {
       throw result.error || new Error(`Node ${node.getId()} execution failed`);
     }
@@ -77,12 +102,11 @@ export class WorkflowEngine {
 
   private async executeParallel(
     nodes: NodeBase[],
-    input: NodeInput,
     context: NodeContext,
     config?: NodeExecutionConfig,
   ): Promise<NodeOutput[]> {
     return Promise.all(
-      nodes.map(node => this.executeNode(node, input, context, config)),
+      nodes.map(node => this.executeNode(node, context, config)),
     );
   }
 
@@ -102,7 +126,7 @@ export class WorkflowEngine {
 
     try {
       for (const key in initialWorkflowInput) {
-        ctx.set(key, initialWorkflowInput[key]);
+        ctx.setInput(key, initialWorkflowInput[key]);
       }
 
       const entryNodes = this.getEntryNodes();
@@ -110,7 +134,7 @@ export class WorkflowEngine {
         throw new Error("No entry nodes found in workflow");
       }
       
-      const entryOutputs = await this.executeParallel(entryNodes, {}, ctx, config);
+      const entryOutputs = await this.executeParallel(entryNodes, ctx, config);
 
       const processedNodes = new Set<string>();
       entryNodes.forEach(node => processedNodes.add(node.getId()));
@@ -137,12 +161,12 @@ export class WorkflowEngine {
         
         if (nodesToExecuteInBatch.length === 0) continue;
 
-        const outputs = await this.executeParallel(nodesToExecuteInBatch, {}, ctx, config);
+        const outputs = await this.executeParallel(nodesToExecuteInBatch, ctx, config);
 
         nodesToExecuteInBatch.forEach(node => processedNodes.add(node.getId()));
 
         const nextLevelNodesSet = new Set<NodeBase>();
-        nodesToExecuteInBatch.forEach((node, index) => {
+        nodesToExecuteInBatch.forEach(node => {
           this.getNextNodes(node.getId()).forEach(nextNode => {
             if (!processedNodes.has(nextNode.getId())) {
               nextLevelNodesSet.add(nextNode);
@@ -181,15 +205,14 @@ export class WorkflowEngine {
 
     try {
       for (const key in initialWorkflowInput) {
-        ctx.set(key, initialWorkflowInput[key]);
-      }
+        ctx.setInput(key, initialWorkflowInput[key]);      }
 
       const entryNodes = this.getEntryNodes();
       if (entryNodes.length === 0) {
         throw new Error("No entry nodes found in workflow");
       }
 
-      const entryOutputs = await this.executeParallel(entryNodes, {}, ctx, config);
+      const entryOutputs = await this.executeParallel(entryNodes, ctx, config);
       yield entryOutputs;
 
       const processedNodes = new Set<string>();
@@ -217,7 +240,7 @@ export class WorkflowEngine {
         
         if (nodesToExecuteInBatch.length === 0) continue;
 
-        const outputs = await this.executeParallel(nodesToExecuteInBatch, {}, ctx, config);
+        const outputs = await this.executeParallel(nodesToExecuteInBatch, ctx, config);
         yield outputs;
 
         nodesToExecuteInBatch.forEach(node => processedNodes.add(node.getId()));

@@ -2,7 +2,8 @@ import { NodeTool, ToolMethod, ToolParameterDescriptor } from "@/lib/nodeflow/No
 import { NodeContext } from "@/lib/nodeflow/NodeContext";
 
 export class OutputNodeTools extends NodeTool {
-  protected static readonly toolType: string = "output";
+  // 与 OutputNode.nodeName 保持一致
+  protected static readonly toolName: string = "output";
   protected static readonly version: string = "1.0.0";
 
   /**
@@ -16,23 +17,31 @@ export class OutputNodeTools extends NodeTool {
     this.logExecution("extractContextField", { fieldKey });
     
     try {
-      // Priority: cache -> output -> input
-      if (context.has(fieldKey)) {
-        return context.get(fieldKey);
+      // 按优先级查找: cache -> output -> input
+      if (context.hasCache(fieldKey)) {
+        return context.getCache(fieldKey);
       }
       
-      if (context.getOutputData(fieldKey) !== undefined) {
-        return context.getOutputData(fieldKey);
+      if (context.hasOutput(fieldKey)) {
+        return context.getOutput(fieldKey);
       }
       
-      if (context.getInputData(fieldKey) !== undefined) {
-        return context.getInputData(fieldKey);
+      if (context.hasInput(fieldKey)) {
+        return context.getInput(fieldKey);
       }
 
-      // Check if it's a node output (format: nodeId.outputKey or nodeId_output)
+      // 检查是否为节点输出(格式: nodeId.outputKey 或 nodeId_output)
       if (fieldKey.includes(".")) {
         const [nodeId, outputKey] = fieldKey.split(".", 2);
-        const nodeOutput = context.get(`${nodeId}_output`);
+        // 优先从cache中查找，然后是input和output中查找
+        let nodeOutput = context.hasCache(`${nodeId}_output`) ? context.getCache(`${nodeId}_output`) : null;
+        if (!nodeOutput) {
+          nodeOutput = context.hasInput(`${nodeId}_output`) ? context.getInput(`${nodeId}_output`) : null;
+        }
+        if (!nodeOutput) {
+          nodeOutput = context.hasOutput(`${nodeId}_output`) ? context.getOutput(`${nodeId}_output`) : null;
+        }
+        
         if (nodeOutput && typeof nodeOutput === "object" && outputKey in nodeOutput) {
           return nodeOutput[outputKey];
         }
@@ -54,22 +63,26 @@ export class OutputNodeTools extends NodeTool {
     this.logExecution("extractAllContextData");
     
     try {
+      // 获取完整的上下文数据
       const contextData = context.toJSON();
       
-      // Reorganize data for better output structure
+      // 重新组织数据，使其更有结构化
       const result: Record<string, any> = {
-        // Final outputs from outputStore
-        ...contextData.outputStore,
+        // 主要输出结果
+        output: contextData.outputStore,
         
-        // Important cache data (non-internal)
+        // 输入数据
+        input: contextData.inputStore,
+        
+        // 重要的缓存数据(非内部使用的)
         cache: Object.fromEntries(
           Object.entries(contextData.cacheStore).filter(([key]) => 
             !key.startsWith("_") && !key.includes("temp"),
           ),
         ),
         
-        // Node-specific outputs
-        nodeOutputs: contextData.nodeOutputs,
+        // 节点特定输出（如果有）
+        nodeOutputs: contextData.nodeOutputs || {},
       };
 
       return result;

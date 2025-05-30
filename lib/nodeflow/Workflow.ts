@@ -16,23 +16,13 @@ export class Workflow {
   }
 
   async execute(inputData: Record<string, any> = {}, config?: NodeExecutionConfig): Promise<any> {
-
     const registry: NodeRegistry = {};
-    const nodeConfigs = [];
-    
     for (const [_, node] of this.nodes) {
       const nodeName = node.getName();
       registry[nodeName] = { nodeClass: node.constructor as any };
-      nodeConfigs.push(node.toJSON());
     }
 
-    const workflowConfig: WorkflowConfig = {
-      id: this.workflowId,
-      name: this.workflowId,
-      nodes: nodeConfigs,
-    };
-
-    const engine = new WorkflowEngine(workflowConfig, registry);
+    const engine = new WorkflowEngine(this.nodes, registry);
     return await engine.execute(inputData, undefined, config);
   }
 

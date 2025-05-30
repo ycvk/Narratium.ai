@@ -15,31 +15,16 @@ export abstract class NodeBase {
   constructor(config: NodeConfig) {
     this.id = config.id;
     this.name = config.name;
-    this.category = config.category || this.getDefaultCategory();
+    this.category = this.getDefaultCategory();
     this.params = config.params || {};
     this.next = config.next || [];
     this.inputMappings = (config as any).inputMappings || [];
     this.outputMappings = (config as any).outputMappings || [];
     
-    this.validateNodeCategory();
     this.initializeTools();
   }
 
   protected abstract getDefaultCategory(): NodeCategory;
-
-  private validateNodeCategory(): void {
-    switch (this.category) {
-    case NodeCategory.ENTRY:
-      break;
-    case NodeCategory.EXIT:
-      if (this.next.length > 0) {
-        console.warn(`Exit node '${this.id}' has next nodes, which may not be intended`);
-      }
-      break;
-    case NodeCategory.MIDDLE:
-      break;
-    }
-  }
 
   getCategory(): NodeCategory {
     return this.category;
@@ -64,10 +49,6 @@ export abstract class NodeBase {
     }
   }
 
-  protected getToolClass(): typeof NodeTool | undefined {
-    return this.toolClass;
-  }
-
   protected async executeTool(methodName: string, ...params: any[]): Promise<any> {
     if (!this.toolClass) {
       throw new Error(`No tool class available for node type: ${this.getName()}`);
@@ -75,15 +56,6 @@ export abstract class NodeBase {
     
     return await this.toolClass.executeMethod(methodName, ...params);
   }
-  
-  hasToolMethod(methodName: string): boolean {
-    if (!this.toolClass) return false;
-    return this.toolClass.getAvailableMethods().includes(methodName);
-  }
-
-  getAvailableToolMethods(): string[] {
-    return this.toolClass?.getAvailableMethods() || [];
-  } 
 
   getId(): string {
     return this.id;
@@ -105,46 +77,71 @@ export abstract class NodeBase {
 
   abstract _call(input: NodeInput, config?: NodeExecutionConfig): Promise<NodeOutput>;
 
-  protected async resolveInput(context: NodeContext, directInput?: NodeInput): Promise<NodeInput> {
-    const resolvedInput: NodeInput = { ...directInput };
+  protected async resolveInput(context: NodeContext): Promise<NodeInput> {
+    const resolvedInput: NodeInput = {};
 
+    if (this.category === NodeCategory.ENTRY && this.inputMappings.length === 0) {
+      return resolvedInput;
+    }
+    
     for (const mapping of this.inputMappings) {
-      if (resolvedInput[mapping.nodeKey] === undefined) {
-        if (context.has(mapping.contextKey)) {
-          resolvedInput[mapping.nodeKey] = context.get(mapping.contextKey);
-        } else if (mapping.required) {
-          throw new Error(`Node ${this.id}: Missing required input '${mapping.nodeKey}' (expected from context key '${mapping.contextKey}')`);
-        } else if (mapping.defaultValue !== undefined) {
-          resolvedInput[mapping.nodeKey] = mapping.defaultValue;
-        }
+      if (context.hasCache(mapping.contextKey)) {
+        resolvedInput[mapping.nodeKey] = context.getCache(mapping.contextKey);
+        continue;
+      } 
+      
+      if (context.hasInput(mapping.contextKey)) {
+        resolvedInput[mapping.nodeKey] = context.getInput(mapping.contextKey);
+        continue;
+      }
+      
+      if (mapping.defaultValue !== undefined) {
+        resolvedInput[mapping.nodeKey] = mapping.defaultValue;
+        continue;
+      }
+
+      if (mapping.required) {
+        throw new Error(`Node ${this.id}: Missing required input '${mapping.nodeKey}' (expected from context key '${mapping.contextKey}')`);
       }
     }
+    
     return resolvedInput;
   }
 
   protected async publishOutput(output: NodeOutput, context: NodeContext): Promise<void> {
+    const storeData = (key: string, value: any) => {
+      switch (this.category) {
+        case NodeCategory.EXIT:
+          context.setOutput(key, value);
+          break;
+        default:
+          context.setCache(key, value);
+          break;
+      }
+    };
+
     for (const mapping of this.outputMappings) {
       if (output[mapping.nodeKey] !== undefined) {
-        context.set(mapping.contextKey, output[mapping.nodeKey]);
+        storeData(mapping.contextKey, output[mapping.nodeKey]);
       } else if (mapping.required) {
         console.warn(`Node ${this.id}: Required output '${mapping.nodeKey}' not found to publish to context key '${mapping.contextKey}'`);
       }
     }
-    context.set(`${this.id}_output`, output);
+    
+    storeData(`${this.name}_${this.id}_output`, output);
   }
 
-  async execute(directInput: NodeInput, context: NodeContext, config?: NodeExecutionConfig): Promise<NodeExecutionResult> {
+  async execute(context: NodeContext, config?: NodeExecutionConfig): Promise<NodeExecutionResult> {
     const startTime = new Date();
-    let resolvedNodeInput = directInput; 
     const result: NodeExecutionResult = {
       nodeId: this.id,
       status: NodeExecutionStatus.RUNNING,
-      input: resolvedNodeInput,
+      input: {},
       startTime,
     };
 
     try {
-      resolvedNodeInput = await this.resolveInput(context, directInput);
+      const resolvedNodeInput = await this.resolveInput(context);
       result.input = resolvedNodeInput;
 
       await this.beforeExecute(resolvedNodeInput, context);
@@ -157,10 +154,9 @@ export abstract class NodeBase {
     } catch (error) {
       result.status = NodeExecutionStatus.FAILED;
       result.error = error as Error;
-      await this.onError(error as Error, context);
     } finally {
       result.endTime = new Date();
-      context.set(`${this.id}_execution`, result);
+      context.setCache(`${this.name}_${this.id}_execution`, result);
     }
 
     return result;
@@ -170,15 +166,6 @@ export abstract class NodeBase {
   }
 
   protected async afterExecute(output: NodeOutput, context: NodeContext): Promise<void> {
-  }
-
-  protected async onError(error: Error, context: NodeContext): Promise<void> {
-  }
-
-  protected validateInput(input: NodeInput): void {
-  }
-
-  protected validateOutput(output: NodeOutput): void {
   }
 
   getStatus(): Record<string, any> {
