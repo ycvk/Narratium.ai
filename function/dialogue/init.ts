@@ -100,7 +100,7 @@ export async function initCharacterDialogue(options: InitCharacterDialogueOption
             regexResult: processedMessage,
           },
           undefined,
-          2,
+          2
         );
         nodeIds.push(nodeId);
       }
