@@ -21,11 +21,7 @@ Narratium aims to deliver a lightweight storytelling engine combining context co
 
 Narratium is currently presented as a web-based interactive game:
 
-MVP 1.0 (AI automatically processes world books, no regular expression support):
-: [Narratium MVP 1.0](https://narratium-ltc2-hwo6gila4-0xhacker.vercel.app/)
-
-MVP 2.0 (supports world books and regular expressions, logic refinement in progress):
-: [Narratium MVP 2.0](https://narratium.org)
+MVP Experience Version (Visual Novel with Diverse Rendering): [Narratium MVP](https://narratium.org)
 
 ## 🖼️ Page Preview
 
