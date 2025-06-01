@@ -128,7 +128,6 @@ async function processPostResponseAsync({
     const parsed: ParsedResponse = {
       regexResult: screenContent,
       nextPrompts,
-      event,
     };
 
     const dialogueTree = await LocalCharacterDialogueOperations.getDialogueTreeById(characterId);
@@ -140,7 +139,6 @@ async function processPostResponseAsync({
       message,
       screenContent,
       fullResponse,
-      "",
       parsed,
       nodeId,
     );
@@ -154,7 +152,6 @@ async function processPostResponseAsync({
           characterId,
           nodeId,
           {
-            response_summary: compressedParsed,
             parsed_content: {
               ...parsed,
               compressedContent: compressedParsed,

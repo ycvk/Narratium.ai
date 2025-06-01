@@ -8,9 +8,7 @@ import { Character } from "@/lib/core/character";
 interface EditDialogueNodeRequest {
   characterId: string;
   nodeId: string;
-  screen: string;
-  speech: string;
-  innerThought: string;
+  assistantResponse: string;
   model_name: string;
   api_key: string;
   base_url: string;
@@ -23,9 +21,7 @@ export async function editDialaogueNodeContent(input: EditDialogueNodeRequest) {
     const { 
       characterId, 
       nodeId, 
-      screen,
-      speech,
-      innerThought,
+      assistantResponse,
       model_name,
       api_key,
       base_url,
@@ -59,7 +55,7 @@ export async function editDialaogueNodeContent(input: EditDialogueNodeRequest) {
     try {
       const compressedResult = await dialogue.compressStory(
         node.user_input || "",
-        screen + speech + innerThought,
+        assistantResponse,
       );
       summary = parseEvent(compressedResult);
     } catch (compressionError) {
@@ -68,8 +64,7 @@ export async function editDialaogueNodeContent(input: EditDialogueNodeRequest) {
     }
 
     const nodeUpdates: Partial<DialogueNode> = {
-      assistant_response: screen + speech + innerThought,
-      response_summary: summary,
+      assistant_response: assistantResponse,
       parsed_content: {
         compressedContent: summary,
       },

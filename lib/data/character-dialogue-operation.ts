@@ -4,7 +4,7 @@ import { v4 as uuidv4 } from "uuid";
 import { ParsedResponse } from "@/lib/models/parsed-response";
 
 export class LocalCharacterDialogueOperations {
-  static async createDialogueTree(characterId: string, title: string = "Untitled Conversation"): Promise<DialogueTree> {
+  static async createDialogueTree(characterId: string): Promise<DialogueTree> {
     const dialogues = await readData(CHARACTER_DIALOGUES_FILE);
     
     const filteredDialogues = dialogues.filter((d: any) => d.character_id !== characterId);
@@ -20,7 +20,7 @@ export class LocalCharacterDialogueOperations {
     filteredDialogues.push(dialogueTree); 
     await writeData(CHARACTER_DIALOGUES_FILE, filteredDialogues);
 
-    await this.addNodeToDialogueTree(characterId, "", "", "", "","", undefined, "root");
+    await this.addNodeToDialogueTree(characterId, "", "", "", "", undefined, "root");
     return dialogueTree;
   }
   
@@ -40,7 +40,6 @@ export class LocalCharacterDialogueOperations {
         node.user_input,
         node.assistant_response,
         node.full_response,
-        node.response_summary,
         node.parsed_content,
         node.created_at,
       )) || [],
@@ -57,7 +56,6 @@ export class LocalCharacterDialogueOperations {
     userInput: string,
     assistantResponse: string,
     fullResponse: string,
-    responseSummary: string = "",
     parsedContent?: ParsedResponse,
     nodeId?: string,
     branchId?: number,
@@ -83,7 +81,6 @@ export class LocalCharacterDialogueOperations {
       userInput,
       assistantResponse,
       fullResponse,
-      responseSummary,
       parsedContent,
     );
     

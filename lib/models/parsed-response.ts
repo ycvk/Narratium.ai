@@ -1,6 +1,5 @@
 export interface ParsedResponse {
-    regexResult?: string;
-    nextPrompts?: string[];
-    compressedContent?: string;
-    event?: string;
-  }
+  regexResult?: string;
+  nextPrompts?: string[];
+  compressedContent?: string;
+}

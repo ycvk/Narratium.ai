@@ -117,7 +117,7 @@ function DialogueNodeComponent({ id, data }: NodeProps<DialogueNode["data"]>) {
       {showRootTooltip && (
         <div className="absolute -top-14 right-0 z-20 bg-[#1c1c1c] border border-amber-700 rounded-md p-2 shadow-lg max-w-[200px] text-xs text-amber-400 animate-fade-in">
           <div className="relative">
-            {t("dialogue.rootNodeCannotJump") || "根节点是对话的起点，无法跳转"}
+            {t("dialogue.rootNodeCannotJump")}
             <div className="absolute -bottom-6 right-4 w-0 h-0 border-8 border-transparent border-t-amber-700"></div>
           </div>
         </div>
@@ -278,9 +278,7 @@ export default function DialogueTreeModal({ isOpen, onClose, characterId, onDial
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
   const [selectedNode, setSelectedNode] = useState<DialogueNode | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [editScreen, setEditScreen] = useState("");
-  const [editSpeech, setEditSpeech] = useState("");
-  const [editThought, setEditThought] = useState("");
+  const [editContent, setEditContent] = useState("");
   const [isSaving, setIsSaving] = useState(false);
   const [dataLoaded, setDataLoaded] = useState(false);
   const [isJumpingToNode, setIsJumpingToNode] = useState(false);
@@ -325,13 +323,7 @@ export default function DialogueTreeModal({ isOpen, onClose, characterId, onDial
     const nodeToEdit = nodesRef.current.find(node => node.id == nodeId);
     if (nodeToEdit) {
       setSelectedNode(nodeToEdit as DialogueNode);
-      
-      const parsedContent = nodeToEdit.data.parsedContent || {};
-      
-      setEditScreen(parsedContent.screen || "");
-      setEditSpeech(parsedContent.speech || "");
-      setEditThought(parsedContent.thought || "");
-      
+      setEditContent(nodeToEdit.data.assistantResponse || "");
       setIsEditModalOpen(true);
     } else {
       console.error("Node not found with ID:", nodeId, "Available nodes:", nodesRef.current.map(n => n.id));
@@ -482,8 +474,8 @@ export default function DialogueTreeModal({ isOpen, onClose, characterId, onDial
           
           label = `${t("dialogue.startingPoint")}${rootChildrenCount - rootChildIndex}${rootChildrenCount > 1 ? `/${rootChildrenCount}` : ""}`;
         } else if (node.assistant_response) {
-          if (node.response_summary) {
-            label = node.response_summary;
+          if (node.parsed_content?.compressedContent) {
+            label = node.parsed_content.compressedContent;
           } else {
             const shortResponse = node.assistant_response.length > 30 
               ? node.assistant_response.substring(0, 30) + "..." 
@@ -597,21 +589,11 @@ export default function DialogueTreeModal({ isOpen, onClose, characterId, onDial
         const baseUrl = localStorage.getItem("modelBaseUrl") || "";
         const llmType = localStorage.getItem("llmType") || "openai";
         const language = localStorage.getItem("language") || "zh";
-
-        const parsedContent = {
-          screen: editScreen,
-          speech: editSpeech,
-          thought: editThought,
-          nextPrompts: [],
-          status: "",
-        };
         
         const response = await editDialaogueNodeContent({
           characterId: characterId,
           nodeId: selectedNode.id,
-          screen: editScreen,
-          speech: editSpeech,
-          innerThought: editThought,
+          assistantResponse: editContent,
           model_name: modelName,
           api_key: apiKey,
           base_url: baseUrl,
@@ -631,8 +613,10 @@ export default function DialogueTreeModal({ isOpen, onClose, characterId, onDial
                 data: {
                   ...node.data,
                   label: node.data.label,
-                  assistantResponse: node.data.assistantResponse,
-                  parsedContent: parsedContent,
+                  assistantResponse: editContent,
+                  parsedContent: {
+                    compressedContent: response.summary,
+                  },
                 },
               };
             }
@@ -667,7 +651,7 @@ export default function DialogueTreeModal({ isOpen, onClose, characterId, onDial
       <div className="absolute inset-0 backdrop-blur-sm"></div>
       <div className="bg-[#1e1c1b] bg-opacity-75 border border-[#534741] rounded-lg shadow-lg p-4 w-[90%] h-[80%] max-w-5xl mx-4 fantasy-bg relative z-10 backdrop-filter backdrop-blur-sm">
         <div className="flex justify-between items-center mb-4">
-          <h3 className={`text-[#f4e8c1] text-lg ${serifFontClass}`}>{t("dialogue.treeVisualization") || "对话树可视化"}</h3>
+          <h3 className={`text-[#f4e8c1] text-lg ${serifFontClass}`}>{t("dialogue.treeVisualization")}</h3>
           <button 
             onClick={(e) => {trackButtonClick("DialogueTreeModal", "关闭对话树");onClose();}}
             className="text-[#8a8a8a] hover:text-amber-400 transition-colors duration-300"
@@ -687,13 +671,13 @@ export default function DialogueTreeModal({ isOpen, onClose, characterId, onDial
                 <line x1="12" y1="8" x2="12" y2="12"></line>
                 <line x1="12" y1="16" x2="12.01" y2="16"></line>
               </svg>
-              <h4 className={`text-amber-400 mb-3 ${serifFontClass}`}>{t("dialogue.noCharacterSelected") || "未选择角色"}</h4>
-              <p className={`text-[#f4e8c1] mb-4 ${fontClass}`}>{t("dialogue.selectCharacterFirst") || "请先选择一个角色"}</p>
+              <h4 className={`text-amber-400 mb-3 ${serifFontClass}`}>{t("dialogue.noCharacterSelected")}</h4>
+              <p className={`text-[#f4e8c1] mb-4 ${fontClass}`}>{t("dialogue.selectCharacterFirst")}</p>
               <button 
                 onClick={(e) => {trackButtonClick("DialogueTreeModal", "关闭对话树");onClose();}}
                 className={`px-4 py-2 bg-[#2a2825] hover:bg-[#3a3835] text-amber-400 rounded-md transition-all duration-300 border border-amber-700 hover:shadow-[0_0_8px_rgba(251,146,60,0.4)] ${fontClass}`}
               >
-                {t("common.return") || "返回"}
+                {t("common.return")}
               </button>
             </div>
           </div>
@@ -701,7 +685,7 @@ export default function DialogueTreeModal({ isOpen, onClose, characterId, onDial
           <div className="h-[calc(100%-6rem)] w-full flex flex-col items-center justify-center">
             <div className="text-center p-6 border border-[#534741] rounded-lg bg-[#1c1c1c] max-w-lg">
               <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-amber-400 mx-auto mb-4"></div>
-              <p className={`text-[#f4e8c1] ${fontClass}`}>{t("dialogue.loadingDialogue") || "正在加载对话数据..."}</p>
+              <p className={`text-[#f4e8c1] ${fontClass}`}>{t("dialogue.loadingDialogue")}</p>
             </div>
           </div>
         ) : nodes.length === 0 ? (
@@ -712,8 +696,8 @@ export default function DialogueTreeModal({ isOpen, onClose, characterId, onDial
                 <line x1="12" y1="8" x2="12" y2="12"></line>
                 <line x1="12" y1="16" x2="12.01" y2="16"></line>
               </svg>
-              <h4 className={`text-amber-400 mb-3 ${serifFontClass}`}>{t("dialogue.noDialogueNodes") || "没有对话节点"}</h4>
-              <p className={`text-[#f4e8c1] mb-4 ${fontClass}`}>{t("dialogue.startConversation") || "开始一段对话来创建对话树"}</p>
+              <h4 className={`text-amber-400 mb-3 ${serifFontClass}`}>{t("dialogue.noDialogueNodes")}</h4>
+              <p className={`text-[#f4e8c1] mb-4 ${fontClass}`}>{t("dialogue.startConversation")}</p>
               <button 
                 onClick={(e) => {trackButtonClick("DialogueTreeModal", "关闭对话树");onClose();}}
                 className={`px-4 py-2 bg-[#2a2825] hover:bg-[#3a3835] text-amber-400 rounded-md transition-all duration-300 border border-amber-700 hover:shadow-[0_0_8px_rgba(251,146,60,0.4)] ${fontClass}`}
@@ -756,20 +740,20 @@ export default function DialogueTreeModal({ isOpen, onClose, characterId, onDial
                     <polyline points="15 10 20 15 15 20"></polyline>
                     <path d="M4 4v7a4 4 0 0 0 4 4h12"></path>
                   </svg>
-                  <span className={`text-[#d1a35c] text-xs ${fontClass}`}>{t("dialogue.jumpToNode") || "跳转到节点"}</span>
+                  <span className={`text-[#d1a35c] text-xs ${fontClass}`}>{t("dialogue.jumpToNode")}</span>
                 </div>
                 <div className="flex items-center">
                   <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-amber-400 mr-2">
                     <path d="M9 18l6-6-6-6" />
                   </svg>
-                  <span className={`text-[#d1a35c] text-xs ${fontClass}`}>{t("dialogue.expandNode") || "展开节点"}</span>
+                  <span className={`text-[#d1a35c] text-xs ${fontClass}`}>{t("dialogue.expandNode")}</span>
                 </div>
                 <div className="flex items-center">
                   <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-amber-400 mr-2">
                     <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
                     <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
                   </svg>
-                  <span className={`text-[#d1a35c] text-xs ${fontClass}`}>{t("dialogue.editNode") || "编辑节点"}</span>
+                  <span className={`text-[#d1a35c] text-xs ${fontClass}`}>{t("dialogue.editNode")}</span>
                 </div>
               </div>
             </Panel>
@@ -798,7 +782,7 @@ export default function DialogueTreeModal({ isOpen, onClose, characterId, onDial
                 <h5 className={`text-amber-400 text-sm mb-2 ${serifFontClass}`}>{t("dialogue.memorySummary")}:</h5>
                 <div className="ml-2">
                   <ol className={`list-decimal list-inside ${fontClass} text-[#f4e8c1] text-sm`}>
-                    {selectedNode.data.label.split("——>").map((step, index) => (
+                    {selectedNode.data.label.split(/——>|->/).map((step, index) => (
                       <li key={index} className="mb-1">{step.trim()}</li>
                     ))}
                   </ol>
@@ -812,51 +796,14 @@ export default function DialogueTreeModal({ isOpen, onClose, characterId, onDial
                       <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-1">
                         <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
                       </svg>
-                      {t("characterChat.screen")}
+                      {t("dialogue.response")}
                     </span>
                   </label>
                   <textarea 
-                    value={editScreen}
-                    onChange={(e) => setEditScreen(e.target.value)}
-                    className={`w-full h-24 p-3 bg-[#121212] border border-[#444444] rounded-md text-[#f4e8c1] fantasy-scrollbar focus:outline-none focus:border-amber-400 ${fontClass} text-sm leading-relaxed`}
-                    placeholder={t("dialogue.screenPlaceholder")}
-                  />
-                </div>
-
-                <div>
-                  <label className={`block text-[#c093ff] text-sm mb-2 ${serifFontClass}`}>
-                    <span className="flex items-center">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-1">
-                        <path d="M2 12h20M2 12a10 10 0 0 0 10 10M2 12a10 10 0 0 1 10-10M22 12a10 10 0 0 1-10 10M22 12a10 10 0 0 0-10-10"></path>
-                      </svg>
-                      {t("characterChat.speech")}
-                    </span>
-                  </label>
-                  <textarea 
-                    value={editSpeech}
-                    onChange={(e) => setEditSpeech(e.target.value)}
-                    className={`w-full h-24 p-3 bg-[#121212] border border-[#444444] rounded-md text-[#c093ff] fantasy-scrollbar focus:outline-none focus:border-[#c093ff] ${fontClass} text-sm leading-relaxed`}
-                    placeholder={t("dialogue.speechPlaceholder")}
-                  />
-                </div>
-                
-                <div>
-                  <label className={`block text-[#56b3b4] text-sm mb-2 ${serifFontClass}`}>
-                    <span className="flex items-center">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-1">
-                        <circle cx="12" cy="12" r="10"></circle>
-                        <path d="M8 14s1.5 2 4 2 4-2 4-2"></path>
-                        <line x1="9" y1="9" x2="9.01" y2="9"></line>
-                        <line x1="15" y1="9" x2="15.01" y2="9"></line>
-                      </svg>
-                      {t("characterChat.innerThought")}
-                    </span>
-                  </label>
-                  <textarea 
-                    value={editThought}
-                    onChange={(e) => setEditThought(e.target.value)}
-                    className={`w-full h-24 p-3 bg-[#121212] border border-[#444444] rounded-md text-[#56b3b4] fantasy-scrollbar focus:outline-none focus:border-[#56b3b4] ${fontClass} text-sm leading-relaxed`}
-                    placeholder={t("dialogue.thoughtPlaceholder")}
+                    value={editContent}
+                    onChange={(e) => setEditContent(e.target.value)}
+                    className={`w-full h-64 p-3 bg-[#121212] border border-[#444444] rounded-md text-[#f4e8c1] fantasy-scrollbar focus:outline-none focus:border-amber-400 ${fontClass} text-sm leading-relaxed`}
+                    placeholder={t("dialogue.responsePlaceholder")}
                   />
                 </div>
               </div>
