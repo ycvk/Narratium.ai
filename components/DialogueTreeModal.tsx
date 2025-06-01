@@ -284,6 +284,8 @@ export default function DialogueTreeModal({ isOpen, onClose, characterId, onDial
   const [isJumpingToNode, setIsJumpingToNode] = useState(false);
   const flowRef = useRef(null);
   const nodesRef = useRef<Node[]>([]);
+  const modalRef = useRef<HTMLDivElement>(null);
+  const editModalRef = useRef<HTMLDivElement>(null);
   
   const defaultEdgeOptions = useMemo(() => ({
     type: "smoothstep", 
@@ -376,6 +378,38 @@ export default function DialogueTreeModal({ isOpen, onClose, characterId, onDial
       setDataLoaded(false);
     }
   }, [isOpen, characterId]);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (modalRef.current && !modalRef.current.contains(event.target as HTMLElement)) {
+        onClose();
+      }
+    }
+
+    if (isOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isOpen, onClose]);
+
+  useEffect(() => {
+    function handleEditModalClickOutside(event: MouseEvent) {
+      if (editModalRef.current && !editModalRef.current.contains(event.target as HTMLElement)) {
+        setIsEditModalOpen(false);
+      }
+    }
+
+    if (isEditModalOpen) {
+      document.addEventListener("mousedown", handleEditModalClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleEditModalClickOutside);
+    };
+  }, [isEditModalOpen]);
 
   const fetchDialogueData = async (characterId: string) => {
     if (!characterId) {
@@ -649,7 +683,7 @@ export default function DialogueTreeModal({ isOpen, onClose, characterId, onDial
     <div className="fixed inset-0 z-50 flex items-center justify-center">
       <DialogueFlowStyles />
       <div className="absolute inset-0 backdrop-blur-sm"></div>
-      <div className="bg-[#1e1c1b] bg-opacity-75 border border-[#534741] rounded-lg shadow-lg p-4 w-[90%] h-[80%] max-w-5xl mx-4 fantasy-bg relative z-10 backdrop-filter backdrop-blur-sm">
+      <div ref={modalRef} className="bg-[#1e1c1b] bg-opacity-75 border border-[#534741] rounded-lg shadow-lg p-4 w-[90%] h-[80%] max-w-5xl mx-4 fantasy-bg relative z-10 backdrop-filter backdrop-blur-sm">
         <div className="flex justify-between items-center mb-4">
           <h3 className={`text-[#f4e8c1] text-lg ${serifFontClass}`}>{t("dialogue.treeVisualization")}</h3>
           <button 
@@ -763,7 +797,7 @@ export default function DialogueTreeModal({ isOpen, onClose, characterId, onDial
                 
         {isEditModalOpen && selectedNode && (
           <div className="absolute inset-0 flex items-center justify-center backdrop-blur-md z-20">
-            <div className="bg-[#1e1c1b] bg-opacity-85 border border-[#534741] rounded-lg p-6 w-[80%] max-w-2xl backdrop-filter backdrop-blur-sm shadow-lg">
+            <div ref={editModalRef} className="bg-[#1e1c1b] bg-opacity-85 border border-[#534741] rounded-lg p-6 w-[80%] max-w-2xl backdrop-filter backdrop-blur-sm shadow-lg">
               <div className="flex justify-between items-center mb-4">
                 <h4 className={`text-[#f4e8c1] text-lg ${serifFontClass}`}>{t("dialogue.editNode") || "编辑对话节点"}</h4>
                 <button 
