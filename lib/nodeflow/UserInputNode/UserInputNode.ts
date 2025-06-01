@@ -1,6 +1,5 @@
 import { NodeBase } from "@/lib/nodeflow/NodeBase";
 import { NodeConfig, NodeInput, NodeOutput, NodeCategory } from "@/lib/nodeflow/types";
-import { NodeContext } from "@/lib/nodeflow/NodeContext";
 
 export class UserInputNode extends NodeBase {
   static readonly nodeName = "userInput";
@@ -15,12 +14,12 @@ export class UserInputNode extends NodeBase {
     return NodeCategory.ENTRY;
   }
 
-  protected async beforeExecute(input: NodeInput, context: NodeContext): Promise<void> {
-    await super.beforeExecute(input, context);
+  protected async beforeExecute(input: NodeInput): Promise<void> {
+    await super.beforeExecute(input);
   }
 
-  protected async afterExecute(output: NodeOutput, context: NodeContext): Promise<void> {
-    await super.afterExecute(output, context);
+  protected async afterExecute(output: NodeOutput): Promise<void> {
+    await super.afterExecute(output);
   }
 
   protected async _call(input: NodeInput): Promise<NodeOutput> {

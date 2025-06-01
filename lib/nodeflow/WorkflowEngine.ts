@@ -155,6 +155,7 @@ export class WorkflowEngine {
     } finally {
       result.endTime = new Date();
       result.results = [];
+      result.outputData = ctx.toJSON().outputStore;
     }
 
     return result;
@@ -232,6 +233,7 @@ export class WorkflowEngine {
       result.status = NodeExecutionStatus.FAILED;
     } finally {
       result.endTime = new Date();
+      result.outputData = ctx.toJSON().outputStore;
     }
 
     return result;

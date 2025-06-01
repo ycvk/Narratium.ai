@@ -129,6 +129,29 @@ export class ExampleNode extends NodeBase {
       outputField2: value2
     };
   }
+
+  // Optional: Override for pre-processing logic
+  protected async beforeExecute(input: NodeInput): Promise<void> {
+    // All required data is already resolved in input parameter
+    // No need for context since data is pre-resolved
+    await super.beforeExecute(input);
+    
+    // Custom pre-processing logic
+    const characterId = input.characterId;
+    if (characterId) {
+      // Initialize node state based on input
+      const data = await this.executeTool("loadData", characterId);
+      this.setState("loadedData", data);
+    }
+  }
+
+  // Optional: Override for post-processing logic  
+  protected async afterExecute(output: NodeOutput): Promise<void> {
+    await super.afterExecute(output);
+    
+    // Custom post-processing logic
+    console.log(`Node ${this.getId()} completed with output:`, output);
+  }
 }
 ```
 
@@ -228,6 +251,32 @@ protected async _call(input: NodeInput): Promise<NodeOutput> {
 }
 ```
 
+### 4. 生命周期方法设计
+
+NodeFlow 采用简化的生命周期设计，避免重复传递 context：
+
+```typescript
+// ✅ 简化设计：数据已在 resolveInput 中预处理
+protected async beforeExecute(input: NodeInput): Promise<void> {
+  // input 已包含所有需要的数据，无需再从 context 获取
+  const characterId = input.characterId;
+}
+
+protected async afterExecute(output: NodeOutput): Promise<void> {
+  // 处理输出结果，专注于输出数据本身
+  console.log("Processing completed:", output);
+}
+
+// ❌ 过度设计：重复传递 context 参数
+// protected async beforeExecute(input: NodeInput, context: NodeContext): Promise<void>
+```
+
+**设计原理：**
+- `resolveInput()` 阶段已将所有需要的数据从 context 提取到 input
+- `beforeExecute()` 只需关注 input 数据的预处理
+- `afterExecute()` 只需关注 output 数据的后处理
+- 避免重复的 context 访问，保持职责单一
+
 ## 注释规范
 
 - 所有注释使用英文
@@ -252,4 +301,45 @@ static async processUserInput(
 - 节点类名: `{Purpose}Node` (如 `BasePromptNode`)
 - 工具类名: `{Purpose}NodeTools` (如 `BasePromptNodeTools`)
 - 方法名: 动词开头，描述具体操作 (如 `getBaseSystemPrompt`)
-- 变量名: 驼峰命名，描述性强 
+- 变量名: 驼峰命名，描述性强
+
+## 节点类型示例
+
+### 数据获取节点
+- **BasePromptNode**: 获取角色基础提示词
+- **ContextNode**: 加载和管理对话历史上下文
+
+### 数据处理节点
+- **WorldBookNode**: 将世界书内容整合到提示词中
+- **LLMNode**: 调用大语言模型生成响应
+
+### 后处理节点
+- **RegexNode**: 对LLM响应进行正则表达式处理和内容提取
+- **OutputNode**: 格式化最终输出结果
+
+### 完整工作流示例
+```
+UserInputNode → ContextNode → BasePromptNode → WorldBookNode → LLMNode → RegexNode → OutputNode
+```
+
+每个节点都专注于单一职责，通过Cache Store传递数据，构成完整的对话处理管道。
+
+## 工作流输出数据
+
+WorkflowEngine.execute()方法返回的WorkflowExecutionResult包含outputData字段，该字段包含所有EXIT节点输出到Output Store的键值对数据：
+
+```typescript
+const result = await engine.execute(inputData, context);
+
+// 获取输出数据
+const outputData = result.outputData;
+console.log("工作流输出:", outputData);
+
+// 解构获取具体字段
+const { processedResponse, screenContent, nextPrompts } = outputData || {};
+```
+
+**数据流向总结：**
+- **InitParams**: Input Store → Entry节点
+- **InputFields**: Cache Store → Middle节点间传递
+- **OutputFields**: Exit节点 → Output Store → WorkflowExecutionResult.outputData

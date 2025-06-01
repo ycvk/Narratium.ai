@@ -22,7 +22,7 @@ export class PromptAssembler {
     baseSystemMessage: string,
     userMessage: string,
     chatHistory: DialogueMessage[],
-    currentUserInput: string,
+    userInput: string,
     username?: string,
     charName?: string,
   ): { systemMessage: string; userMessage: string } {
@@ -30,17 +30,17 @@ export class PromptAssembler {
     
     const contextWithCurrentMessage = [...adjustedChatHistory];
 
-    if (currentUserInput) {
+    if (userInput) {
       contextWithCurrentMessage.push({
         role: "user",
-        content: currentUserInput,
+        content: userInput,
         id: adjustedChatHistory.length,
       });
     }
     
     const matchingEntries = WorldBookManager.getMatchingEntries(
       worldBook,
-      currentUserInput,
+      userInput,
       contextWithCurrentMessage,
       { contextWindow: this.contextWindow },
     );

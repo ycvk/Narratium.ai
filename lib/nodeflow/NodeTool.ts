@@ -11,9 +11,7 @@ export abstract class NodeTool {
   }
 
   protected static logExecution(methodName: string, params?: any): void {
-    if (process.env.NODE_ENV === "development") {
-      console.log(`[${this.getToolType()}Tool] Executing ${methodName}`, params);
-    }
+    console.log(`[${this.getToolType()}Tool] Executing ${methodName}`, params);
   }
 
   protected static handleError(error: Error, methodName: string): never {
@@ -32,11 +30,7 @@ export abstract class NodeTool {
   }
 
   static async executeMethod(methodName: string, ...params: any[]): Promise<any> {
-    console.log(`executeMethod 被调用: 方法=${methodName}, this.getToolType()=${this.getToolType()}`);
-    console.log("this 对象:", this.name);
-    
     const method = (this as any)[methodName];
-    console.log("找到的方法:", typeof method, method?.name);
     
     if (typeof method !== "function") {
       console.error(`方法查找失败: ${methodName} 在 ${this.getToolType()}Tool 中不存在`);

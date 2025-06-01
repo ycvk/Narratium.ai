@@ -156,11 +156,12 @@ export abstract class NodeBase {
     };
     try {
       const resolvedNodeInput = await this.resolveInput(context);
-      await this.beforeExecute(resolvedNodeInput, context);
+      await this.beforeExecute(resolvedNodeInput);
       result.input = resolvedNodeInput;
       
       const output = await this._call(resolvedNodeInput);
       await this.publishOutput(output, context);
+      await this.afterExecute(output);
 
       result.status = NodeExecutionStatus.COMPLETED;
       result.output = output;
@@ -174,11 +175,11 @@ export abstract class NodeBase {
     return result;
   }
 
-  protected async beforeExecute(input: NodeInput, context: NodeContext): Promise<void> {
+  protected async beforeExecute(input: NodeInput): Promise<void> {
     console.log(`Node ${this.id}: Processing workflow beforeExecute`);
   }
 
-  protected async afterExecute(output: NodeOutput, context: NodeContext): Promise<void> {
+  protected async afterExecute(output: NodeOutput): Promise<void> {
     console.log(`Node ${this.id}: Processing workflow afterExecute`);
   }
 

@@ -1,9 +1,7 @@
 import { NodeBase } from "@/lib/nodeflow/NodeBase";
 import { NodeConfig, NodeInput, NodeOutput, NodeCategory } from "@/lib/nodeflow/types";
 import { DialogueMessage } from "@/lib/models/character-dialogue-model";
-import { DialogueStory } from "@/lib/nodeflow/ContextNode/ContextNodeModel";
-import { NodeContext } from "../NodeContext";
-import { ContextNodeTools } from "./ContextNodeTools";
+import { ContextNodeTools, DialogueStory } from "./ContextNodeTools";
 import { NodeToolRegistry } from "../NodeTool";
 
 export class ContextNode extends NodeBase {
@@ -29,10 +27,9 @@ export class ContextNode extends NodeBase {
     return NodeCategory.MIDDLE;
   }
 
-  protected async beforeExecute(input: NodeInput, context: NodeContext): Promise<void> {
-    await super.beforeExecute(input, context);
-    const characterId = context.getCache("characterId");
-    console.log("characterId",characterId);
+  protected async beforeExecute(input: NodeInput): Promise<void> {
+    await super.beforeExecute(input);
+    const characterId = input.characterId;
 
     try {
       if (characterId) {
@@ -56,7 +53,7 @@ export class ContextNode extends NodeBase {
   }
 
   protected async _call(input: NodeInput): Promise<NodeOutput> {
-    const memLen = input.memoryLength;
+    const memLen = input.memoryLength || 10;
     const recentDialogue = this.getState<DialogueStory>("recentDialogue");
     const historyDialogue = this.getState<DialogueStory>("historyDialogue");
     const systemMessage = this.getState<string>("systemMessage");
@@ -64,7 +61,12 @@ export class ContextNode extends NodeBase {
     const recentHistory = await this.executeTool("getRecentHistory", recentDialogue, memLen) as string;
     const compressedHistory = await this.executeTool("getCompressedHistory", historyDialogue, memLen) as string;
     const messages = await this.executeTool("getMessages", recentDialogue) as DialogueMessage[];
-
+    console.log("ContextNode output:", {
+      recentHistory,
+      compressedHistory,
+      systemMessage,
+      messages,
+    });
     return {
       recentHistory,
       compressedHistory,

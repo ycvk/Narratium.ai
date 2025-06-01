@@ -45,6 +45,7 @@ export interface WorkflowExecutionResult {
   workflowId: string;
   status: NodeExecutionStatus;
   results: NodeExecutionResult[];
+  outputData?: Record<string, any>;
   startTime: Date;
   endTime?: Date;
 }

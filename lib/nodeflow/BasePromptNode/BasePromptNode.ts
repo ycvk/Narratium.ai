@@ -20,22 +20,39 @@ export class BasePromptNode extends NodeBase {
 
   protected async _call(input: NodeInput): Promise<NodeOutput> {
     const characterId = input.characterId;
-    const language = input.language;
+    const language = input.language || "zh";
     const username = input.username;
+    const userInput = input.userInput;
+    const promptType = input.promptType || "EXPLICIT";
+    const number = input.number || 200;
+    const recentHistory = input.recentHistory || "";
+    const compressedHistory = input.compressedHistory || "";
+    const systemMessage = input.systemMessage || "";
 
     if (!characterId) {
       throw new Error("Character ID is required for BasePromptNode");
     }
 
-    const baseSystemMessage = await this.executeTool(
-      "getBaseSystemPrompt",
+    if (!userInput) {
+      throw new Error("User input is required for BasePromptNode");
+    }
+
+    const result = await this.executeTool(
+      "buildCharacterPrompts",
       characterId,
       language,
+      userInput,
+      promptType,
+      number,
+      systemMessage,
+      recentHistory,
+      compressedHistory,
       username,
-    ) as string;
+    ) as { baseSystemMessage: string; userMessage: string };
 
     return {
-      baseSystemMessage,
+      baseSystemMessage: result.baseSystemMessage,
+      userMessage: result.userMessage,
       characterId,
       language,
       username,

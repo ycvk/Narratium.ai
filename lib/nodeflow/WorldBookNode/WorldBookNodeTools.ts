@@ -13,10 +13,7 @@ export class WorldBookNodeTools extends NodeTool {
   }
 
   static async executeMethod(methodName: string, ...params: any[]): Promise<any> {
-    console.log(`WorldBookNodeTools.executeMethod called: method=${methodName}`);
-    
     const method = (this as any)[methodName];
-    console.log("Method found in WorldBookNodeTools:", typeof method);
     
     if (typeof method !== "function") {
       console.error(`Method lookup failed: ${methodName} not found in WorldBookNodeTools`);
@@ -27,11 +24,10 @@ export class WorldBookNodeTools extends NodeTool {
     }
 
     try {
-      console.log(`Executing method: ${methodName}`);
+      this.logExecution(methodName, params);
       return await (method as Function).apply(this, params);
     } catch (error) {
-      console.error(`Method execution failed: ${methodName}`, error);
-      throw error;
+      this.handleError(error as Error, methodName);
     }
   }
 

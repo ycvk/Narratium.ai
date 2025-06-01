@@ -13,11 +13,11 @@ export async function handleCharacterChatRequest(payload: {
   modelName: string;
   baseUrl: string;
   apiKey: string;
-  llmType?: string;
-  streaming?: boolean;
-  language?: "zh" | "en";
-  promptType?: PromptType;
-  number?: number;
+  llmType: string;
+  streaming: boolean;
+  language: "zh" | "en";
+  promptType: PromptType;
+  number: number;
   nodeId: string;
 }): Promise<Response> {
   try {
@@ -28,10 +28,10 @@ export async function handleCharacterChatRequest(payload: {
       modelName,
       baseUrl,
       apiKey,
-      llmType = "openai",
-      language = "zh",
-      promptType = PromptType.EXPLICIT,
-      number = 200,
+      llmType,
+      language,
+      promptType,
+      number,
       nodeId,
     } = payload;
 
@@ -52,7 +52,7 @@ export async function handleCharacterChatRequest(payload: {
       modelName,
       apiKey,
       baseUrl,
-      llmType: llmType as "openai" | "ollama",
+      llmType:llmType as "openai" | "ollama",
       temperature: 0.7,
       streaming: false,
       language,

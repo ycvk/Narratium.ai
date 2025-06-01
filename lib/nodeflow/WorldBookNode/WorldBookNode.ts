@@ -22,7 +22,7 @@ export class WorldBookNode extends NodeBase {
   protected async _call(input: NodeInput): Promise<NodeOutput> {
     const baseSystemMessage = input.baseSystemMessage;
     const userMessage = input.userMessage;
-    const currentUserInput = input.currentUserInput || userMessage;
+    const currentUserInput = input.userInput;
     const characterId = input.characterId;
     const language = input.language || "zh";
     const username = input.username;
