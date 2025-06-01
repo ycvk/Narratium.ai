@@ -56,10 +56,10 @@ export class ContextNode extends NodeBase {
   }
 
   protected async _call(input: NodeInput): Promise<NodeOutput> {
-    const memLen = this.getConfigValue<number>("memoryLength") || 10;
+    const memLen = input.memoryLength;
     const recentDialogue = this.getState<DialogueStory>("recentDialogue");
     const historyDialogue = this.getState<DialogueStory>("historyDialogue");
-    const systemMessage = this.getState<string>("systemMessage") || "";
+    const systemMessage = this.getState<string>("systemMessage");
 
     const recentHistory = await this.executeTool("getRecentHistory", recentDialogue, memLen) as string;
     const compressedHistory = await this.executeTool("getCompressedHistory", historyDialogue, memLen) as string;

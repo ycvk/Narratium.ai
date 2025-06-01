@@ -104,8 +104,8 @@ export abstract class NodeBase {
 
   protected async resolveInput(context: NodeContext): Promise<NodeInput> {
     const resolvedInput: NodeInput = {};
-    const inputFields = this.getInputFields();
     const initParams = this.getInitParams();
+    const inputFields = this.getInputFields();
 
     for (const fieldName of initParams) {
       if (context.hasInput(fieldName)) {
