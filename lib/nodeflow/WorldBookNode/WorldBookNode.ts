@@ -1,6 +1,5 @@
 import { NodeBase } from "@/lib/nodeflow/NodeBase";
 import { NodeConfig, NodeInput, NodeOutput, NodeCategory } from "@/lib/nodeflow/types";
-import { NodeContext } from "../NodeContext";
 import { WorldBookNodeTools } from "./WorldBookNodeTools";
 import { NodeToolRegistry } from "../NodeTool";
 
