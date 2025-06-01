@@ -94,13 +94,13 @@ export async function initCharacterDialogue(options: InitCharacterDialogueOption
           "",
           adaptedMessage,
           adaptedMessage,
-          "",
           {
             nextPrompts: [],
             regexResult: processedMessage,
+            compressedContent: "",
           },
           undefined,
-          2
+          2,
         );
         nodeIds.push(nodeId);
       }
