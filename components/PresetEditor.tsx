@@ -156,7 +156,7 @@ export default function PresetEditor({
           id: preset.id || `preset-${Date.now()}`,
           enabled: preset.enabled !== false,
           totalPrompts: preset.prompts?.length || 0,
-          enabledPrompts: preset.prompts?.filter((p: { enabled: boolean; }) => p.enabled !== false).length || 0,
+          enabledPrompts: preset.prompts?.filter((p: any) => p.enabled !== false).length || 0,
           lastUpdated: new Date(preset.updated_at || preset.created_at || Date.now()).getTime(),
         })) as PresetData[];
         setPresets(formattedPresets);
