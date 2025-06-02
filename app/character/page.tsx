@@ -13,6 +13,7 @@ import { switchDialogueBranch } from "@/function/dialogue/truncate";
 import CharacterChatPanel from "@/components/CharacterChatPanel";
 import WorldBookEditor from "@/components/WorldBookEditor";
 import RegexScriptEditor from "@/components/RegexScriptEditor";
+import PresetEditor from "@/components/PresetEditor";
 import CharacterChatHeader from "@/components/CharacterChatHeader";
 
 interface Character {
@@ -44,7 +45,7 @@ export default function CharacterPage() {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [suggestedInputs, setSuggestedInputs] = useState<string[]>([]);
   const initializationRef = useRef(false);
-  const [activeView, setActiveView] = useState<"chat" | "worldbook" | "regex">("chat");
+  const [activeView, setActiveView] = useState<"chat" | "worldbook" | "regex" | "preset">("chat");
   const [activeModes, setActiveModes] = useState<Record<string, any>>({
     "story-progress": false,
     "perspective": {
@@ -54,7 +55,7 @@ export default function CharacterPage() {
     "scene-setting": false,
   });
 
-  const switchToView = (targetView: "chat" | "worldbook" | "regex") => {
+  const switchToView = (targetView: "chat" | "worldbook" | "regex" | "preset") => {
     setActiveView(targetView);
   };
 
@@ -337,7 +338,6 @@ export default function CharacterPage() {
       const username = localStorage.getItem("username") || "";
       const responseLength = storedNumber ? parseInt(storedNumber) : 200;
       const nodeId = uuidv4();
-      
       const response = await handleCharacterChatRequest({
         username,
         characterId: character.id,
@@ -522,6 +522,12 @@ export default function CharacterPage() {
           />
         ) : activeView === "worldbook" ? (
           <WorldBookEditor
+            onClose={() => setActiveView("chat")}
+            characterName={character?.name || ""}
+            characterId={characterId || ""}
+          />
+        ) : activeView === "preset" ? (
+          <PresetEditor
             onClose={() => setActiveView("chat")}
             characterName={character?.name || ""}
             characterId={characterId || ""}
