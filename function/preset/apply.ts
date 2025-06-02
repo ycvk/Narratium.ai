@@ -7,12 +7,10 @@ export async function applyPreset(presetId: string, characterId: string) {
       return { success: false, error: "Preset not found" };
     }
 
-    // Check if preset is enabled
     if (preset.enabled === false) {
       return { success: false, error: "Cannot apply disabled preset" };
     }
 
-    // Apply the preset (this just marks it as the active preset for the character)
     const success = await PresetOperations.applyPreset(presetId, characterId);
 
     if (!success) {
