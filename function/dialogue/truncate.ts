@@ -1,27 +1,5 @@
 import { LocalCharacterDialogueOperations } from "@/lib/data/character-dialogue-operation";
 
-const formatNodeContent = (node: any): string => {
-  if (node.parent_node_id == "root") {
-    return node.assistant_response || "";
-  }
-
-  let formattedContent = "";
-
-  if (node.parsed_content.screen) {
-    formattedContent += `<screen>${node.parsed_content.screen}</screen>`;
-  }
-
-  if (node.parsed_content.speech) {
-    formattedContent += `<speech>${node.parsed_content.speech}</speech>`;
-  }
-
-  if (node.parsed_content.thought) {
-    formattedContent += `<thought>${node.parsed_content.thought}</thought>`;
-  }
-
-  return formattedContent || node.assistant_response;
-};
-
 interface SwitchDialogueBranchOptions {
   characterId: string;
   nodeId: string;
@@ -70,7 +48,7 @@ export async function switchDialogueBranch({ characterId, nodeId }: SwitchDialog
         msgs.push({
           id: node.node_id,
           role: "assistant",
-          content: formatNodeContent(node),
+          content: node.assistant_response,
           parsedContent: node.parsed_content || null,
           node_id: node.node_id,
         });
