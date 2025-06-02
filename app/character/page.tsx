@@ -10,6 +10,7 @@ import { initCharacterDialogue } from "@/function/dialogue/init";
 import { getCharacterDialogue } from "@/function/dialogue/info";
 import { handleCharacterChatRequest } from "@/function/dialogue/chat";
 import { switchDialogueBranch } from "@/function/dialogue/truncate";
+import { deleteDialogueNode } from "@/function/dialogue/delete";
 import CharacterChatPanel from "@/components/CharacterChatPanel";
 import WorldBookEditor from "@/components/WorldBookEditor";
 import RegexScriptEditor from "@/components/RegexScriptEditor";
@@ -111,6 +112,78 @@ export default function CharacterPage() {
       }
     } catch (error) {
       console.error("Error truncating messages:", error);
+    }
+  };
+
+  const handleRegenerate = async (nodeId: string) => {
+    if (!characterId) return;
+    console.log(1);
+    
+    try {
+      const messageIndex = messages.findIndex(msg => msg.id === nodeId && msg.role === "assistant");
+      console.log("message",messageIndex);
+      if (messageIndex === -1) {
+        console.warn(`Message not found: ${nodeId}`);
+        return;
+      }
+      const messageToRegenerate = messages[messageIndex];
+      if (messageToRegenerate.role != "assistant") {
+        console.warn("Can only regenerate assistant messages");
+        return;
+      }
+
+      let userMessage = null;
+      for (let i = messageIndex - 1; i >= 0; i--) {
+        if (messages[i].role === "user") {
+          userMessage = messages[i];
+          break;
+        }
+      }
+      console.log("userMessage",userMessage);
+
+      if (!userMessage) {
+        console.warn("No previous user message found for regeneration");
+        return;
+      }
+
+      const response = await deleteDialogueNode({
+        characterId,
+        nodeId,
+      });
+      console.log("1");
+      if (!response.success) {
+        console.error("Failed to delete message", response);
+        return;
+      }
+      
+      const dialogue = response.dialogue;
+      
+      if (dialogue) {
+        setTimeout(() => {
+          const formattedMessages = dialogue.messages.map((msg: any) => ({
+            id: msg.id,
+            role: msg.role == "system" ? "assistant" : msg.role,
+            content: msg.content,
+            timestamp: msg.timestamp || new Date(dialogue.created_at).toISOString(),
+          }));
+
+          setMessages(formattedMessages);
+          
+          const lastMessage = dialogue.messages[dialogue.messages.length - 1];
+          if (lastMessage && lastMessage.parsedContent?.nextPrompts) {
+            setSuggestedInputs(lastMessage.parsedContent.nextPrompts);
+          } else {
+            setSuggestedInputs([]);
+          }
+        }, 100);
+      }
+
+      setTimeout(async () => {
+        await handleSendMessage(userMessage.content);
+      }, 300);
+
+    } catch (error) {
+      console.error("Error regenerating message:", error);
     }
   };
 
@@ -514,6 +587,7 @@ export default function CharacterPage() {
             onSubmit={handleSubmit}
             onSuggestedInput={handleSuggestedInput}
             onTruncate={truncateMessagesAfter}
+            onRegenerate={handleRegenerate}
             fontClass={fontClass}
             serifFontClass={serifFontClass}
             t={t}

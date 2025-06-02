@@ -198,6 +198,44 @@ export class LocalCharacterDialogueOperations {
     return true;
   }
 
+  static async deleteNode(dialogueId: string, nodeId: string): Promise<DialogueTree | null> {
+    const dialogueTree = await this.getDialogueTreeById(dialogueId);
+    
+    if (!dialogueTree || nodeId === "root") {
+      return null;
+    }
+    
+    const nodeToDelete = dialogueTree.nodes.find(node => node.node_id === nodeId);
+    if (!nodeToDelete) {
+      return null;
+    }
+
+    const nodesToDelete = new Set<string>();
+    const collectNodesToDelete = (currentNodeId: string) => {
+      nodesToDelete.add(currentNodeId);
+      const children = dialogueTree.nodes.filter(node => node.parent_node_id === currentNodeId);
+      children.forEach(child => collectNodesToDelete(child.node_id));
+    };
+    
+    collectNodesToDelete(nodeId);
+    dialogueTree.nodes = dialogueTree.nodes.filter(node => !nodesToDelete.has(node.node_id));
+    if (nodesToDelete.has(dialogueTree.current_node_id)) {
+      dialogueTree.current_node_id = nodeToDelete.parent_node_id;
+      const newCurrentNode = dialogueTree.nodes.find(node => node.node_id === dialogueTree.current_node_id);
+      if (newCurrentNode) {
+        dialogueTree.current_branch_id = newCurrentNode.branch_id;
+      } else {
+        dialogueTree.current_branch_id = 0;
+      }
+    }
+    
+    dialogueTree.updated_at = new Date().toISOString();
+    
+    await this.updateDialogueTree(dialogueId, dialogueTree);
+    
+    return dialogueTree;
+  }
+
   static async getDialoguePathToNode(dialogueId: string, nodeId: string): Promise<DialogueNode[]> {
     const dialogueTree = await this.getDialogueTreeById(dialogueId);
     

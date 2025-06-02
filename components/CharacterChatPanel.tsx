@@ -29,6 +29,7 @@ interface Props {
   onSubmit: (e: React.FormEvent) => void;
   onSuggestedInput: (input: string) => void;
   onTruncate: (id: string) => void;
+  onRegenerate: (id: string) => void;
   fontClass: string;
   serifFontClass: string;
   t: (key: string) => string;
@@ -46,6 +47,7 @@ export default function CharacterChatPanel({
   onSubmit,
   onSuggestedInput,
   onTruncate,
+  onRegenerate,
   fontClass,
   serifFontClass,
   t,
@@ -61,6 +63,14 @@ export default function CharacterChatPanel({
   };  
 
   const [suggestionsCollapsed, setSuggestionsCollapsed] = useState(false);
+
+  const shouldShowRegenerateButton = (message: Message, index: number) => {
+    if (isSending) return false;
+    if (message.role !== "assistant") return false;
+    if (index !== messages.length - 1) return false;
+    
+    return true;
+  };
 
   useEffect(() => {
     const id = setTimeout(() => scrollToBottom(), 300);
@@ -153,6 +163,34 @@ export default function CharacterChatPanel({
                             fill="none"
                             viewBox="0 0 24 24"
                             stroke="currentColor"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          >
+                            <path d="M12 19V5"></path>
+                            <polyline points="5 12 12 5 19 12"></polyline>
+                          </svg>
+                        </button>
+                        <button
+                          onClick={() => {
+                            trackButtonClick("page", "重新生成消息");
+                            onRegenerate(message.id);
+                          }}
+                          className={`ml-1 w-6 h-6 flex items-center justify-center text-[#a18d6f] hover:text-orange-400 bg-[#1c1c1c] rounded-lg border border-[#333333] shadow-inner transition-all duration-300 hover:border-[#444444] hover:shadow-[0_0_8px_rgba(249,115,22,0.4)] ${
+                            shouldShowRegenerateButton(message, index) ? "" : "hidden"
+                          }`}
+                          aria-label={t("重新生成消息")}
+                        >
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="12"
+                            height="12"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
                           >
                             <polyline points="17 1 21 5 17 9"></polyline>
                             <path d="M3 11V9a4 4 0 0 1 4-4h14"></path>
