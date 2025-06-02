@@ -1,11 +1,12 @@
 const DB_NAME = "CharacterAppDB";
-const DB_VERSION = 3;
+const DB_VERSION = 4;
 
 export const CHARACTERS_RECORD_FILE = "characters_record";
 export const CHARACTER_DIALOGUES_FILE = "character_dialogues";
 export const CHARACTER_IMAGES_FILE = "character_images";
 export const WORLD_BOOK_FILE = "world_book";
 export const REGEX_SCRIPTS_FILE = "regex_scripts";
+export const PRESET_FILE = "preset_data";
 
 function openDB(): Promise<IDBDatabase> {
   return new Promise((resolve, reject) => {
@@ -30,6 +31,9 @@ function openDB(): Promise<IDBDatabase> {
       }
       if (!db.objectStoreNames.contains(REGEX_SCRIPTS_FILE)) {
         db.createObjectStore(REGEX_SCRIPTS_FILE);
+      }
+      if (!db.objectStoreNames.contains(PRESET_FILE)) {
+        db.createObjectStore(PRESET_FILE);
       }
     };
   });
@@ -69,6 +73,8 @@ export async function initializeDataFiles(): Promise<void> {
     CHARACTER_DIALOGUES_FILE, 
     CHARACTER_IMAGES_FILE,
     WORLD_BOOK_FILE,
+    PRESET_FILE,
+    REGEX_SCRIPTS_FILE,
   ];
 
   await Promise.all(storeNames.map(storeName => {
