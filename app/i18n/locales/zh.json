@@ -34,6 +34,8 @@
     "saveSettings": "点击启用",
     "settingsSaved": "设置已保存",
     "commonModels": "常用模型推荐:",
+    "modelList": "模型列表",
+    "selectModel": "选择模型",
     "configurations": "API 配置",
     "newConfig": "新建配置",
     "configName": "配置名称",
@@ -44,7 +46,10 @@
     "confirmDelete": "确定要删除此配置吗？",
     "configCreated": "配置已创建",
     "noConfigs": "暂无API配置",
-    "createFirstConfig": "创建你的第一个配置"
+    "createFirstConfig": "创建你的第一个配置",
+    "getModelList": "获取模型列表",
+    "getModelListSuccess": "获取模型列表成功",
+    "getModelListError": "获取模型列表失败"
   },
   "llmSettings": {
     "title": "设置",
