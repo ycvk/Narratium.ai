@@ -51,7 +51,7 @@ function DialogueNodeComponent({ id, data }: NodeProps<DialogueNode["data"]>) {
   const [showRootTooltip, setShowRootTooltip] = useState(false);
   
   const steps = data.label
-    .split("——>")
+    .split(/——>|-->|->/)
     .map(step => step.trim())
     .filter(step => step.length > 0);
 
@@ -816,7 +816,7 @@ export default function DialogueTreeModal({ isOpen, onClose, characterId, onDial
                 <h5 className={`text-amber-400 text-sm mb-2 ${serifFontClass}`}>{t("dialogue.memorySummary")}:</h5>
                 <div className="ml-2">
                   <ol className={`list-decimal list-inside ${fontClass} text-[#f4e8c1] text-sm`}>
-                    {selectedNode.data.label.split(/——>|->/).map((step, index) => (
+                    {selectedNode.data.label.split(/——>|-->|->/).map((step, index) => (
                       <li key={index} className="mb-1">{step.trim()}</li>
                     ))}
                   </ol>
