@@ -198,7 +198,7 @@ export class PresetOperations {
       if (!preset) {
         return false;
       }
-
+      
       // Check if preset is enabled
       if (preset.enabled === false) {
         return false;

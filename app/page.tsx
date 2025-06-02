@@ -4,11 +4,14 @@ import { useState, useEffect, Suspense } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { useLanguage } from "./i18n";
+import UserTour from "@/components/UserTour";
+import { useTour } from "@/hooks/useTour";
 import "./styles/fantasy-ui.css";
 
 function HomeContent() {
   const { t, fontClass, serifFontClass } = useLanguage();
   const [mounted, setMounted] = useState(false);
+  const { isTourVisible, currentTourSteps, completeTour, skipTour } = useTour();
 
   useEffect(() => {
     setMounted(true);
@@ -96,6 +99,12 @@ function HomeContent() {
           </Link>
         </div>
       </motion.div>
+      <UserTour
+        steps={currentTourSteps}
+        isVisible={isTourVisible}
+        onComplete={completeTour}
+        onSkip={skipTour}
+      />
     </div>
   );
 }

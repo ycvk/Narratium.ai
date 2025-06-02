@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import { useLanguage } from "@/app/i18n";
 import { useSoundContext } from "@/app/contexts/SoundContext";
 import LLMSettingsModal from "@/components/LLMSettingsModal";
+import { useTour } from "@/hooks/useTour";
 
 interface SettingsDropdownProps {
   toggleModelSidebar: () => void;
@@ -15,6 +16,7 @@ export default function SettingsDropdown({ toggleModelSidebar }: SettingsDropdow
   const { language, setLanguage, t } = useLanguage();
   const { soundEnabled, toggleSound } = useSoundContext();
   const [isLLMSettingsOpen, setIsLLMSettingsOpen] = useState(false);
+  const { resetTour } = useTour();
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -44,6 +46,7 @@ export default function SettingsDropdown({ toggleModelSidebar }: SettingsDropdow
     <div className="relative" ref={dropdownRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
+        data-tour="settings-button"
         className="w-8 h-8 flex items-center justify-center text-[#f4e8c1] bg-[#1c1c1c] rounded-lg border border-[#333333] shadow-inner transition-all duration-300 hover:bg-[#252525] hover:border-[#444444] hover:text-amber-400 hover:shadow-[0_0_8px_rgba(251,146,60,0.4)]"
         aria-label={t("common.settings")}
         aria-expanded={isOpen}
@@ -117,6 +120,23 @@ export default function SettingsDropdown({ toggleModelSidebar }: SettingsDropdow
                 <path d="M12 3v3m0 12v3M3 12h3m12 0h3M5.636 5.636l2.122 2.122m8.484 8.484l2.122 2.122M5.636 18.364l2.122-2.122m8.484-8.484l2.122-2.122" />
               </svg>
               {t("llmSettings.title")}
+            </button>
+            
+            <button
+              onClick={() => {
+                resetTour();
+                setIsOpen(false);
+                window.location.reload();
+              }}
+              className="flex items-center w-full px-4 py-2 text-sm text-[#f4e8c1] hover:bg-[#252525] transition-colors"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2">
+                <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8" />
+                <path d="M21 3v5h-5" />
+                <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16" />
+                <path d="M3 21v-5h5" />
+              </svg>
+              {t("tour.resetTour")}
             </button>
           </div>
         </div>

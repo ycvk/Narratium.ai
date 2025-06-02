@@ -103,6 +103,7 @@ export default function CharacterChatHeader({
               onSwitchToView("worldbook");
             }
           }}
+          data-tour="worldbook-button"
           className={`group ml-2 px-3 py-1 flex items-center rounded-md border transition-all duration-300 shadow-md relative overflow-hidden portal-button ${
             activeView === "worldbook"
               ? "border-[#59d3a2]/60 bg-gradient-to-br from-[#212821] to-[#131a16] shadow-[0_0_12px_rgba(88,248,183,0.3)]"
@@ -149,6 +150,7 @@ export default function CharacterChatHeader({
               onSwitchToView("regex");
             }
           }}
+          data-tour="regex-button"
           className={`group ml-2 px-3 py-1 flex items-center rounded-md border transition-all duration-300 shadow-md relative overflow-hidden ${
             activeView === "regex"
               ? "border-[#d39a59]/60 bg-gradient-to-br from-[#282521] to-[#1a1613] shadow-[0_0_12px_rgba(248,183,88,0.3)]"
@@ -195,6 +197,7 @@ export default function CharacterChatHeader({
               onSwitchToView("preset");
             }
           }}
+          data-tour="preset-button"
           className={`group ml-2 px-3 py-1 flex items-center rounded-md border transition-all duration-300 shadow-md relative overflow-hidden ${
             activeView === "preset"
               ? "border-[#9a59d3]/60 bg-gradient-to-br from-[#252128] to-[#161316] shadow-[0_0_12px_rgba(183,88,248,0.3)]"

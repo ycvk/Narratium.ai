@@ -287,6 +287,7 @@ export default function CharacterChatPanel({
                 value={userInput}
                 onChange={(e) => setUserInput(e.target.value)}
                 placeholder={t("characterChat.typeMessage") || "Type a message..."}
+                data-tour="chat-input"
                 className="w-full bg-[#2a261f] border border-[#534741] rounded-lg py-2.5 px-4 text-[#f4e8c1] text-sm leading-tight focus:outline-none focus:border-[#c0a480] shadow-inner relative z-1 transition-all duration-300 group-hover:border-[#a18d6f]"
                 disabled={isSending}
               />
