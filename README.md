@@ -152,7 +152,11 @@ This project consists of two distinct parts with independent licenses:
 
 Special thanks to the SillyTavern community and countless character card contributors.If you'd like to join the contributor list, please contact: [qianzhang.happyfox@gmail.com](mailto:qianzhang.happyfox@gmail.com)
 
-## 🙌 Contributer
+## 👨‍💻 Code Contributer
+
+[![Contributors](https://contrib.rocks/image?repo=Narratium/Narratium.ai)](https://github.com/Narratium/Narratium.ai/graphs/contributors)
+
+## 🙌 Cards Contributer
 
 [![Contributors](https://contrib.rocks/image?repo=Narratium/Character-Card)](https://github.com/Narratium/Narratium.ai/graphs/contributors)
 

@@ -153,7 +153,11 @@ Narratium 让讲故事变得简单又强大：
 
 感谢 SillyTavern 社区和无数角色卡贡献值，在演示版本中，Narratium 使用了 SillyTavern 的角色卡数据，请联系我加入贡献者行列：\[[qianzhang.happyfox@gmail.com](mailto:qianzhang.happyfox@gmail.com)]
 
-## 🙌 贡献者
+## 👨‍💻 代码贡献者
+
+[![Contributors](https://contrib.rocks/image?repo=Narratium/Narratium.ai)](https://github.com/Narratium/Narratium.ai/graphs/contributors)
+
+## 🙌 角色卡贡献者
 
 [![Contributors](https://contrib.rocks/image?repo=Narratium/Character-Card)](https://github.com/Narratium/Narratium.ai/graphs/contributors)
 
