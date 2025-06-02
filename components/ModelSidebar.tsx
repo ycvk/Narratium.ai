@@ -55,7 +55,6 @@ export default function ModelSidebar({ isOpen, toggleSidebar }: ModelSidebarProp
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [getModelListSuccess, setGetModelListSuccess] = useState(false);
   const [getModelListError, setGetModelListError] = useState(false);
-
   
   const ollamaModelOptions = [
     "llama3.3:8b",
@@ -66,10 +65,10 @@ export default function ModelSidebar({ isOpen, toggleSidebar }: ModelSidebarProp
 
   useEffect(() => {
     if (typeof window === "undefined") return;
-  
+
     const savedConfigsStr = localStorage.getItem("apiConfigs");
     let mergedConfigs: APIConfig[] = [];
-  
+
     if (savedConfigsStr) {
       try {
         mergedConfigs = JSON.parse(savedConfigsStr) as APIConfig[];
@@ -77,56 +76,20 @@ export default function ModelSidebar({ isOpen, toggleSidebar }: ModelSidebarProp
         console.error("Error parsing saved API configs", e);
       }
     }
-  
-    let hasDeepSeek = mergedConfigs.some((c) => c.id === DEFAULT_DEEPSEEK_CONFIG.id);
-    let firstInit = false;
-    
-    if (!hasDeepSeek) {
-      mergedConfigs = [...mergedConfigs, DEFAULT_DEEPSEEK_CONFIG];
-      firstInit = true;
-    }
-    
-    let hasGemini = mergedConfigs.some((c) => c.id === DEFAULT_GEMINI_CONFIG.id);
-    if (!hasGemini) {
-      mergedConfigs = [...mergedConfigs, DEFAULT_GEMINI_CONFIG];
-      firstInit = true;
-    }
-    
-    if (firstInit) {
-      localStorage.setItem("apiConfigs", JSON.stringify(mergedConfigs));
-    }
-  
+
     const storedActiveId = localStorage.getItem("activeConfigId");
     const activeIdCandidate = storedActiveId && mergedConfigs.some((c) => c.id === storedActiveId)
       ? storedActiveId
-      : DEFAULT_DEEPSEEK_CONFIG.id;
-  
+      : (mergedConfigs[0]?.id || "");
+
     setConfigs(mergedConfigs);
     setActiveConfigId(activeIdCandidate);
 
-    if (firstInit || !storedActiveId) {
-      localStorage.setItem("activeConfigId", DEFAULT_DEEPSEEK_CONFIG.id);
-      localStorage.setItem("llmType", DEFAULT_DEEPSEEK_CONFIG.type);
-      localStorage.setItem(
-        DEFAULT_DEEPSEEK_CONFIG.type === "openai" ? "openaiBaseUrl" : "ollamaBaseUrl",
-        DEFAULT_DEEPSEEK_CONFIG.baseUrl,
-      );
-      localStorage.setItem(
-        DEFAULT_DEEPSEEK_CONFIG.type === "openai" ? "openaiModel" : "ollamaModel",
-        DEFAULT_DEEPSEEK_CONFIG.model,
-      );
-      if (DEFAULT_DEEPSEEK_CONFIG.type === "openai") {
-        localStorage.setItem("openaiApiKey", DEFAULT_DEEPSEEK_CONFIG.apiKey || "");
-        localStorage.setItem("apiKey", DEFAULT_DEEPSEEK_CONFIG.apiKey || "");
-      }
-      localStorage.setItem("modelBaseUrl", DEFAULT_DEEPSEEK_CONFIG.baseUrl);
-      localStorage.setItem("modelName", DEFAULT_DEEPSEEK_CONFIG.model);
-      loadConfigToForm(DEFAULT_DEEPSEEK_CONFIG);
-    } else {
+    if (mergedConfigs.length > 0) {
       loadConfigToForm(mergedConfigs.find((c) => c.id === activeIdCandidate)!);
     }
   }, []);
-
+  
   const loadConfigToForm = (config: APIConfig) => {
     setLlmType(config.type);
     setBaseUrl(config.baseUrl);
