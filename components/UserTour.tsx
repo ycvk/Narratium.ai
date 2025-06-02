@@ -9,7 +9,7 @@ interface TourStep {
   content: string;
   position: "top" | "bottom" | "left" | "right";
   allowSkip?: boolean;
-  isLanguageSelection?: boolean; // Added field to mark language selection step
+  isLanguageSelection?: boolean;
 }
 
 interface UserTourProps {
@@ -22,7 +22,13 @@ interface UserTourProps {
 export default function UserTour({ steps, isVisible, onComplete, onSkip }: UserTourProps) {
   const [currentStep, setCurrentStep] = useState(0);
   const [targetRect, setTargetRect] = useState<DOMRect | null>(null);
-  const { t, fontClass, setLanguage } = useLanguage();
+  const { t, fontClass, setLanguage, language } = useLanguage();
+
+  useEffect(() => {
+    if (currentStep > 0 && steps[0]?.isLanguageSelection) {
+      setCurrentStep(1);
+    }
+  }, [language]);
   const overlayRef = useRef<HTMLDivElement>(null);
   const originalScrollPos = useRef<{ x: number; y: number } | null>(null);
   useEffect(() => {

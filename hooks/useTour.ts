@@ -16,7 +16,7 @@ const CHARACTER_TOUR_STORAGE_KEY = "narratium_character_tour_completed";
 export function useTour() {
   const [isTourVisible, setIsTourVisible] = useState(false);
   const [currentTourSteps, setCurrentTourSteps] = useState<TourStep[]>([]);
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
 
   useEffect(() => {
     const tourCompleted = localStorage.getItem(TOUR_STORAGE_KEY);
@@ -27,6 +27,19 @@ export function useTour() {
     }
   }, []);
 
+  useEffect(() => {
+    if (isTourVisible) {
+      const isHomeTour = currentTourSteps.length > 0 && currentTourSteps[0].target === "body";
+      const isCharacterTour = !isHomeTour;
+
+      if (isHomeTour) {
+        startHomeTour();
+      } else if (isCharacterTour) {
+        startCharacterTour();
+      }
+    }
+  }, [language]);
+
   const startHomeTour = () => {
     const homeSteps: TourStep[] = [
       {
@@ -35,7 +48,7 @@ export function useTour() {
         content: "请选择您偏好的语言 | Please select your preferred language",
         position: "bottom",
         allowSkip: false,
-        isLanguageSelection: true
+        isLanguageSelection: true,
       },
       {
         target: "body",
