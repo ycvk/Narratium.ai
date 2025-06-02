@@ -16,6 +16,8 @@ import WorldBookEditor from "@/components/WorldBookEditor";
 import RegexScriptEditor from "@/components/RegexScriptEditor";
 import PresetEditor from "@/components/PresetEditor";
 import CharacterChatHeader from "@/components/CharacterChatHeader";
+import UserTour from "@/components/UserTour";
+import { useTour } from "@/hooks/useTour";
 
 interface Character {
   id: string;
@@ -35,6 +37,7 @@ export default function CharacterPage() {
   const searchParams = useSearchParams();
   const characterId = searchParams.get("id");
   const { t, fontClass, serifFontClass } = useLanguage();
+  const { isTourVisible, currentTourSteps, startCharacterTour, completeTour, skipTour } = useTour();
 
   const [character, setCharacter] = useState<Character | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -138,7 +141,6 @@ export default function CharacterPage() {
           break;
         }
       }
-      console.log("userMessage",userMessage);
 
       if (!userMessage) {
         console.warn("No previous user message found for regeneration");
@@ -304,85 +306,6 @@ export default function CharacterPage() {
     }
   };
 
-  const handleStreamResponse = async (response: Response, nodeId: string) => {
-    if (!response.body) {
-      throw new Error("Response body is null");
-    }
-
-    const reader = response.body.getReader();
-    const decoder = new TextDecoder();
-    let buffer = "";
-    let formattedContent = "";
-    let receivedNextPrompts: string[] = [];
-
-    setMessages(prev => [...prev, { id: nodeId, role: "assistant", content: "", timestamp: new Date().toISOString() }]);
-
-    try {
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        
-        if (typeof value === "string") {
-          buffer += value;
-        } else if (value) {
-          try {
-            buffer += decoder.decode(value, { stream: true });
-          } catch (decodeError) {
-            console.error("Error decoding binary chunk:", decodeError);
-          }
-        }
-        
-        const lines = buffer.split("\n");
-        buffer = lines.pop() || "";
-        for (const line of lines) {
-          if (!line.trim()) continue;
-          
-          try {
-            const data = JSON.parse(line);
-            
-            switch (data.type) {
-            case "chunk":
-              if (data.isRegexProcessed) {
-                formattedContent = data.content;
-                setMessages(prev => {
-                  const newMessages = [...prev];
-                  newMessages[newMessages.length - 1].content = data.content;
-                  return newMessages;
-                });
-              } else {
-                formattedContent += data.content;
-                const processedContent = formattedContent;
-                setMessages(prev => {
-                  const newMessages = [...prev];
-                  newMessages[newMessages.length - 1].content = processedContent;
-                  return newMessages;
-                });
-              }
-              break;
-                
-            case "complete":
-              if (data.parsedContent?.nextPrompts) {
-                receivedNextPrompts = data.parsedContent.nextPrompts;
-                setSuggestedInputs(receivedNextPrompts);
-              }
-              break;
-                
-            case "error":
-              throw new Error(data.message || "Character response failed");
-            }
-          } catch (e) {
-            console.error("Error parsing chunk:", e, line);
-          }
-        }
-      }
-
-      return { formattedContent, nextPrompts: receivedNextPrompts };
-    } catch (error) {
-      console.error("Error reading stream:", error);
-      throw error;
-    }
-  };
-
   const handleSendMessage = async (message: string) => {
     if (!character || isSending) return;
 
@@ -452,6 +375,19 @@ export default function CharacterPage() {
       setIsSending(false);
     }
   };
+
+  // Check if user should see character tour
+  useEffect(() => {
+    if (character && !isLoading && !isInitializing && !error) {
+      const hasSeenCharacterTour = localStorage.getItem("narratium_character_tour_completed");
+      if (!hasSeenCharacterTour) {
+        // Start character tour after a delay to ensure all elements are rendered
+        setTimeout(() => {
+          startCharacterTour();
+        }, 2000); // Increased delay for better stability
+      }
+    }
+  }, [character, isLoading, isInitializing, error, startCharacterTour]);
 
   if (isLoading && !character) {
     return (
@@ -612,6 +548,18 @@ export default function CharacterPage() {
           />
         )}
       </div>
+      <UserTour
+        steps={currentTourSteps}
+        isVisible={isTourVisible}
+        onComplete={() => {
+          completeTour();
+          localStorage.setItem("narratium_character_tour_completed", "true");
+        }}
+        onSkip={() => {
+          skipTour();
+          localStorage.setItem("narratium_character_tour_completed", "true");
+        }}
+      />
     </div>
   );
 }

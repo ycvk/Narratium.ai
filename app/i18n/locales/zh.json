@@ -428,7 +428,7 @@
     "rootNodeCannotJump": "根节点是对话的起点，不能跳转",
     "response": "回复内容",
     "responsePlaceholder": "编辑回复内容..."
-  },
+  },  
   "downloadModal": {
       "title": "从社区仓库下载角色",
       "loading": "加载中…",
@@ -570,7 +570,9 @@
     "filterImported": "全局",
     "filteredCount": "筛选结果",
     "ascending": "升序",
-    "descending": "降序"
+    "descending": "降序",
+    "fullscreenContent": "大窗口编辑",
+    "exitFullscreen": "关闭编辑器"
   },
   "regexScriptEditor": {
     "title": "正则脚本编辑器",
@@ -630,5 +632,26 @@
     "applyToResponse": "应用到回复",
     "yes": "是",
     "no": "否"
+  },
+  "tour": {
+    "welcome": "欢迎使用 Narratium",
+    "welcomeDescription": "Narratium 是一个智能角色对话平台，您可以与各种AI角色进行深度对话，创造独特的故事体验。让我们先了解一下基本功能。",
+    "loginTitle": "首先登录账户",
+    "loginDescription": "点击这里登录。请注意：您输入的用户名可能会被AI角色用作主角名称，所以建议使用您希望在故事中使用的名字。",
+    "settingsTitle": "配置AI模型",
+    "settingsDescription": "登录后，点击右上角的设置按钮来配置您的AI模型。您可以选择OpenAI或Ollama，并设置相应的API密钥和模型参数。",
+    "worldbookTitle": "世界书功能",
+    "worldbookDescription": "世界书用于定义角色的背景世界、设定和重要信息。AI会根据世界书中的内容来保持角色设定的一致性，让对话更加沉浸。",
+    "regexTitle": "正则脚本",
+    "regexDescription": "正则脚本允许您自定义AI回复的格式和处理逻辑。您可以设置特殊的文本替换规则，让角色的表达方式更加独特。",
+    "presetTitle": "预设管理",
+    "presetDescription": "预设功能让您可以保存和管理不同的对话设置，包括角色的语气、风格和特殊指令，方便在不同场景下快速切换。",
+    "chatTitle": "开始对话",
+    "chatDescription": "现在您可以在输入框中输入消息，开始与AI角色的精彩对话了！AI会根据您设置的世界书、正则脚本和预设来回应。",
+    "next": "下一步",
+    "previous": "上一步",
+    "skip": "跳过",
+    "finish": "完成",
+    "resetTour": "重置引导"
   }
 }
