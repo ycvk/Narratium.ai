@@ -156,7 +156,7 @@ export default function PresetEditor({
           id: preset.id || `preset-${Date.now()}`,
           enabled: preset.enabled !== false,
           totalPrompts: preset.prompts?.length || 0,
-          enabledPrompts: preset.prompts?.filter((p: any) => p.enabled !== false).length || 0,
+          enabledPrompts: preset.prompts?.filter((p:any) => p.enabled !== false).length || 0,
           lastUpdated: new Date(preset.updated_at || preset.created_at || Date.now()).getTime(),
         })) as PresetData[];
         setPresets(formattedPresets);
@@ -275,33 +275,6 @@ export default function PresetEditor({
       }
       return newSet;
     });
-  };
-
-  const handleAddPrompt = async (presetId: string) => {
-    const promptName = prompt(t("preset.enterPromptName"));
-    if (!promptName?.trim()) return;
-
-    try {
-      const newPrompt = {
-        identifier: `prompt_${Date.now()}`,
-        name: promptName.trim(),
-        content: "",
-        enabled: true,
-        system_prompt: false,
-      };
-
-      const result = await addPromptToPreset(presetId, newPrompt);
-      if (result.success) {
-        await loadPresetData();
-        await handleSelectPreset(presetId);
-        toast.success(t("preset.addPromptSuccess"));
-      } else {
-        toast.error(t("preset.addPromptFailed"));
-      }
-    } catch (error) {
-      console.error("Add prompt failed:", error);
-      toast.error(t("preset.addPromptFailed"));
-    }
   };
 
   const handleDeletePrompt = async (presetId: string, promptIdentifier: string) => {
@@ -843,16 +816,6 @@ export default function PresetEditor({
                                 </span>
                               )}
                             </h4>
-                            <button
-                              onClick={() => handleAddPrompt(selectedPreset.id)}
-                              className="px-2 py-1 bg-gradient-to-r from-[#1f1c1a] to-[#13100e] hover:from-[#282521] hover:to-[#1a1613] text-[#e9c08d] hover:text-[#f6daae] rounded-md transition-all duration-300 text-xs font-medium shadow-lg hover:shadow-[#f8b758]/20 border border-[#403a33]"
-                            >
-                              <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-1">
-                                <line x1="12" y1="5" x2="12" y2="19"></line>
-                                <line x1="5" y1="12" x2="19" y2="12"></line>
-                              </svg>
-                              {t("preset.addPrompt")}
-                            </button>
                           </div>
                           
                           {selectedPreset.prompts.length === 0 ? (
