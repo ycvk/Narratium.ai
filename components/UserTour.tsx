@@ -91,8 +91,13 @@ export default function UserTour({ steps, isVisible, onComplete, onSkip }: UserT
       }
     };
 
-    const delay = steps[currentStep].target === "body" ? 1000 : 100;
-    setTimeout(updateTargetPosition, delay);
+    const delay = steps[currentStep].target === "body" ? 1000 : 300;
+
+    if (!targetRect) {
+      setTimeout(updateTargetPosition, delay);
+    } else {
+      updateTargetPosition();
+    }
 
     window.addEventListener("resize", updateTargetPosition);
 
@@ -248,11 +253,14 @@ export default function UserTour({ steps, isVisible, onComplete, onSkip }: UserT
       )}
 
       <div
-        className="absolute bg-[#2a261f] border border-[#534741] rounded-lg shadow-2xl p-6 max-w-sm pointer-events-auto"
+        className="absolute bg-[#2a261f] border border-[#534741] rounded-lg shadow-2xl p-6 max-w-sm pointer-events-auto transition-all duration-300 opacity-100"
         style={{
           top: tooltipPosition.top,
           left: tooltipPosition.left,
           boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.1)",
+          // 增加渐变效果属性
+          transform: "scale(1)",
+          opacity: targetRect ? 1 : 0,
         }}
       >
         <div className="mb-4">
