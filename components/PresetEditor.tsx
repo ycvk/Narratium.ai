@@ -9,7 +9,6 @@ import ImportPresetModal from "@/components/ImportPresetModal";
 import CreatePresetModal from "@/components/CreatePresetModal";
 import "@/app/styles/fantasy-ui.css";
 import React from "react";
-import { PresetOperations } from "@/lib/data/preset-operation";
 
 interface PresetEditorProps {
   onClose: () => void;
@@ -154,10 +153,10 @@ export default function PresetEditor({
       if (result.success && result.data) {
         const formattedPresets = result.data.map((preset) => ({
           ...preset,
-          id: preset.id || `preset-${Date.now()}`, // Ensure id is not undefined
-          enabled: preset.enabled !== false, // Default to true if not specified
+          id: preset.id || `preset-${Date.now()}`,
+          enabled: preset.enabled !== false,
           totalPrompts: preset.prompts?.length || 0,
-          enabledPrompts: preset.prompts?.filter((p) => p.enabled !== false).length || 0,
+          enabledPrompts: preset.prompts?.filter((p: { enabled: boolean; }) => p.enabled !== false).length || 0,
           lastUpdated: new Date(preset.updated_at || preset.created_at || Date.now()).getTime(),
         })) as PresetData[];
         setPresets(formattedPresets);
