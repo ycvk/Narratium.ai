@@ -1,6 +1,7 @@
 "use client";
 
 import { useLanguage } from "@/app/i18n";
+import { useState } from "react";
 
 interface EditingEntry {
   entry_id: string;
@@ -36,6 +37,7 @@ export default function WorldBookEntryEditor({
   onEntryChange,
 }: WorldBookEntryEditorProps) {
   const { t, fontClass, serifFontClass } = useLanguage();
+  const [isFullscreen, setIsFullscreen] = useState(false);
 
   if (!isOpen || !editingEntry) return null;
 
@@ -281,9 +283,20 @@ export default function WorldBookEntryEditor({
                 <label className={`block text-sm font-medium text-[#c0a480] ${fontClass}`}>
                   {t("worldBook.contentLabel")}
                 </label>
-                <span className={`text-xs text-[#a18d6f]/70 bg-[#252220]/60 px-2 py-1 rounded-md ${fontClass}`}>
-                  {editingEntry.content.length} {t("worldBook.characters")}
-                </span>
+                <div className="flex items-center space-x-2">
+                  <span className={`text-xs text-[#a18d6f]/70 bg-[#252220]/60 px-2 py-1 rounded-md ${fontClass}`}>
+                    {editingEntry.content.length} {t("worldBook.characters")}
+                  </span>
+                  <button
+                    onClick={() => setIsFullscreen(true)}
+                    className="w-7 h-7 flex items-center justify-center text-[#a18d6f] hover:text-[#eae6db] transition-colors duration-300 rounded-md hover:bg-[#333]/50 group"
+                    title={t("worldBook.fullscreenContent")}
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="transition-transform duration-300 group-hover:scale-110">
+                      <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path>
+                    </svg>
+                  </button>
+                </div>
               </div>
               <textarea
                 value={editingEntry.content}
@@ -319,6 +332,49 @@ export default function WorldBookEntryEditor({
           </button>
         </div>
       </div>
+
+      {isFullscreen && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-6 animate-in fade-in duration-300">
+          <div className="absolute inset-0 backdrop-blur-md" onClick={() => setIsFullscreen(false)}></div>
+          <div className="relative w-full max-w-5xl h-[85vh] bg-[#1e1c1b] bg-opacity-95 border border-[#534741] rounded-xl overflow-hidden shadow-2xl shadow-black/50 backdrop-filter backdrop-blur-sm">
+            <div className="absolute inset-0 bg-gradient-to-br from-amber-500/5 via-transparent to-orange-500/5 pointer-events-none"></div>
+            <div className="relative border-b border-[#534741]/60">
+              <div className="p-4 bg-[#252220]/90">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-3">
+                    <h3 className={`text-lg font-semibold text-transparent bg-clip-text bg-gradient-to-r from-amber-300 via-orange-300 to-yellow-300 ${serifFontClass}`}>
+                      {t("worldBook.contentLabel")} - {editingEntry.comment || t("worldBook.newEntry")}
+                    </h3>
+                    <span className={`text-sm text-[#a18d6f]/70 bg-[#252220]/60 px-3 py-1.5 rounded-md ${fontClass}`}>
+                      {editingEntry.content.length} {t("worldBook.characters")}
+                    </span>
+                  </div>
+                  <button
+                    onClick={() => setIsFullscreen(false)}
+                    className="w-8 h-8 flex items-center justify-center text-[#a18d6f] hover:text-[#eae6db] transition-all duration-300 rounded-lg hover:bg-[#333]/50 group"
+                    title={t("worldBook.exitFullscreen")}
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="transition-transform duration-300 group-hover:scale-110 group-hover:rotate-90">
+                      <line x1="18" y1="6" x2="6" y2="18"></line>
+                      <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            </div>
+            <div className="relative p-6 h-[calc(85vh-80px)]">
+              <textarea
+                value={editingEntry.content}
+                onChange={(e) => onEntryChange({ ...editingEntry, content: e.target.value })}
+                className={`w-full h-full bg-[#252220]/80 border border-[#534741]/60 rounded-lg px-4 py-4 text-[#eae6db] focus:outline-none focus:ring-2 focus:ring-amber-500/50 focus:border-amber-500/50 transition-all duration-300 resize-none fantasy-scrollbar backdrop-blur-sm text-base leading-relaxed ${fontClass}`}
+                placeholder={t("worldBook.contentPlaceholder")}
+                style={{ fontSize: "16px", lineHeight: "1.6" }}
+                autoFocus
+              />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
