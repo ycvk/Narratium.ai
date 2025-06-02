@@ -34,6 +34,8 @@
     "saveSettings": "Click to enable",
     "settingsSaved": "Settings Saved",
     "commonModels": "Common Models:",
+    "modelList": "Model List",
+    "selectModel": "Select a model...",
     "configurations": "API Configurations",
     "newConfig": "New Config",
     "configName": "Configuration Name",
@@ -43,7 +45,10 @@
     "cannotDeleteLastConfig": "Cannot delete the last configuration",
     "confirmDelete": "Are you sure you want to delete this configuration?",
     "createFirstConfig": "Create Your First Configuration",
-    "noConfigs": "No API configurations yet"
+    "noConfigs": "No API configurations yet",
+    "getModelList": "Get Model List",
+    "getModelListSuccess": "Get Model List Success",
+    "getModelListError": "Get Model List Error"
   },
   "llmSettings": {
     "title": "Settings",

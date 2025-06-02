@@ -50,15 +50,12 @@ export default function ModelSidebar({ isOpen, toggleSidebar }: ModelSidebarProp
   const [baseUrl, setBaseUrl] = useState("");
   const [model, setModel] = useState("");
   const [apiKey, setApiKey] = useState("");
+  const [openaiModelList, setOpenaiModelList] = useState<string[]>([]);
   
   const [saveSuccess, setSaveSuccess] = useState(false);
+  const [getModelListSuccess, setGetModelListSuccess] = useState(false);
+  const [getModelListError, setGetModelListError] = useState(false);
 
-  const openaiModelOptions = [
-    "gpt-4.1",
-    "gemini-2.0-flash",
-    "gpt-4o",
-    "deepseek-chat",
-  ];
   
   const ollamaModelOptions = [
     "llama3.3:8b",
@@ -306,6 +303,29 @@ export default function ModelSidebar({ isOpen, toggleSidebar }: ModelSidebarProp
     }
   };
 
+  const handleGetModelList = async (baseUrl: string, apiKey: string) => {
+    try {
+      const response = await fetch(`${baseUrl}/models`, {
+        headers: {
+          "Authorization": `Bearer ${apiKey}`,
+        },
+      });
+      const data = await response.json();
+      setOpenaiModelList(data.data.map((item: any) => item.id));
+      
+      setGetModelListSuccess(true);
+      setTimeout(() => {
+        setGetModelListSuccess(false);
+      }, 2000);
+    } catch (error) {
+      console.error(t("modelSettings.getModelListError"), error);
+      setGetModelListError(true);
+      setTimeout(() => {
+        setGetModelListError(false);
+      }, 2000);
+    }
+  };
+
   return (
     <div
       className={`h-full magic-border border-l border-[#534741] breathing-bg text-[#d0d0d0] transition-all duration-300 overflow-hidden ${isOpen ? "w-64" : "w-0"
@@ -436,6 +456,41 @@ export default function ModelSidebar({ isOpen, toggleSidebar }: ModelSidebarProp
               )}
 
               <div className="mb-4">
+                <div className="relative">
+                  <button 
+                    className={`bg-[#3e3a3a] hover:bg-[#534741] text-[#f4e8c1] font-normal py-1.5 px-3 text-sm rounded-md border border-[#d1a35c] w-full transition-colors magical-text ${fontClass}`} 
+                    onClick={() => handleGetModelList(baseUrl, apiKey)}
+                  >{t("modelSettings.getModelList") || "Get Model List"}</button>
+                  
+                  {getModelListSuccess && (
+                    <div className="absolute top-0 left-0 w-full h-full flex items-center justify-center bg-[#333333] bg-opacity-80 rounded transition-opacity">
+                      <div className="flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-green-500 mr-2 animate-pulse" viewBox="0 0 20 20" fill="currentColor">
+                          <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                        </svg>
+                        <span className={`text-white text-xs ${fontClass}`}>
+                          {t("modelSettings.getModelListSuccess") || "Get Model List Success"}
+                        </span>
+                      </div>
+                    </div>
+                  )}
+                  
+                  {getModelListError && (
+                    <div className="absolute top-0 left-0 w-full h-full flex items-center justify-center bg-[#333333] bg-opacity-80 rounded transition-opacity">
+                      <div className="flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-red-500 mr-2 animate-pulse" viewBox="0 0 20 20" fill="currentColor">
+                          <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                        </svg>
+                        <span className={`text-white text-xs ${fontClass}`}>
+                          {t("modelSettings.getModelListError") || "Get Model List Error"}
+                        </span>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <div className="mb-4">
                 <label htmlFor="model" className={`block text-[#f4e8c1] text-sm font-medium mb-2 ${fontClass}`}>
                   {t("modelSettings.model")}
                 </label>
@@ -448,18 +503,28 @@ export default function ModelSidebar({ isOpen, toggleSidebar }: ModelSidebarProp
                   onChange={(e) => setModel(e.target.value)}
                 />
                 <div className="mt-2 text-xs text-[#8a8a8a]">
-                  <p className={`mb-1 ${fontClass}`}>{t("modelSettings.commonModels") || "Common Models"}</p>
-                  <div className="flex flex-wrap gap-1">
-                    {(llmType === "openai" ? openaiModelOptions : ollamaModelOptions).slice(0, 5).map((option) => (
-                      <button
+                  <p className={`mb-1 ${fontClass}`}>{t("modelSettings.modelList") || "Model List"}</p>
+                  <select
+                    value={model}
+                    onChange={(e) => {
+                      trackButtonClick("ModelSidebar", t("modelSettings.selectModel") || "Select a model...");
+                      setModel(e.target.value);
+                    }}
+                    className="w-full bg-[#292929] border border-[#534741] rounded py-2 px-3 text-[#d0d0d0] text-sm leading-tight focus:outline-none focus:border-[#d1a35c] transition-colors"
+                  >
+                    <option value="" disabled className="text-[#8a8a8a]">
+                      {t("modelSettings.selectModel") || "Select a model..."}
+                    </option>
+                    {(llmType === "openai" ? openaiModelList : ollamaModelOptions).map((option) => (
+                      <option
                         key={option}
-                        className="px-2 py-1 bg-[#292929] border border-[#534741] rounded text-[#f4e8c1] hover:bg-[#333333] transition-colors"
-                        onClick={(e) => {trackButtonClick("ModelSidebar", "选择模型"); e.stopPropagation(); setModel(option);}}
+                        value={option}
+                        className="bg-[#292929] text-[#d0d0d0]"
                       >
                         {option}
-                      </button>
+                      </option>
                     ))}
-                  </div>
+                  </select>
                 </div>
               </div>
 
