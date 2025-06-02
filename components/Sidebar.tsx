@@ -270,6 +270,7 @@ export default function Sidebar({ isOpen, toggleSidebar, openLoginModal }: Sideb
           {!isLoggedIn ? (
             <button 
               onClick={openLoginModal}
+              data-tour="login-button"
               className={`focus:outline-none group relative overflow-hidden rounded-md w-full transition-all duration-300 ${!isOpen ? "p-2 flex justify-center" : "py-1.5 px-2 flex items-center justify-center"} cursor-pointer`}
             >
               <div className="absolute inset-0 bg-gradient-to-br from-[#242424]/0 to-[#1a1a1a]/0 opacity-0 group-hover:opacity-80 transition-opacity duration-300"></div>
