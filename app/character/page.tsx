@@ -121,7 +121,6 @@ export default function CharacterPage() {
     
     try {
       const messageIndex = messages.findIndex(msg => msg.id === nodeId && msg.role === "assistant");
-      console.log("message",messageIndex);
       if (messageIndex === -1) {
         console.warn(`Message not found: ${nodeId}`);
         return;
@@ -150,7 +149,6 @@ export default function CharacterPage() {
         characterId,
         nodeId,
       });
-      console.log("1");
       if (!response.success) {
         console.error("Failed to delete message", response);
         return;
