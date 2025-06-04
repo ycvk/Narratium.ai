@@ -1,7 +1,6 @@
 import { LocalCharacterDialogueOperations } from "@/lib/data/character-dialogue-operation";
 import { PromptType } from "@/lib/models/character-prompts-model";
 import { ParsedResponse } from "@/lib/models/parsed-response";
-import { parseEvent } from "@/lib/utils/response-parser";
 import { DialogueWorkflow, DialogueWorkflowParams } from "@/lib/workflow/examples/DialogueWorkflow";
 
 export async function handleCharacterChatRequest(payload: {
@@ -143,9 +142,7 @@ async function processPostResponseAsync({
       nodeId,
     );
 
-    const compressedParsed = parseEvent(event);
-
-    if (compressedParsed) {
+    if (event) {
       const updatedDialogueTree = await LocalCharacterDialogueOperations.getDialogueTreeById(characterId);
       if (updatedDialogueTree) {
         await LocalCharacterDialogueOperations.updateNodeInDialogueTree(
@@ -154,7 +151,7 @@ async function processPostResponseAsync({
           {
             parsed_content: {
               ...parsed,
-              compressedContent: compressedParsed,
+              compressedContent: event,
             },
           },
         );
