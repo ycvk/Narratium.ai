@@ -3,8 +3,14 @@ import { PresetOperations } from "@/lib/data/preset-operation";
 
 interface GithubPreset {
   name: string;
-  displayName: string;
-  description: string;
+  displayName: {
+    zh: string;
+    en: string;
+  };
+  description: {
+    zh: string;
+    en: string;
+  };
   filename: string;
 }
 
@@ -14,14 +20,32 @@ const GITHUB_REPO_URL = "https://raw.githubusercontent.com/Narratium/Preset/main
 const AVAILABLE_PRESETS: GithubPreset[] = [
   {
     name: "belle_cat",
-    displayName: "贝露喵",
-    description: "贝露喵预设",
+    displayName: {
+      zh: "贝露喵",
+      en: "Belle Cat",
+    },
+    description: {
+      zh: "表演家——超强人物演绎",
+      en: "Performer - Exceptional Character Portrayal",
+    },
     filename: "贝露喵预设.json",
   },
 ];
 
 export function getAvailableGithubPresets(): GithubPreset[] {
   return AVAILABLE_PRESETS;
+}
+
+export function getPresetDisplayName(presetName: string, language: "zh" | "en" = "zh"): string {
+  const preset = AVAILABLE_PRESETS.find(p => p.name === presetName);
+  if (!preset) return presetName;
+  return preset.displayName[language] || preset.displayName.zh || preset.name;
+}
+
+export function getPresetDescription(presetName: string, language: "zh" | "en" = "zh"): string {
+  const preset = AVAILABLE_PRESETS.find(p => p.name === presetName);
+  if (!preset) return "";
+  return preset.description[language] || preset.description.zh || "";
 }
 
 export async function isPresetDownloaded(presetName: string): Promise<boolean> {
@@ -44,10 +68,12 @@ export async function doesPresetExist(presetName: string): Promise<boolean> {
     
     const presetConfig = AVAILABLE_PRESETS.find(p => p.name === presetName);
     if (!presetConfig) return false;
-    
+
     return allPresets.some(preset => 
-      preset.name === presetConfig.displayName || 
-      preset.name.includes(presetConfig.displayName),
+      preset.name === presetConfig.displayName.zh || 
+      preset.name === presetConfig.displayName.en ||
+      preset.name.includes(presetConfig.displayName.zh) ||
+      preset.name.includes(presetConfig.displayName.en),
     );
   } catch (error) {
     console.error("Error checking if preset exists:", error);
@@ -55,7 +81,7 @@ export async function doesPresetExist(presetName: string): Promise<boolean> {
   }
 }
 
-export async function downloadPresetFromGithub(presetName: string): Promise<{ success: boolean; message?: string; presetId?: string }> {
+export async function downloadPresetFromGithub(presetName: string, language: "zh" | "en" = "zh"): Promise<{ success: boolean; message?: string; presetId?: string }> {
   try {
     const preset = AVAILABLE_PRESETS.find(p => p.name === presetName);
     if (!preset) {
@@ -79,7 +105,8 @@ export async function downloadPresetFromGithub(presetName: string): Promise<{ su
             }
             
             const jsonContent = await response.text();
-            const result = await importPresetFromJson(jsonContent, preset.displayName);
+            const localizedName = getPresetDisplayName(presetName, language);
+            const result = await importPresetFromJson(jsonContent, localizedName);
             
             if (result.success && result.presetId) {
               markPresetAsDownloaded(presetName);
@@ -103,7 +130,8 @@ export async function downloadPresetFromGithub(presetName: string): Promise<{ su
     }
     
     const jsonContent = await response.text();
-    const result = await importPresetFromJson(jsonContent, preset.displayName);
+    const localizedName = getPresetDisplayName(presetName, language);
+    const result = await importPresetFromJson(jsonContent, localizedName);
     
     if (result.success && result.presetId) {
       markPresetAsDownloaded(presetName);

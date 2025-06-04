@@ -4,7 +4,7 @@ import Link from "next/link";
 import DialogueTreeModal from "@/components/DialogueTreeModal";
 import { trackButtonClick } from "@/lib/utils/google-analytics";
 import { CharacterAvatarBackground } from "@/components/CharacterAvatarBackground";
-import { getAvailableGithubPresets, isPresetDownloaded, downloadPresetFromGithub, doesPresetExist } from "@/function/preset/download";
+import { getAvailableGithubPresets, isPresetDownloaded, downloadPresetFromGithub, doesPresetExist, getPresetDisplayName, getPresetDescription } from "@/function/preset/download";
 import { toast } from "react-hot-toast";
 
 export enum PromptType {
@@ -39,9 +39,8 @@ const CharacterSidebar: React.FC<CharacterSidebarProps> = ({
   onPromptTypeChange,
   onDialogueEdit,
 }) => {
-  const { t, fontClass, serifFontClass } = useLanguage();
+  const { t, fontClass, serifFontClass, language } = useLanguage();
   const [currentPromptType, setCurrentPromptType] = useState<PromptType>(promptType);
-  const [showPromptDropdown, setShowPromptDropdown] = useState(false);
   const [currentResponseLength, setCurrentResponseLength] = useState<number>(200);
   const [githubPresets, setGithubPresets] = useState<any[]>([]);
   const [showGithubPresetDropdown, setShowGithubPresetDropdown] = useState(false);
@@ -99,12 +98,14 @@ const CharacterSidebar: React.FC<CharacterSidebarProps> = ({
       const exists = await doesPresetExist(presetName);
 
       if (isDownloaded && exists) {
-        toast.success(`预设 "${presetName}" 已下载`);
+        const displayName = getPresetDisplayName(presetName, language as "zh" | "en");
+        toast.success(`预设 "${displayName}" 已下载`);
       } else {
-        const result = await downloadPresetFromGithub(presetName);
+        const result = await downloadPresetFromGithub(presetName, language as "zh" | "en");
         if (result.success) {
           setDownloadedPresets(prev => [...prev, presetName]);
-          toast.success(`预设 "${presetName}" 下载成功`);
+          const displayName = getPresetDisplayName(presetName, language as "zh" | "en");
+          toast.success(`预设 "${displayName}" 下载成功`);
         } else {
           toast.error(`下载预设失败: ${result.message || "未知错误"}`);
         }
@@ -468,8 +469,12 @@ const CharacterSidebar: React.FC<CharacterSidebarProps> = ({
                       >
                         <div className="flex items-center justify-between">
                           <div>
-                            <span className={`text-sm text-[#f4e8c1] ${fontClass}`}>{preset.displayName}</span>
-                            <p className={`text-xs text-[#a18d6f] mt-1 ${fontClass}`}>{preset.description}</p>
+                            <span className={`text-sm text-[#f4e8c1] ${fontClass}`}>
+                              {getPresetDisplayName(preset.name, language as "zh" | "en")}
+                            </span>
+                            <p className={`text-xs text-[#a18d6f] mt-1 ${fontClass}`}>
+                              {getPresetDescription(preset.name, language as "zh" | "en")}
+                            </p>
                           </div>
                           <div>
                             {isDownloading && (
