@@ -5,7 +5,7 @@ import { NodeToolRegistry } from "../NodeTool";
 
 export class WorldBookNode extends NodeBase {
   static readonly nodeName = "worldBook";
-  static readonly description = "Integrates world book content into prompts";
+  static readonly description = "Assembles world book content into system and user messages";
   static readonly version = "1.0.0";
 
   constructor(config: NodeConfig) {
@@ -19,34 +19,27 @@ export class WorldBookNode extends NodeBase {
   }
 
   protected async _call(input: NodeInput): Promise<NodeOutput> {
-    const baseSystemMessage = input.baseSystemMessage;
+    const systemMessage = input.systemMessage;
     const userMessage = input.userMessage;
-    const currentUserInput = input.userInput;
     const characterId = input.characterId;
     const language = input.language || "zh";
     const username = input.username;
     const charName = input.charName;
-    const chatHistory = input.chatHistory || [];
+    const currentUserInput = input.currentUserInput || "";
     const contextWindow = input.contextWindow || 5;
 
-    if (!baseSystemMessage) {
-      throw new Error("Base system message is required for WorldBookNode");
-    }
-
-    if (!userMessage) {
-      throw new Error("User message is required for WorldBookNode");
+    if (!systemMessage) {
+      throw new Error("System message is required for WorldBookNode");
     }
 
     if (!characterId) {
       throw new Error("Character ID is required for WorldBookNode");
     }
-
     const result = await this.executeTool(
       "assemblePromptWithWorldBook",
       characterId,
-      baseSystemMessage,
+      systemMessage,
       userMessage,
-      chatHistory,
       currentUserInput,
       language,
       contextWindow,
@@ -56,13 +49,13 @@ export class WorldBookNode extends NodeBase {
 
     return {
       systemMessage: result.systemMessage,
-      enhancedUserMessage: result.userMessage,
-      baseSystemMessage,
-      originalUserMessage: userMessage,
+      userMessage: result.userMessage,
       characterId,
       language,
       username,
       charName,
+      contextWindow,
+      currentUserInput,
     };
   }
 } 

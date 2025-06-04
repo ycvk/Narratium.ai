@@ -3,6 +3,7 @@ import { Character } from "@/lib/core/character";
 import { PromptAssembler } from "@/lib/core/prompt-assembler";
 import { DialogueMessage } from "@/lib/models/character-dialogue-model";
 import { LocalCharacterRecordOperations } from "@/lib/data/character-record-operation";
+import { LocalCharacterDialogueOperations } from "@/lib/data/character-dialogue-operation";
 
 export class WorldBookNodeTools extends NodeTool {
   protected static readonly toolType: string = "worldBook";
@@ -35,7 +36,6 @@ export class WorldBookNodeTools extends NodeTool {
     characterId: string,
     baseSystemMessage: string,
     userMessage: string,
-    chatHistory: DialogueMessage[],
     currentUserInput: string,
     language: "zh" | "en" = "zh",
     contextWindow: number = 5,
@@ -43,16 +43,10 @@ export class WorldBookNodeTools extends NodeTool {
     charName?: string,
   ): Promise<{ systemMessage: string; userMessage: string }> {
     try {
-      this.logExecution("assemblePromptWithWorldBook", { 
-        characterId, 
-        language, 
-        contextWindow, 
-        username, 
-        charName, 
-      });
-
       const characterRecord = await LocalCharacterRecordOperations.getCharacterById(characterId);
       const character = new Character(characterRecord);
+
+      const chatHistory = await this.getChatHistory(characterId, contextWindow);
       
       const promptAssembler = new PromptAssembler({
         language,
@@ -68,10 +62,53 @@ export class WorldBookNodeTools extends NodeTool {
         username,
         charName,
       );
-
       return result;
     } catch (error) {
       this.handleError(error as Error, "assemblePromptWithWorldBook");
+    }
+  }
+
+  private static async getChatHistory(characterId: string, contextWindow: number = 5): Promise<DialogueMessage[]> {
+    try {
+      const dialogueTree = await LocalCharacterDialogueOperations.getDialogueTreeById(characterId);
+      if (!dialogueTree) {
+        return [];
+      }
+
+      const nodePath = dialogueTree.current_node_id !== "root"
+        ? await LocalCharacterDialogueOperations.getDialoguePathToNode(characterId, dialogueTree.current_node_id)
+        : [];
+      
+      const messages: DialogueMessage[] = [];
+      let messageId = 0;
+      
+      for (const node of nodePath) {
+        if (node.parent_node_id === "root" && node.assistant_response) {
+          continue;
+        }
+        
+        if (node.user_input) {
+          messages.push({
+            role: "user",
+            content: node.user_input,
+            id: messageId++,
+          });
+        }
+        
+        if (node.assistant_response) {
+          messages.push({
+            role: "assistant", 
+            content: node.assistant_response,
+            id: messageId++,
+          });
+        }
+      }
+
+      const recentMessages = messages.slice(-contextWindow * 2);
+      return recentMessages;
+    } catch (error) {
+      this.handleError(error as Error, "getChatHistory");
+      return [];
     }
   }
 } 
