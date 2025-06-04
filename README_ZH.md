@@ -161,6 +161,10 @@ Narratium 让讲故事变得简单又强大：
 
 [![Contributors](https://contrib.rocks/image?repo=Narratium/Character-Card)](https://github.com/Narratium/Narratium.ai/graphs/contributors)
 
+## 其他
+
+贝露喵预设（Belle Cat）：由 @beilusaiying 赞助
+
 ## ⭐ Star Growth
 
 [![Stargazers over time](https://starchart.cc/Narratium/Narratium.ai.svg?variant=dark)](https://starchart.cc/Narratium/Narratium.ai)

@@ -160,6 +160,10 @@ Special thanks to the SillyTavern community and countless character card contrib
 
 [![Contributors](https://contrib.rocks/image?repo=Narratium/Character-Card)](https://github.com/Narratium/Narratium.ai/graphs/contributors)
 
+## Others
+
+Belle Cat Preset: Sponsored by @beilusaiying
+
 ## ⭐ Star Growth
 
 [![Stargazers over time](https://starchart.cc/Narratium/Narratium.ai.svg?variant=dark)](https://starchart.cc/Narratium/Narratium.ai)
