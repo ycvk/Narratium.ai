@@ -21,6 +21,7 @@ export abstract class NodeBase {
       initParams: config.initParams || [],
       inputFields: config.inputFields || [],
       outputFields: config.outputFields || [],
+      inputMapping: config.inputMapping || {},
     };
     this.initializeTools();
   }
@@ -106,6 +107,7 @@ export abstract class NodeBase {
     const resolvedInput: NodeInput = {};
     const initParams = this.getInitParams();
     const inputFields = this.getInputFields();
+    const inputMapping = this.getConfigValue<Record<string, string>>("inputMapping") || {};
 
     for (const fieldName of initParams) {
       if (context.hasInput(fieldName)) {
@@ -114,11 +116,14 @@ export abstract class NodeBase {
         console.warn(`Node ${this.id}: Required input '${fieldName}' not found in Input`);
       }
     }
-    for (const fieldName of inputFields) {
-      if (context.hasCache(fieldName)) {
-        resolvedInput[fieldName] = context.getCache(fieldName);
+
+    for (const workflowFieldName of inputFields) {
+      const nodeFieldName = inputMapping[workflowFieldName] || workflowFieldName;
+      
+      if (context.hasCache(workflowFieldName)) {
+        resolvedInput[nodeFieldName] = context.getCache(workflowFieldName);
       } else {
-        console.warn(`Node ${this.id}: Required input '${fieldName}' not found in cache`);
+        console.warn(`Node ${this.id}: Required input '${workflowFieldName}' (mapped to node field '${nodeFieldName}') not found in cache`);
       }
     }
 
@@ -126,6 +131,8 @@ export abstract class NodeBase {
   }
 
   protected async publishOutput(output: NodeOutput, context: NodeContext): Promise<void> {
+    const outputFields = this.getOutputFields();
+    
     const storeData = (key: string, value: any) => {
       switch (this.category) {
       case NodeCategory.EXIT:
@@ -136,8 +143,6 @@ export abstract class NodeBase {
         break;
       }
     };
-
-    const outputFields = this.getOutputFields();
     
     for (const fieldName of outputFields) {
       if (output[fieldName] !== undefined) {
