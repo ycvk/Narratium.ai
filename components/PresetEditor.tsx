@@ -2,8 +2,8 @@
 
 import { useState, useEffect } from "react";
 import { toast } from "react-hot-toast";
-import { getAllPresets, getPreset, createPreset, deletePreset, togglePresetEnabled } from "@/function/preset/global";
-import { addPromptToPreset, deletePromptFromPreset, togglePromptEnabled } from "@/function/preset/edit";
+import { getAllPresets, getPreset, deletePreset, togglePresetEnabled } from "@/function/preset/global";
+import { deletePromptFromPreset, togglePromptEnabled } from "@/function/preset/edit";
 import { useLanguage } from "@/app/i18n";
 import ImportPresetModal from "@/components/ImportPresetModal";
 import CreatePresetModal from "@/components/CreatePresetModal";
@@ -408,7 +408,6 @@ export default function PresetEditor({
   };
 
   const handleTogglePreset = async (presetId: string, enableState: boolean) => {
-    // First, update the presets list immediately for better UX
     setPresets(prevPresets => 
       prevPresets.map(preset => {
         if (preset.id === presetId) {
@@ -416,27 +415,44 @@ export default function PresetEditor({
             ...preset,
             enabled: enableState,
           };
+        } else if (enableState) {
+          return {
+            ...preset,
+            enabled: false,
+          };
         }
         return preset;
       }),
     );
 
-    // Also update selectedPreset if it matches
-    if (selectedPreset && selectedPreset.id === presetId) {
-      setSelectedPreset({
-        ...selectedPreset,
-        enabled: enableState,
-      });
+    if (selectedPreset) {
+      if (selectedPreset.id === presetId) {
+        setSelectedPreset({
+          ...selectedPreset,
+          enabled: enableState,
+        });
+      } else if (enableState) {
+        setSelectedPreset({
+          ...selectedPreset,
+          enabled: false,
+        });
+      }
     }
 
     try {
       const result = await togglePresetEnabled(presetId, enableState);
       if (result.success) {
-        toast.success(enableState 
-          ? t("preset.presetEnabledSuccess") 
-          : t("preset.presetDisabledSuccess"));
+        if (enableState) {
+          const enabledCount = presets.filter(p => p.enabled !== false && p.id !== presetId).length;
+          if (enabledCount > 0) {
+            toast.success(t("preset.presetEnabledExclusiveSuccess"));
+          } else {
+            toast.success(t("preset.presetEnabledSuccess"));
+          }
+        } else {
+          toast.success(t("preset.presetDisabledSuccess"));
+        }
       } else {
-        // Rollback on failure
         setPresets(prevPresets => 
           prevPresets.map(preset => {
             if (preset.id === presetId) {
@@ -444,22 +460,35 @@ export default function PresetEditor({
                 ...preset,
                 enabled: !enableState,
               };
+            } else if (enableState) {
+              const originalPreset = presets.find(p => p.id === preset.id);
+              return {
+                ...preset,
+                enabled: originalPreset?.enabled !== false,
+              };
             }
             return preset;
           }),
         );
         
-        if (selectedPreset && selectedPreset.id === presetId) {
-          setSelectedPreset({
-            ...selectedPreset,
-            enabled: !enableState,
-          });
+        if (selectedPreset) {
+          if (selectedPreset.id === presetId) {
+            setSelectedPreset({
+              ...selectedPreset,
+              enabled: !enableState,
+            });
+          } else if (enableState) {
+            const originalSelectedPreset = presets.find(p => p.id === selectedPreset.id);
+            setSelectedPreset({
+              ...selectedPreset,
+              enabled: originalSelectedPreset?.enabled !== false,
+            });
+          }
         }
         
         toast.error(t("preset.togglePresetFailed"));
       }
     } catch (error) {
-      // Rollback on error
       setPresets(prevPresets => 
         prevPresets.map(preset => {
           if (preset.id === presetId) {
@@ -467,16 +496,30 @@ export default function PresetEditor({
               ...preset,
               enabled: !enableState,
             };
+          } else if (enableState) {
+            const originalPreset = presets.find(p => p.id === preset.id);
+            return {
+              ...preset,
+              enabled: originalPreset?.enabled !== false,
+            };
           }
           return preset;
         }),
       );
       
-      if (selectedPreset && selectedPreset.id === presetId) {
-        setSelectedPreset({
-          ...selectedPreset,
-          enabled: !enableState,
-        });
+      if (selectedPreset) {
+        if (selectedPreset.id === presetId) {
+          setSelectedPreset({
+            ...selectedPreset,
+            enabled: !enableState,
+          });
+        } else if (enableState) {
+          const originalSelectedPreset = presets.find(p => p.id === selectedPreset.id);
+          setSelectedPreset({
+            ...selectedPreset,
+            enabled: originalSelectedPreset?.enabled !== false,
+          });
+        }
       }
       
       console.error("Toggle preset failed:", error);
