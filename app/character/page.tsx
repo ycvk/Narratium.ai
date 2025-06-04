@@ -466,8 +466,19 @@ export default function CharacterPage() {
   }, [character, isLoading, isInitializing, error, startCharacterTour]);
 
   useEffect(() => {
-    const handleSwitchToPresetView = () => {
+    const handleSwitchToPresetView = (event: any) => {
       setActiveView("preset");
+      
+      // 如果有预设ID，则在切换视图后启用该预设
+      const detail = event.detail;
+      if (detail) {
+        // 将预设信息存储在sessionStorage中，供PresetEditor组件使用
+        if (detail.presetId) {
+          sessionStorage.setItem("activate_preset_id", detail.presetId);
+        } else if (detail.presetName) {
+          sessionStorage.setItem("activate_preset_name", detail.presetName);
+        }
+      }
     };
     
     window.addEventListener("switchToPresetView", handleSwitchToPresetView);
