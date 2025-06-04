@@ -19,8 +19,9 @@ export class LLMNode extends NodeBase {
   }
 
   protected async _call(input: NodeInput): Promise<NodeOutput> {    
+    console.log("llm-input", input);
     const systemMessage = input.systemMessage;
-    const userMessage = input.enhancedUserMessage;
+    const userMessage = input.userMessage;
     const modelName = input.modelName;
     const apiKey = input.apiKey;
     const baseUrl = input.baseUrl;
@@ -32,7 +33,7 @@ export class LLMNode extends NodeBase {
       throw new Error("System message is required for LLMNode");
     }
 
-    if (!userMessage) {
+    if (!userMessage) { 
       throw new Error("User message is required for LLMNode");
     }
 

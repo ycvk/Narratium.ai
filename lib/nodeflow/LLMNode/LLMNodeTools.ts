@@ -56,6 +56,7 @@ export class LLMNodeTools extends NodeTool {
     config: LLMConfig,
   ): Promise<string> {
     try {
+      console.log("invokeLLM");
       const llm = this.createLLM(config);
       const dialogueChain = this.createDialogueChain(llm);
       const response = await dialogueChain.invoke({
