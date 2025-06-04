@@ -4,13 +4,11 @@ class DialogueStory {
   language: string;
   userInput: string[];
   responses: string[];
-  status: string[];
 
-  constructor(language: string, userInput: string[] | null = null, responses: string[] | null = null, status: string[] | null = null) {
+  constructor(language: string, userInput: string[] | null = null, responses: string[] | null = null) {
     this.language = language;
     this.userInput = userInput || [];
     this.responses = responses || [];
-    this.status = status || [];
   }
 
   getStory(startIndex: number | null = null, endIndex: number | null = null): string {
@@ -20,16 +18,13 @@ class DialogueStory {
     let result = "";
     const userLabel = "User";
     const assistantLabel = "Character";
-    const statusLabel = "Status";
   
     for (let i = startIndex; i < endIndex; i++) {
       const userInput = this.userInput[i];
       const response = this.responses[i];
-      const status = this.status[i];
   
       if (userInput) result += `${userLabel}: ${userInput}\n`;
       if (response) result += `${assistantLabel}: ${response}\n`;
-      if (status) result += `${statusLabel}: ${status}\n`;
     }
   
     return result.trim();
@@ -39,7 +34,6 @@ class DialogueStory {
 export class CharacterHistory {
   language: string;
   systemMessage: string;
-  sampleStatus: string;
   memLen: number;
   recentDialogue: DialogueStory;
   historyDialogue: DialogueStory;
@@ -50,7 +44,6 @@ export class CharacterHistory {
     this.memLen = memLen;
     this.recentDialogue = new DialogueStory(language);
     this.historyDialogue = new DialogueStory(language);
-    this.sampleStatus = "";
   }
 
   getRecentHistory(): string {
@@ -63,10 +56,6 @@ export class CharacterHistory {
 
   getSystemMessage(): string {
     return this.systemMessage;
-  }
-
-  getSampleStatus(): string {
-    return this.sampleStatus;
   }
 
   getMessages(): DialogueMessage[] {

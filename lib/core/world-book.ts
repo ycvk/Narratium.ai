@@ -25,14 +25,12 @@ export class WorldBookManager {
     
     const fullText = `${recentMessages} ${message}`.toLowerCase();
 
-    console.log("fullText", fullText);
-
     const entries = Array.isArray(worldBook) 
       ? worldBook 
       : Object.values(worldBook);
 
     const enabledEntries = entries.filter(entry => entry.selective !== false);
-    console.log("enabledEntries", enabledEntries);
+
     const constantEntries = enabledEntries.filter(entry => entry.constant);
 
     const matchedEntries = enabledEntries
@@ -95,18 +93,5 @@ export class WorldBookManager {
     }
     
     return positionGroups;
-  }
-  
-  static getPositionInsertContent(
-    entries: WorldBookEntry[],
-  ): string {
-    if (!entries.length) return "";
-    
-    return entries
-      .map(entry => {
-        const entryName = entry.comment || "";
-        return `[${entryName}]\n${entry.content}`;
-      })
-      .join("\n\n");
   }
 }

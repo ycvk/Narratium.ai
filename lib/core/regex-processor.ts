@@ -1,6 +1,5 @@
 import { RegexReplacementResult } from "@/lib/models/regex-script-model";
 import { RegexScriptOperations } from "@/lib/data/regex-script-operation";
-import { DialogueMessage } from "@/lib/models/character-dialogue-model";
 
 export interface RegexProcessorOptions {
   ownerId: string;
@@ -119,74 +118,5 @@ export class RegexProcessor {
     }
     
     return result;
-  }
-
-  static async processChatMessages(
-    messages: DialogueMessage[],
-    options: RegexProcessorOptions,
-  ): Promise<DialogueMessage[]> {
-    const processedMessages: DialogueMessage[] = [];
-    
-    for (const message of messages) {
-      const result = await this.processFullContext(message.content, options);
-      
-      processedMessages.push({
-        ...message,
-        content: result.replacedText,
-      });
-    }
-    
-    return processedMessages;
-  }
-
-  static async processSystemPrompt(
-    systemPrompt: string,
-    options: RegexProcessorOptions,
-  ): Promise<string> {
-    const result = await this.processFullContext(
-      systemPrompt,
-      { ...options },
-    );
-    
-    return result.replacedText;
-  }
-
-  static async processUserMessage(
-    userMessage: string,
-    options: RegexProcessorOptions,
-  ): Promise<string> {
-    const result = await this.processFullContext(
-      userMessage,
-      { ...options },
-    );
-    
-    return result.replacedText;
-  }
-
-  static async processConversation(
-    systemPrompt: string,
-    userMessage: string,
-    chatHistory: DialogueMessage[],
-    options: RegexProcessorOptions,
-  ): Promise<{
-    processedSystemPrompt: string;
-    processedUserMessage: string;
-    processedChatHistory: DialogueMessage[];
-  }> {
-    const [
-      processedSystemPrompt,
-      processedUserMessage,
-      processedChatHistory,
-    ] = await Promise.all([
-      this.processSystemPrompt(systemPrompt, options),
-      this.processUserMessage(userMessage, options),
-      this.processChatMessages(chatHistory, options),
-    ]);
-    
-    return {
-      processedSystemPrompt,
-      processedUserMessage,
-      processedChatHistory,
-    };
   }
 }

@@ -6,7 +6,7 @@ import { StringOutputParser } from "@langchain/core/output_parsers";
 import { PromptAssembler } from "@/lib/core/prompt-assembler";
 import { RunnablePassthrough } from "@langchain/core/runnables";
 import { PromptType } from "@/lib/models/character-prompts-model";
-import { getPrefixPrompt, getChainOfThoughtPrompt, getSuffixPrompt, getCharacterPromptZh, getCharacterPromptEn, getCharacterCompressorPromptZh, getCharacterCompressorPromptEn } from "@/lib/prompts/character-prompts";
+import { getCharacterCompressorPromptZh, getCharacterCompressorPromptEn } from "@/lib/prompts/character-prompts";
 import { CharacterHistory } from "@/lib/core/character-history";
 import { DialogueOptions } from "@/lib/models/character-dialogue-model";
 import { RegexProcessor } from "@/lib/core/regex-processor";
@@ -65,7 +65,7 @@ export class CharacterDialogue {
       baseUrl,
       llmType,
       temperature = 0.7,
-      streaming = true,
+      streaming = false,
     } = options;
 
     const safeModel = modelName && modelName.trim() ? modelName.trim() : "";
@@ -162,101 +162,6 @@ export class CharacterDialogue {
       .pipe(dialoguePrompt)
       .pipe(this.llm)
       .pipe(new StringOutputParser());
-  }
-
-  async sendMessage(number: number, _userMessage: string, username?: string): Promise<{ response: string, result: string, success: boolean }> {
-    if (!this.dialogueChain) {
-      throw new Error("Dialogue chain not initialized");
-    }
-
-    try {
-      const userMessage = this.prepareUserMessage(number, _userMessage, username);
-      const baseSystemMessage = this.character.getSystemPrompt(this.language, username);
-
-      const { systemMessage, userMessage: enhancedUserMessage } = this.promptAssembler.assemblePrompt(
-        this.character.worldBook,
-        baseSystemMessage,
-        userMessage,
-        this.history.getMessages(),
-        _userMessage,
-        username,
-      );
-
-      const stream = await this.dialogueChain.stream({
-        system_message: systemMessage,
-        user_message: enhancedUserMessage,
-      });
-
-      let response = "";
-      for await (const chunk of stream) {
-        response += chunk;
-      }
-
-      const result = await RegexProcessor.processFullContext(response, {
-        ownerId: this.character.id,
-      });
-      
-      return { 
-        response: response,
-        result: result.replacedText,
-        success: result.success,
-      };
-    } catch (error) {
-      console.error("Error in character dialogue:", error);
-      throw new Error(`Failed to get character response: ${error}`);
-    }
-  }
-
-  prepareUserMessage(number: number, userMessage: string,username?: string): string {
-    let prefixPrompt = "";
-    let chainOfThoughtPrompt = "";
-    let suffixPrompt = "";
-
-    if (this.promptType === PromptType.CUSTOM) {
-      try {
-        const characterData = this.character.getData(this.language, username);
-        if ((characterData as any).custom_prompts) {
-          prefixPrompt = (characterData as any).custom_prompts.prefixPrompt || "";
-          if (prefixPrompt.trim() == "") {
-            prefixPrompt = getPrefixPrompt(PromptType.COMPANION, this.language);
-          }
-          chainOfThoughtPrompt = (characterData as any).custom_prompts.chainOfThoughtPrompt || "";
-          if (chainOfThoughtPrompt.trim() == "") {
-            chainOfThoughtPrompt = getChainOfThoughtPrompt(PromptType.COMPANION, this.language);
-          }
-          suffixPrompt = (characterData as any).custom_prompts.suffixPrompt || "";
-          if (suffixPrompt.trim() == "") {
-            suffixPrompt = getSuffixPrompt(PromptType.COMPANION, this.language);
-          }
-        }
-      } catch (error) {
-        console.error("Error getting custom prompts:", error);
-      }
-    } else {
-      prefixPrompt = getPrefixPrompt(this.promptType, this.language);
-      chainOfThoughtPrompt = getChainOfThoughtPrompt(this.promptType, this.language);
-      suffixPrompt = getSuffixPrompt(this.promptType, this.language);
-    }
-    
-    const characterPromptParams = {
-      username,
-      name: this.character.getData(this.language,username).name,
-      number: number,
-      prefixPrompt,
-      chainOfThoughtPrompt,
-      suffixPrompt,
-      language: this.language,
-      systemPrompt: this.history.getSystemMessage(),
-      storyHistory: this.history.getCompressedHistory(),
-      conversationHistory: this.history.getRecentHistory(),
-      userInput: userMessage,
-    };
-
-    const characterSystemPrompt = this.language === "zh" 
-      ? getCharacterPromptZh(characterPromptParams)
-      : getCharacterPromptEn(characterPromptParams);
-    
-    return characterSystemPrompt;
   }
   
   async compressStory(userInput: string, story: string): Promise<string> {

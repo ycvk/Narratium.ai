@@ -90,42 +90,5 @@ export class Character {
     } 
     return prompt;
   }
-  
-  getSampleStatus(language: "en" | "zh" = "zh", username?: string): string {
-    const processedData = adaptCharacterData(this.characterData, language, username);
-    let info = "";
-    
-    if (processedData.character_book && processedData.character_book.length > 0) {
-      const characterBook = processedData.character_book;
-      const statusKeywords = [
-        "状态栏", "状态表达", "当前状态", "状态信息", "状态展示", 
-        "情绪状态", "心情状态", "状态输出", "状态显示", "状态设定",
-        "status bar", "status expression", "current status", "status info",
-        "status display", "emotional state", "mood status", 
-        "status output", "status view", "status setup",
-      ];
-        
-      for (const entry of characterBook) {
-        if (entry.comment && entry.content) {
-          if (statusKeywords.some(keyword => entry.comment.toLowerCase().includes(keyword.toLowerCase()))) {
-            return `【${entry.comment}】: ${entry.content}`;
-          }          
-        }
-      }
-        
-      info += "\n\n";
-      characterBook.forEach((entry: any, index: any) => {
-        if (entry.comment && entry.content) {
-          info += `【${entry.comment}】: ${entry.content}`;
-          if (index < characterBook.length - 1) {
-            info += "\n\n";
-          }
-        }
-      });
-    }
-    info +=  (processedData.alternate_greetings ? processedData.alternate_greetings[0] : processedData.first_mes) || "";
-    return info;
-  }
-    
 }   
   
