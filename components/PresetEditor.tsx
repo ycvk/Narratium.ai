@@ -139,7 +139,51 @@ export default function PresetEditor({
   useEffect(() => {
     loadSortPreferences();
     loadFilterPreferences();
-    loadPresetData();
+    
+    loadPresetData().then(async () => {
+      const activatePresetId = sessionStorage.getItem("activate_preset_id");
+      const activatePresetName = sessionStorage.getItem("activate_preset_name");
+    
+      if (activatePresetId) {
+        try {
+          const preset = await getPreset(activatePresetId);
+          if (preset.success && preset.data) {
+            await handleTogglePreset(activatePresetId, true);
+            toast.success(t("preset.presetEnabledExclusiveSuccess"));
+          }
+        } catch (error) {
+          console.error("Error activating preset by ID:", error);
+        }
+        sessionStorage.removeItem("activate_preset_id");
+      } else if (activatePresetName) {
+        try {
+          const allPresets = await getAllPresets();
+          if (allPresets.success && allPresets.data) {
+            const matchingPresets = allPresets.data.filter(p => 
+              p.name && p.name.toLowerCase().includes(activatePresetName.toLowerCase()),
+            );
+          
+            if (matchingPresets.length > 0 && matchingPresets[0].id) {
+              await handleTogglePreset(matchingPresets[0].id, true);
+              toast.success(t("preset.presetEnabledExclusiveSuccess"));
+
+              setPresets(prevPresets =>
+                prevPresets.map(preset => ({
+                  ...preset,
+                  enabled: preset.id === matchingPresets[0].id,
+                })),
+              );
+            } else {
+              toast.error(`No preset found matching "${activatePresetName}"`);
+            }
+          }
+        } catch (error) {
+          console.error("Error activating preset by name:", error);
+          toast.error("Failed to activate preset");
+        }
+        sessionStorage.removeItem("activate_preset_name");
+      }
+    });
     
     const timer = setTimeout(() => setAnimationComplete(true), 100);
     return () => clearTimeout(timer);
@@ -296,7 +340,6 @@ export default function PresetEditor({
   };
 
   const handleTogglePrompt = async (presetId: string, promptIdentifier: string, enableState: boolean) => {
-    // First, update the selectedPreset state immediately for better UX
     if (selectedPreset && selectedPreset.id === presetId) {
       const updatedPrompts = selectedPreset.prompts.map(p => {
         if (p.identifier === promptIdentifier) {
@@ -313,7 +356,6 @@ export default function PresetEditor({
       });
     }
     
-    // Also update the presets list immediately
     setPresets(prevPresets => 
       prevPresets.map(preset => {
         if (preset.id === presetId) {
@@ -335,7 +377,6 @@ export default function PresetEditor({
           ? t("preset.promptEnabledSuccess") 
           : t("preset.promptDisabledSuccess"));
       } else {
-        // Rollback on failure
         if (selectedPreset && selectedPreset.id === presetId) {
           const revertedPrompts = selectedPreset.prompts.map(p => {
             if (p.identifier === promptIdentifier) {
@@ -352,7 +393,6 @@ export default function PresetEditor({
           });
         }
         
-        // Rollback presets list
         setPresets(prevPresets => 
           prevPresets.map(preset => {
             if (preset.id === presetId) {
@@ -370,7 +410,6 @@ export default function PresetEditor({
         toast.error(t("preset.togglePromptFailed"));
       }
     } catch (error) {
-      // Rollback on error
       if (selectedPreset && selectedPreset.id === presetId) {
         const revertedPrompts = selectedPreset.prompts.map(p => {
           if (p.identifier === promptIdentifier) {
@@ -387,7 +426,6 @@ export default function PresetEditor({
         });
       }
       
-      // Rollback presets list
       setPresets(prevPresets => 
         prevPresets.map(preset => {
           if (preset.id === presetId) {
