@@ -1,16 +1,6 @@
 import { readData, writeData, PRESET_FILE } from "@/lib/data/local-storage";
 import { Preset, PresetPrompt } from "@/lib/models/preset-model";
 
-export interface PresetSettings {
-  default_preset_id?: string;
-  auto_apply?: boolean;
-  metadata?: any;
-}
-
-const DEFAULT_SETTINGS: PresetSettings = {
-  auto_apply: false,
-};
-
 export class PresetOperations {
   static async getPresets(): Promise<Record<string, any>> {
     const presetsArray = await readData(PRESET_FILE);
@@ -24,7 +14,6 @@ export class PresetOperations {
   static async getAllPresets(): Promise<Preset[]> {
     try {
       const presets = await this.getPresets();
-      // 过滤掉设置项，只返回预设数据
       const presetList = Object.entries(presets)
         .filter(([key]) => !key.endsWith("_settings"))
         .map(([_, value]) => value as Preset);
@@ -54,7 +43,7 @@ export class PresetOperations {
       const newPreset = {
         ...preset,
         id: presetId,
-        enabled: preset.enabled !== false, // Default to true if not specified
+        enabled: preset.enabled !== false,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
       };
@@ -113,31 +102,61 @@ export class PresetOperations {
     try {
       const presetData = typeof jsonData === "string" ? JSON.parse(jsonData) : jsonData;
       
-      // 提取相关字段创建新的预设对象
       const newPreset: Preset = {
         name: customName || presetData.name || "Imported Preset",
-        enabled: presetData.enabled !== false, // Default to true for imported presets
-        
-        // 过滤并提取prompts中有效的部分
-        prompts: Array.isArray(presetData.prompts) 
-          ? presetData.prompts
-            .filter((prompt: any) => prompt.identifier && prompt.name)
-            .map((prompt: any) => ({
+        enabled: false,
+        prompts: [],
+      };
+
+      const addedPrompts = new Map<string, PresetPrompt>();
+      
+      if (Array.isArray(presetData.prompts)) {
+        presetData.prompts
+          .filter((prompt: any) => prompt.identifier && prompt.name)
+          .forEach((prompt: any) => {
+            const newPrompt: PresetPrompt = {
               identifier: prompt.identifier,
               name: prompt.name,
-              system_prompt: prompt.system_prompt,
-              enabled: prompt.enabled !== false, // 默认为true
+              enabled: prompt.enabled !== false,
               marker: prompt.marker,
               role: prompt.role,
               content: prompt.content,
-              injection_position: prompt.injection_position,
-              injection_depth: prompt.injection_depth,
               forbid_overrides: prompt.forbid_overrides,
-            } as PresetPrompt))
-          : [],
-      };
+            };
+            
+            addedPrompts.set(prompt.identifier, newPrompt);
+          });
+      }
       
-      // 创建新预设
+      if (Array.isArray(presetData.prompt_order)) {
+        let groupId = 1;
+        
+        for (const orderItem of presetData.prompt_order) {
+          if (Array.isArray(orderItem.order)) {
+            orderItem.order.forEach((entry: any, index: number) => {
+              let prompt = addedPrompts.get(entry.identifier);
+              
+              if (!prompt) {
+                prompt = {
+                  identifier: entry.identifier,
+                  name: entry.identifier,
+                  enabled: entry.enabled !== false,
+                };
+                addedPrompts.set(entry.identifier, prompt);
+              }
+              
+              prompt.group_id = groupId;
+              prompt.position = index;
+              prompt.enabled = entry.enabled !== false;
+            });
+            
+            groupId++;
+          }
+        }
+      }
+      
+      newPreset.prompts = Array.from(addedPrompts.values());
+      
       return this.createPreset(newPreset);
     } catch (error) {
       console.error("Error importing preset:", error);
@@ -145,53 +164,55 @@ export class PresetOperations {
     }
   }
 
-  static async exportPreset(presetId: string): Promise<string | null> {
+  static async getOrderedPrompts(presetId: string, characterId: string | number): Promise<PresetPrompt[]> {
     try {
       const preset = await this.getPreset(presetId);
       
-      if (!preset) {
-        return null;
+      if (!preset || preset.enabled === false) {
+        return [];
+      }
+
+      let targetGroupId = 2;
+      let groupPrompts = preset.prompts.filter(
+        prompt => Number(prompt.group_id) === targetGroupId,
+      );
+      
+      if (groupPrompts.length === 0) {
+        targetGroupId = 1;
+        groupPrompts = preset.prompts.filter(
+          prompt => Number(prompt.group_id) === targetGroupId,
+        );
+      }
+
+      if (groupPrompts.length === 0) {
+        return preset.prompts.filter(prompt => 
+          !prompt.group_id && prompt.enabled !== false,
+        );
       }
       
-      // 删除内部使用的字段
-      const { id, created_at, updated_at, ...exportData } = preset;
+      const orderedPrompts = [...groupPrompts].sort(
+        (a, b) => (a.position || 0) - (b.position || 0),
+      );
       
-      return JSON.stringify(exportData, null, 2);
+      return orderedPrompts.filter(prompt => prompt.enabled !== false);
     } catch (error) {
-      console.error("Error exporting preset:", error);
-      return null;
+      console.error("Error getting ordered prompts:", error);
+      return [];
     }
   }
-  
-  static async getPresetSettings(characterId: string): Promise<PresetSettings> {
-    const presets = await this.getPresets();
-    const settings = presets[`${characterId}_settings`] as PresetSettings;
-    
-    if (!settings) {
-      return { ...DEFAULT_SETTINGS };
-    }
-    
-    return {
-      ...DEFAULT_SETTINGS,
-      ...settings,
-    };
-  }
-  
-  static async updatePresetSettings(
-    characterId: string,
-    updates: Partial<PresetSettings>,
-  ): Promise<PresetSettings> {
-    const presets = await this.getPresets();
-    const currentSettings = await this.getPresetSettings(characterId);
-    const newSettings = { ...currentSettings, ...updates };
-    
-    presets[`${characterId}_settings`] = newSettings;
-    await this.savePresets(presets);
-    
-    return newSettings;
-  }
-  
-  static async applyPreset(presetId: string, characterId: string): Promise<boolean> {
+
+  static async updateCharacterPrompt(
+    presetId: string,
+    characterId: string | number,
+    promptData: {
+      identifier: string;
+      name: string;
+      content?: string;
+      enabled?: boolean;
+      position?: number;
+      [key: string]: any;
+    },
+  ): Promise<boolean> {
     try {
       const preset = await this.getPreset(presetId);
       
@@ -199,116 +220,43 @@ export class PresetOperations {
         return false;
       }
       
-      // Check if preset is enabled
-      if (preset.enabled === false) {
-        return false;
-      }
+      const groupPrompts = preset.prompts.filter(
+        prompt => String(prompt.group_id) === String(characterId),
+      );
       
-      // Update settings to mark this preset as active for the character
-      await this.updatePresetSettings(characterId, {
-        default_preset_id: presetId,
-      });
+      const existingIndex = groupPrompts.findIndex(
+        prompt => prompt.identifier === promptData.identifier,
+      );
       
-      return true;
-    } catch (error) {
-      console.error("Error applying preset:", error);
-      return false;
-    }
-  }
-
-  // Get effective prompts from a preset (considering both preset and prompt level enabled states)
-  static async getEffectivePrompts(presetId: string): Promise<PresetPrompt[]> {
-    try {
-      const preset = await this.getPreset(presetId);
-      
-      if (!preset || preset.enabled === false) {
-        return []; // If preset is disabled, no prompts are effective
-      }
-      
-      // Return only enabled prompts from an enabled preset
-      return preset.prompts.filter(prompt => prompt.enabled !== false);
-    } catch (error) {
-      console.error("Error getting effective prompts:", error);
-      return [];
-    }
-  }
-
-  // Get all effective prompts for a character (from the active preset)
-  static async getCharacterEffectivePrompts(characterId: string): Promise<PresetPrompt[]> {
-    try {
-      const settings = await this.getPresetSettings(characterId);
-      
-      if (!settings.default_preset_id) {
-        return []; // No active preset
-      }
-      
-      return this.getEffectivePrompts(settings.default_preset_id);
-    } catch (error) {
-      console.error("Error getting character effective prompts:", error);
-      return [];
-    }
-  }
-
-  // Check if a preset is effectively enabled (preset enabled + has enabled prompts)
-  static async isPresetEffective(presetId: string): Promise<boolean> {
-    try {
-      const preset = await this.getPreset(presetId);
-      
-      if (!preset || preset.enabled === false) {
-        return false; // Preset is disabled
-      }
-      
-      // Check if there are any enabled prompts
-      const enabledPrompts = preset.prompts.filter(prompt => prompt.enabled !== false);
-      return enabledPrompts.length > 0;
-    } catch (error) {
-      console.error("Error checking preset effectiveness:", error);
-      return false;
-    }
-  }
-
-  // Get preset status summary
-  static async getPresetStatus(presetId: string): Promise<{
-    exists: boolean;
-    enabled: boolean;
-    totalPrompts: number;
-    enabledPrompts: number;
-    effective: boolean;
-  }> {
-    try {
-      const preset = await this.getPreset(presetId);
-      
-      if (!preset) {
-        return {
-          exists: false,
-          enabled: false,
-          totalPrompts: 0,
-          enabledPrompts: 0,
-          effective: false,
-        };
-      }
-      
-      const enabled = preset.enabled !== false;
-      const totalPrompts = preset.prompts.length;
-      const enabledPrompts = preset.prompts.filter(prompt => prompt.enabled !== false).length;
-      const effective = enabled && enabledPrompts > 0;
-      
-      return {
-        exists: true,
-        enabled,
-        totalPrompts,
-        enabledPrompts,
-        effective,
+      const updatedPrompt: PresetPrompt = {
+        ...promptData,
+        group_id: characterId,
+        position: promptData.position !== undefined ? 
+          promptData.position : 
+          groupPrompts.length > 0 ? 
+            Math.max(...groupPrompts.map(p => p.position || 0)) + 1 : 
+            0,
       };
+      
+      const updatedPrompts = [...preset.prompts];
+      
+      if (existingIndex >= 0) {
+        const globalIndex = updatedPrompts.findIndex(
+          p => p.identifier === promptData.identifier && 
+               String(p.group_id) === String(characterId),
+        );
+        
+        if (globalIndex >= 0) {
+          updatedPrompts[globalIndex] = updatedPrompt;
+        }
+      } else {
+        updatedPrompts.push(updatedPrompt);
+      }
+      
+      return this.updatePreset(presetId, { prompts: updatedPrompts });
     } catch (error) {
-      console.error("Error getting preset status:", error);
-      return {
-        exists: false,
-        enabled: false,
-        totalPrompts: 0,
-        enabledPrompts: 0,
-        effective: false,
-      };
+      console.error("Error updating character prompt:", error);
+      return false;
     }
   }
 }
