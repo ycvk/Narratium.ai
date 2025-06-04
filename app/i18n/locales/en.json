@@ -379,6 +379,7 @@
     "enablePreset": "Enable preset",
     "disablePreset": "Disable preset",
     "presetEnabledSuccess": "Preset enabled successfully",
+    "presetEnabledExclusiveSuccess": "Preset enabled successfully (other presets disabled)",
     "presetDisabledSuccess": "Preset disabled successfully",
     "togglePresetFailed": "Failed to toggle preset",
     "presetDisabled": "Preset is disabled",

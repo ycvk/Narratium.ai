@@ -377,6 +377,7 @@
     "enablePreset": "启用预设",
     "disablePreset": "禁用预设",
     "presetEnabledSuccess": "预设已成功启用",
+    "presetEnabledExclusiveSuccess": "预设已成功启用（其他预设已自动禁用）",
     "presetDisabledSuccess": "预设已成功禁用",
     "togglePresetFailed": "切换预设状态失败",
     "presetDisabled": "预设已禁用",
