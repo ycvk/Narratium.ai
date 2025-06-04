@@ -1,14 +1,13 @@
 export interface PresetPrompt {
   identifier: string;
   name: string;
-  system_prompt?: boolean;
   enabled?: boolean;
   marker?: boolean;
   role?: string;
   content?: string;
-  injection_position?: number;
-  injection_depth?: number;
   forbid_overrides?: boolean;
+  group_id?: string | number;
+  position?: number;
 }
 
 export interface Preset {

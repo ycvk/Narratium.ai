@@ -20,3 +20,4 @@ export interface DialogueOptions {
   promptType?: PromptType;
   contextWindow?: number;
 }
+
