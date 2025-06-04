@@ -69,9 +69,9 @@ export class DialogueWorkflow extends BaseWorkflow {
           name: "userInput",
           category: NodeCategory.ENTRY,
           next: ["preset-1"],
-          initParams: ["characterId", "userInput", "number", "promptType", "language", "username", "modelName", "apiKey", "baseUrl", "llmType", "temperature", "maxTokens", "maxRetries", "topP", "frequencyPenalty", "presencePenalty", "topK", "repeatPenalty", "streaming", "streamUsage"],
+          initParams: ["characterId", "userInput", "number", "promptType", "language", "username", "modelName", "apiKey", "baseUrl", "llmType", "temperature"],
           inputFields: [],
-          outputFields: ["characterId", "userInput", "number", "promptType", "language", "username", "modelName", "apiKey", "baseUrl", "llmType", "temperature", "maxTokens", "maxRetries", "topP", "frequencyPenalty", "presencePenalty", "topK", "repeatPenalty", "streaming", "streamUsage"],
+          outputFields: ["characterId", "userInput", "number", "promptType", "language", "username", "modelName", "apiKey", "baseUrl", "llmType", "temperature"],
         },
         {
           id: "preset-1",
