@@ -7,8 +7,8 @@ export class PresetAssembler {
     language: "zh" | "en" = "zh",
     contextData: { username?: string; charName?: string } = {},
   ): { systemMessage: string; userMessage: string } {
-    if (!prompts || prompts.length === 0) {
-      return { systemMessage: "", userMessage: "" };
+    if (prompts.length === 0) {
+      return PresetAssembler._getDefaultFramework();
     }
 
     const orderedSystemIdentifiers = [
@@ -155,6 +155,83 @@ export class PresetAssembler {
     }
     finalUserMessageParts.push("</outputFormat>");
 
+    return {
+      systemMessage: finalSystemMessageParts.filter(Boolean).join("\n\n"),
+      userMessage: finalUserMessageParts.filter(Boolean).join("\n\n"),
+    };
+  }
+
+  private static _getDefaultFramework(): { systemMessage: string; userMessage: string } {
+    const orderedSystemIdentifiers = [
+      "main",
+      "worldInfoBefore",
+      "charDescription",
+      "charPersonality",
+      "scenario",
+      "worldInfoAfter",
+    ];
+  
+    const orderedUserIdentifiers = [
+      "dialogueExamples",
+      "enhanceDefinitions",
+      "jailbreak",
+      "chatHistory",
+      "userInput",
+    ];
+  
+    let finalSystemMessageParts: string[] = [];
+    for (const id of orderedSystemIdentifiers) {
+      finalSystemMessageParts.push(`<${id}>`);
+
+      if (id === "worldInfoBefore" || id === "worldInfoAfter") {
+        finalSystemMessageParts.push(`{{${id}}}`);
+      }
+  
+      finalSystemMessageParts.push(`</${id}>`);
+    }
+  
+    let finalUserMessageParts: string[] = [];
+    let hasUserInputSection = false;
+  
+    for (const id of orderedUserIdentifiers) {
+      finalUserMessageParts.push(`<${id}>`);
+      if (id === "chatHistory" || id === "userInput") {
+        finalUserMessageParts.push(`{{${id}}}`);
+        if (id === "userInput") {
+          hasUserInputSection = true;
+        }
+      }
+  
+      finalUserMessageParts.push(`</${id}>`);
+    }
+    if (!hasUserInputSection) {
+      finalUserMessageParts.push("<userInput>");
+      finalUserMessageParts.push("{{userInput}}");
+      finalUserMessageParts.push("</userInput>");
+    }
+  
+    finalUserMessageParts.push("");
+    finalUserMessageParts.push("<outputFormat>");
+    finalUserMessageParts.push("【Output Format Requirements】");
+    finalUserMessageParts.push("Please strictly follow the format below for your response:");
+    finalUserMessageParts.push("");
+    finalUserMessageParts.push("<output>");
+    finalUserMessageParts.push("Output your main response content here, including character dialogue, actions, psychological descriptions, etc.");
+    finalUserMessageParts.push("");
+    finalUserMessageParts.push("<next_prompts>");
+    finalUserMessageParts.push("- [Make a major decision based on the player\'s current state, triggering main plot advancement or side-quest initiation, third-person narrative, within 15 words]");
+    finalUserMessageParts.push("- [Guide into unknown or new areas, triggering the appearance of key items/characters/truths, third-person narrative, within 15 words]");
+    finalUserMessageParts.push("- [Express important emotional choices or changes in interpersonal relationships, influencing future direction, third-person narrative, within 15 words]");
+    finalUserMessageParts.push("</next_prompts>");
+    finalUserMessageParts.push("");
+    finalUserMessageParts.push("<events>");
+    finalUserMessageParts.push("[Core Event 1, concise statement] --> [Core Event 2, concise statement] --> [Core Event 3, concise statement] --> [Core Event 4, concise statement] --> [...]");
+    finalUserMessageParts.push("</events>");
+    finalUserMessageParts.push("</output>");
+    finalUserMessageParts.push("");
+    finalUserMessageParts.push("Note: You must strictly adhere to the XML tag format above. All content must be contained within the output tag.");
+    finalUserMessageParts.push("</outputFormat>");
+  
     return {
       systemMessage: finalSystemMessageParts.filter(Boolean).join("\n\n"),
       userMessage: finalUserMessageParts.filter(Boolean).join("\n\n"),

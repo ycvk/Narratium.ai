@@ -38,18 +38,23 @@ export class PresetNodeTools extends NodeTool {
     charName?: string,
   ): Promise<{ systemMessage: string; userMessage: string; presetId?: string }> {
     try {
-      const allPresets = await PresetOperations.getAllPresets();
-      const enabledPreset = allPresets.find(preset => preset.enabled === true);
-      
-      if (!enabledPreset || !enabledPreset.id) {
-        return { systemMessage: "", userMessage: "" };
-      }
-
       const characterRecord = await LocalCharacterRecordOperations.getCharacterById(characterId);
       const character = new Character(characterRecord);
       
-      const orderedPrompts = await PresetOperations.getOrderedPrompts(enabledPreset.id, characterId);
- 
+      const allPresets = await PresetOperations.getAllPresets();
+      const enabledPreset = allPresets.find(preset => preset.enabled === true);
+      
+      let orderedPrompts: any[] = [];
+      let presetId: string | undefined = undefined;
+      
+      if (enabledPreset && enabledPreset.id) {
+        orderedPrompts = await PresetOperations.getOrderedPrompts(enabledPreset.id);
+        presetId = enabledPreset.id;
+        console.log(`Applied preset ${enabledPreset.name} with ${orderedPrompts.length} prompts to character ${characterId}`);
+      } else {
+        console.log(`No enabled preset found, using default framework for character ${characterId}`);
+      }
+      
       const enrichedPrompts = this.enrichPromptsWithCharacterInfo(orderedPrompts, character);
       
       const { systemMessage, userMessage } = PresetAssembler.assemblePrompts(
@@ -57,13 +62,11 @@ export class PresetNodeTools extends NodeTool {
         language,
         { username, charName: charName || character.characterData.name },
       );
-      
-      console.log(`Applied preset ${enabledPreset.name} with ${orderedPrompts.length} prompts to character ${characterId}`);
 
       return { 
         systemMessage: systemMessage, 
         userMessage: userMessage,
-        presetId: enabledPreset.id,
+        presetId: presetId,
       };
     } catch (error) {
       this.handleError(error as Error, "buildPromptFramework");
