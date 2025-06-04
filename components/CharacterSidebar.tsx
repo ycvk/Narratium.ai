@@ -4,7 +4,8 @@ import Link from "next/link";
 import DialogueTreeModal from "@/components/DialogueTreeModal";
 import { trackButtonClick } from "@/lib/utils/google-analytics";
 import { CharacterAvatarBackground } from "@/components/CharacterAvatarBackground";
-import { saveCharacterPrompts } from "@/function/dialogue/save-prompts";
+import { getAvailableGithubPresets, isPresetDownloaded, downloadPresetFromGithub, doesPresetExist } from "@/function/preset/download";
+import { toast } from "react-hot-toast";
 
 export enum PromptType {
   COMPANION = "companion",
@@ -42,6 +43,10 @@ const CharacterSidebar: React.FC<CharacterSidebarProps> = ({
   const [currentPromptType, setCurrentPromptType] = useState<PromptType>(promptType);
   const [showPromptDropdown, setShowPromptDropdown] = useState(false);
   const [currentResponseLength, setCurrentResponseLength] = useState<number>(200);
+  const [githubPresets, setGithubPresets] = useState<any[]>([]);
+  const [showGithubPresetDropdown, setShowGithubPresetDropdown] = useState(false);
+  const [downloadedPresets, setDownloadedPresets] = useState<string[]>([]);
+  const [isDownloading, setIsDownloading] = useState(false);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -68,25 +73,6 @@ const CharacterSidebar: React.FC<CharacterSidebarProps> = ({
     suffixPrompt: "",
   });
   
-  const handlePromptTypeChange = (type: PromptType) => {
-    setCurrentPromptType(type);
-    if (typeof window !== "undefined") {
-      localStorage.setItem("promptType", type);
-    }
-    
-    if (onPromptTypeChange) {
-      onPromptTypeChange(type);
-    }
-
-    setShowPromptDropdown(false);
-
-    if (type === PromptType.CUSTOM) {
-      setTimeout(() => {
-        handleOpenPromptEditor();
-      }, 100);
-    }
-  };
-  
   const handleResponseLengthChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const length = parseInt(event.target.value);
     setCurrentResponseLength(length);
@@ -104,44 +90,50 @@ const CharacterSidebar: React.FC<CharacterSidebarProps> = ({
     }
   };
   
-  const handleSaveCustomPrompts = async (prompts: {
-    prefixPrompt: string;
-    chainOfThoughtPrompt: string;
-    suffixPrompt: string;
-  }) => {
-    setCustomPrompts(prompts);
-
-    if (typeof window !== "undefined") {
-      localStorage.setItem(`customPrompts_${character.id}`, JSON.stringify(prompts));
-    }
+  const handleDownloadAndEnablePreset = async (presetName: string) => {
+    if (isDownloading) return;
+    
+    setIsDownloading(true);
     try {
-      const response = await saveCharacterPrompts({
-        characterId: character.id,
-        prompts,
-      });
-      
-      if (!response.success) {
-        console.error("Failed to save custom prompts to server");
+      const isDownloaded = downloadedPresets.includes(presetName);
+      const exists = await doesPresetExist(presetName);
+
+      if (isDownloaded && exists) {
+        toast.success(`预设 "${presetName}" 已下载`);
+      } else {
+        const result = await downloadPresetFromGithub(presetName);
+        if (result.success) {
+          setDownloadedPresets(prev => [...prev, presetName]);
+          toast.success(`预设 "${presetName}" 下载成功`);
+        } else {
+          toast.error(`下载预设失败: ${result.message || "未知错误"}`);
+        }
       }
     } catch (error) {
-      console.error("Error saving custom prompts:", error);
+      console.error("Error handling preset:", error);
+      toast.error("处理预设时出错");
+    } finally {
+      setIsDownloading(false);
     }
   };
-  
-  const getCurrentPromptTypeName = () => {
-    switch (currentPromptType) {
-    case PromptType.COMPANION:
-      return t("characterChat.companionMode") || "亲密陪伴模式";
-    case PromptType.NSFW:
-      return t("characterChat.nsfwMode") || "NSFW模式";
-    case PromptType.EXPLICIT:
-      return t("characterChat.explicitMode") || "极度色情模式";
-    case PromptType.CUSTOM:
-      return t("characterChat.customMode") || "自定义模式";
-    default:
-      return t("characterChat.companionMode") || "亲密陪伴模式";
-    }
-  };
+
+  useEffect(() => {
+    const loadGithubPresets = async () => {
+      const presets = getAvailableGithubPresets();
+      setGithubPresets(presets);
+      
+      const downloaded: string[] = [];
+      for (const preset of presets) {
+        const isDownloaded = await isPresetDownloaded(preset.name);
+        if (isDownloaded) {
+          downloaded.push(preset.name);
+        }
+      }
+      setDownloadedPresets(downloaded);
+    };
+    
+    loadGithubPresets();
+  }, []);
 
   useEffect(() => {
     const handleResize = () => {
@@ -401,121 +393,110 @@ const CharacterSidebar: React.FC<CharacterSidebarProps> = ({
           </div>
         </div>
         <div className="mx-4 menu-divider my-2"></div>
-            
-        <div className="px-2 py-1 flex justify-between items-center text-xs text-[#8a8a8a] uppercase tracking-wider font-medium text-[10px] transition-all duration-300 ease-in-out overflow-hidden mx-4" style={{ opacity: isCollapsed ? 0 : 1 }}>
-          <span>{t("characterChat.promptMode")}</span>
-        </div>
-
-        <div className="transition-all duration-300 ease-in-out px-6 max-h-[500px] opacity-100">
-          <div className="space-y-1 my-2">
-            {!isCollapsed ? (
-              <div className="relative">
-                <div 
-                  className={`menu-item flex items-center p-2 rounded-md hover:bg-[#252525] cursor-pointer overflow-hidden transition-all duration-300 group ${showPromptDropdown ? "bg-[#252525]" : ""}`}
-                  onClick={() => setShowPromptDropdown(!showPromptDropdown)}
-                >
-                  <div className="absolute inset-0 bg-gradient-to-br from-amber-500/10 via-transparent to-transparent rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-0" />
-                  <div className="absolute inset-0 w-full h-full bg-[#333] opacity-0 group-hover:opacity-10 transition-opacity duration-300 z-0" />
-                  <div className="absolute bottom-0 left-0 h-[1px] bg-gradient-to-r from-transparent via-[#f8d36a] to-transparent w-0 group-hover:w-full transition-all duration-500 z-5" />
-                  <div className="relative z-5 flex items-center">
-                    <div
-                      className={`${isMobile ? "w-6 h-6" : "w-8 h-8"} flex items-center justify-center flex-shrink-0 text-[#f4e8c1] bg-[#1c1c1c] rounded-lg border border-[#333333] shadow-inner transition-all duration-300 group-hover:border-[#444444] group-hover:text-amber-400 group-hover:shadow-[0_0_8px_rgba(251,146,60,0.4)]`}
-                    >
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="16"
-                        height="16"
-                        viewBox="0 0 24 24"
-                        fill={
-                          currentPromptType === PromptType.NSFW ? "#ec4899" : 
-                            currentPromptType === PromptType.EXPLICIT ? "#ff0000" :
-                              "none"
-                        }
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      >
-                        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
-                      </svg>
-
-                    </div>
-
-                    <div className="ml-2 flex-grow transition-all duration-300 ease-in-out overflow-hidden">
-                      <p className={`text-[#f4e8c1] text-sm transition-colors duration-300 ${fontClass}`}>
-                        {getCurrentPromptTypeName()}
-                      </p>
-                    </div>
-                    <div className="flex items-center justify-center ml-2">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={`transition-transform duration-300 ${showPromptDropdown ? "rotate-180" : ""}`}>
-                        <polyline points="6 9 12 15 18 9" />
-                      </svg>
-                    </div>
-                  </div>
-                </div>
-
-                {showPromptDropdown && (
-                  <div className="absolute left-0 right-0 mt-1 bg-[#1c1c1c] border border-[#333333] rounded-md shadow-lg z-5 overflow-hidden z-8">
-                    <div 
-                      className={`p-2 hover:bg-[#252525] cursor-pointer ${currentPromptType === PromptType.COMPANION ? "bg-[#252525] text-amber-300" : "text-[#f4e8c1]"}`}
-                      onClick={() => handlePromptTypeChange(PromptType.COMPANION)}
-                    >
-                      <span className={`text-xs ${fontClass}`}>{t("characterChat.companionMode")}</span>
-                    </div>
-                    <div 
-                      className={`p-2 hover:bg-[#252525] cursor-pointer ${currentPromptType === PromptType.NSFW ? "bg-[#252525] text-yellow-300" : "text-[#f4e8c1]"}`}
-                      onClick={() => handlePromptTypeChange(PromptType.NSFW)}
-                    >
-                      <span className={`text-xs ${fontClass}`}>{t("characterChat.nsfwMode")}</span>
-                    </div>
-                    <div 
-                      className={`p-2 hover:bg-[#252525] cursor-pointer ${currentPromptType === PromptType.EXPLICIT ? "bg-[#252525] text-amber-400" : "text-[#f4e8c1]"}`}
-                      onClick={() => handlePromptTypeChange(PromptType.EXPLICIT)}
-                    >
-                      <span className={`text-xs ${fontClass}`}>{t("characterChat.explicitMode")}</span>
-                    </div>
-                    <div 
-                      className={`p-2 hover:bg-[#252525] cursor-pointer ${currentPromptType === PromptType.CUSTOM ? "bg-[#252525] text-amber-300" : "text-[#f4e8c1]"}`}
-                      onClick={() => handlePromptTypeChange(PromptType.CUSTOM)}
-                    >
-                      <span className={`text-xs ${fontClass}`}>{t("characterChat.customMode") || "自定义模式"}</span>
-                    </div>
-                  </div>
-                )}
-              </div>
-            ) : (
-              <div 
-                className={"menu-item flex justify-center p-2 rounded-md cursor-pointer hover:bg-[#252525] transition-all duration-300"}
-                onClick={() => setShowPromptDropdown(!showPromptDropdown)}
-              ></div>
-            )}
-          </div>
-        </div>
 
         <div className="mx-4 menu-divider my-2"></div>
             
         {!isCollapsed && (
-          <div 
-            className="menu-item flex items-center p-2 mx-6 rounded-md hover:bg-[#252525] cursor-pointer overflow-hidden transition-all duration-300 group"
-            onClick={handleOpenPromptEditor}
-          >
-            <div className="absolute inset-0 bg-gradient-to-br from-amber-500/10 via-transparent to-transparent rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-0" />
-            <div className="absolute inset-0 w-full h-full bg-[#333] opacity-0 group-hover:opacity-10 transition-opacity duration-300 z-0" />
-            <div className="absolute bottom-0 left-0 h-[1px] bg-gradient-to-r from-transparent via-[#f8d36a] to-transparent w-0 group-hover:w-full transition-all duration-500 z-5" />
-            <div className="relative z-5 flex items-center">
-              <div className={`${isMobile ? "w-6 h-6" : "w-8 h-8"} flex items-center justify-center flex-shrink-0 text-[#f4e8c1] bg-[#1c1c1c] rounded-lg border border-[#333333] shadow-inner transition-all duration-300 group-hover:border-[#444444] group-hover:text-amber-400 group-hover:shadow-[0_0_8px_rgba(251,146,60,0.4)]`}>
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M12 20h9"></path>
-                  <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
-                </svg>
-              </div>
-              <div className="ml-2 transition-all duration-300 ease-in-out overflow-hidden">
-                <span className={`magical-text whitespace-nowrap block text-sm group-hover:text-amber-400 transition-colors duration-300 ${fontClass}`}>
-                  {t("characterChat.customPrompt")}
-                </span>
+          <>
+            <div className="px-2 py-1 flex justify-between items-center text-xs text-[#8a8a8a] uppercase tracking-wider font-medium text-[10px] transition-all duration-300 ease-in-out overflow-hidden mx-4" style={{ opacity: isCollapsed ? 0 : 1 }}>
+              <span>{t("characterChat.presets") || "预设"}</span>
+            </div>
+            <div 
+              className="menu-item flex items-center p-2 mx-6 rounded-md hover:bg-[#252525] cursor-pointer overflow-hidden transition-all duration-300 group"
+              onClick={handleOpenPromptEditor}
+            >
+              <div className="absolute inset-0 bg-gradient-to-br from-amber-500/10 via-transparent to-transparent rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-0" />
+              <div className="absolute inset-0 w-full h-full bg-[#333] opacity-0 group-hover:opacity-10 transition-opacity duration-300 z-0" />
+              <div className="absolute bottom-0 left-0 h-[1px] bg-gradient-to-r from-transparent via-[#f8d36a] to-transparent w-0 group-hover:w-full transition-all duration-500 z-5" />
+              <div className="relative z-5 flex items-center">
+                <div className={`${isMobile ? "w-6 h-6" : "w-8 h-8"} flex items-center justify-center flex-shrink-0 text-[#f4e8c1] bg-[#1c1c1c] rounded-lg border border-[#333333] shadow-inner transition-all duration-300 group-hover:border-[#444444] group-hover:text-amber-400 group-hover:shadow-[0_0_8px_rgba(251,146,60,0.4)]`}>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M12 20h9"></path>
+                    <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+                  </svg>
+                </div>
+                <div className="ml-2 transition-all duration-300 ease-in-out overflow-hidden">
+                  <span className={`magical-text whitespace-nowrap block text-sm group-hover:text-amber-400 transition-colors duration-300 ${fontClass}`}>
+                    {t("characterChat.presetEditor") || "预设编辑器"}
+                  </span>
+                </div>
               </div>
             </div>
-          </div>
+            
+            {/* GitHub 预设下拉菜单 */}
+            <div className="relative">
+              <div 
+                className={`menu-item flex items-center p-2 mx-6 rounded-md hover:bg-[#252525] cursor-pointer overflow-hidden transition-all duration-300 group ${showGithubPresetDropdown ? "bg-[#252525]" : ""}`}
+                onClick={() => setShowGithubPresetDropdown(!showGithubPresetDropdown)}
+              >
+                <div className="absolute inset-0 bg-gradient-to-br from-purple-500/10 via-transparent to-transparent rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-0" />
+                <div className="absolute inset-0 w-full h-full bg-[#333] opacity-0 group-hover:opacity-10 transition-opacity duration-300 z-0" />
+                <div className="absolute bottom-0 left-0 h-[1px] bg-gradient-to-r from-transparent via-[#a78bfa] to-transparent w-0 group-hover:w-full transition-all duration-500 z-5" />
+                <div className="relative z-5 flex items-center justify-between w-full">
+                  <div className="flex items-center">
+                    <div className={`${isMobile ? "w-6 h-6" : "w-8 h-8"} flex items-center justify-center flex-shrink-0 text-[#f4e8c1] bg-[#1c1c1c] rounded-lg border border-[#333333] shadow-inner transition-all duration-300 group-hover:border-[#444444] group-hover:text-purple-400 group-hover:shadow-[0_0_8px_rgba(167,139,250,0.4)]`}>
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path>
+                      </svg>
+                    </div>
+                    <div className="ml-2 transition-all duration-300 ease-in-out overflow-hidden">
+                      <span className={`magical-text whitespace-nowrap block text-sm group-hover:text-purple-400 transition-colors duration-300 ${fontClass}`}>
+                        {t("characterChat.githubPresets") || "GitHub 预设"}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="flex items-center justify-center ml-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={`transition-transform duration-300 ${showGithubPresetDropdown ? "rotate-180" : ""}`}>
+                      <polyline points="6 9 12 15 18 9" />
+                    </svg>
+                  </div>
+                </div>
+              </div>
+
+              {showGithubPresetDropdown && (
+                <div className="absolute left-0 right-0 mt-1 mx-6 bg-[#1c1c1c] border border-[#333333] rounded-md shadow-lg z-10 overflow-hidden">
+                  {githubPresets.length === 0 ? (
+                    <div className="p-3 text-center text-[#a18d6f]">
+                      <span className={`text-xs ${fontClass}`}>{t("characterChat.noPresets") || "没有可用的预设"}</span>
+                    </div>
+                  ) : (
+                    githubPresets.map((preset) => (
+                      <div 
+                        key={preset.name}
+                        className="p-3 hover:bg-[#252525] cursor-pointer border-b border-[#333333] last:border-b-0"
+                        onClick={() => handleDownloadAndEnablePreset(preset.name)}
+                      >
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <span className={`text-sm text-[#f4e8c1] ${fontClass}`}>{preset.displayName}</span>
+                            <p className={`text-xs text-[#a18d6f] mt-1 ${fontClass}`}>{preset.description}</p>
+                          </div>
+                          <div>
+                            {isDownloading && (
+                              <div className="relative w-5 h-5 flex items-center justify-center">
+                                <div className="absolute inset-0 rounded-full border-2 border-t-[#a78bfa] border-r-[#c0a480] border-b-[#a18d6f] border-l-transparent animate-spin"></div>
+                              </div>
+                            )}
+                            {!isDownloading && downloadedPresets.includes(preset.name) ? (
+                              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#a78bfa" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <path d="M20 6L9 17l-5-5"></path>
+                              </svg>
+                            ) : !isDownloading && (
+                              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#a78bfa" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                <polyline points="7 10 12 15 17 10"></polyline>
+                                <line x1="12" y1="15" x2="12" y2="3"></line>
+                              </svg>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+              )}
+            </div>
+          </>
         )}
             
         <div className="mx-4 menu-divider my-2"></div>
