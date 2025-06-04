@@ -30,34 +30,60 @@ export class RegexNode extends NodeBase {
       throw new Error("Character ID is required for RegexNode");
     }
 
+    const outputMatch = llmResponse.match(/<output>([\s\S]*?)<\/output>/);
+    let mainContent = "";
+    let nextPrompts: string[] = [];
+    let event = "";
+    
+    if (outputMatch) {
+      const outputContent = outputMatch[1];
+      
+      const promptsMatch = outputContent.match(/<next_prompts>([\s\S]*?)<\/next_prompts>/);
+      if (promptsMatch) {
+        nextPrompts = promptsMatch[1]
+          .trim()
+          .split("\n")
+          .map((l: string) => l.trim())
+          .filter((l: string) => l.length > 0)
+          .map((l: string) => l.replace(/^[-*]\s*/, "").replace(/^\s*\[|\]\s*$/g, "").trim());
+      }
+
+      const eventsMatch = outputContent.match(/<events>([\s\S]*?)<\/events>/);
+      if (eventsMatch) {
+        event = eventsMatch[1].trim().replace(/\[|\]/g, "");
+        ;
+      }
+
+      mainContent = outputContent
+        .replace(/\n*\s*<next_prompts>[\s\S]*?<\/next_prompts>\s*\n*/g, "")
+        .replace(/\n*\s*<events>[\s\S]*?<\/events>\s*\n*/g, "")
+        .trim();
+    } else {
+      mainContent = llmResponse;
+
+      const promptsMatch = llmResponse.match(/<next_prompts>([\s\S]*?)<\/next_prompts>/);
+      if (promptsMatch) {
+        nextPrompts = promptsMatch[1]
+          .trim()
+          .split("\n")
+          .map((l: string) => l.trim())
+          .filter((l: string) => /^[-*]/.test(l) || /^\s*\[/.test(l) )
+          .map((l: string) => l.replace(/^[-*]\s*/, "").replace(/^\s*\[|\]\s*$/g, "").trim());
+      }
+      
+      event = llmResponse.match(/<event>([\s\S]*?)<\/event>/)?.[1]?.trim() || "";
+    }
+
     const processedResult = await this.executeTool(
       "processRegex",
-      llmResponse,
+      mainContent,
       characterId,
     ) as { replacedText: string };
 
-    const screenStartIndex = llmResponse.indexOf("<screen>");
-    const fullResponse = screenStartIndex >= 0 ? llmResponse.substring(screenStartIndex) : llmResponse;
-    const screenContent = processedResult.replacedText.match(/<screen>([\s\S]*?)<\/screen>/)?.[1]?.trim() || "";
-
-    let nextPrompts: string[] = [];
-    const promptsMatch = processedResult.replacedText.match(/<next_prompts>([\s\S]*?)<\/next_prompts>/);
-    if (promptsMatch) {
-      nextPrompts = promptsMatch[1]
-        .trim()
-        .split("\n")
-        .map((l) => l.trim())
-        .filter((l) => /^[-*]/.test(l))
-        .map((l) => l.replace(/^[-*]\s*/, "").replace(/^\[|\]$/g, "").trim());
-    }
-
-    const event = fullResponse.match(/<event>([\s\S]*?)<\/event>/)?.[1]?.trim() || "";
-
     return {
       replacedText: processedResult.replacedText,
-      originalResponse: llmResponse,
-      screenContent,
-      fullResponse,
+      screenContent: processedResult.replacedText,
+      fullResponse: llmResponse,
       nextPrompts,
       event,
       characterId,
