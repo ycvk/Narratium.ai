@@ -45,7 +45,7 @@ export class ContextNodeTools extends NodeTool {
     const method = (this as any)[methodName];
     
     if (typeof method !== "function") {
-      console.error(`Method lookup failed: ${methodName} not found in LLMNodeTools`);
+      console.error(`Method lookup failed: ${methodName} not found in ContextNodeTools`);
       console.log("Available methods:", Object.getOwnPropertyNames(this).filter(name => 
         typeof (this as any)[name] === "function" && !name.startsWith("_"),
       ));
@@ -59,6 +59,34 @@ export class ContextNodeTools extends NodeTool {
       this.handleError(error as Error, methodName);
     }
   }
+
+  static async assembleChatHistory(
+    userMessage: string,
+    characterId: string,
+    memoryLength: number = 10,
+  ): Promise<{ userMessage: string; messages: DialogueMessage[] }> {
+    try {
+      if (!userMessage.includes("{{chatHistory}}")) {
+        return { userMessage, messages: [] };
+      }
+
+      const historyData = await this.loadCharacterHistory(characterId);
+      const chatHistoryContent = this.formatChatHistory(historyData, memoryLength);
+
+      const assembledUserMessage = userMessage.replace("{{chatHistory}}", chatHistoryContent);
+
+      console.log(`Assembled chat history for character ${characterId}`);
+
+      return {
+        userMessage: assembledUserMessage,
+        messages: [],
+      };
+    } catch (error) {
+      this.handleError(error as Error, "assembleChatHistory");
+      return { userMessage, messages: [] };
+    }
+  }
+
   static async loadCharacterHistory(
     characterId: string,
   ): Promise<{
@@ -67,8 +95,6 @@ export class ContextNodeTools extends NodeTool {
     historyDialogue: DialogueStory;
   }> {
     try {
-      this.logExecution("loadCharacterHistory", { characterId });
-
       const recentDialogue = new DialogueStory("en");
       const historyDialogue = new DialogueStory("en");
       let systemMessage = "";
@@ -94,7 +120,7 @@ export class ContextNodeTools extends NodeTool {
         }
         if (node.assistant_response) {
           recentDialogue.responses.push(node.assistant_response);
-          const compressedContent = node.parsed_content?.compressedContent || node.assistant_response || "";
+          const compressedContent = node.parsed_content?.compressedContent || "";
           historyDialogue.responses.push(compressedContent);
         }
       }
@@ -110,10 +136,43 @@ export class ContextNodeTools extends NodeTool {
     }
   }
 
+  static formatChatHistory(
+    historyData: {
+      systemMessage: string;
+      recentDialogue: DialogueStory;
+      historyDialogue: DialogueStory;
+    },
+    memoryLength: number,
+  ): string {
+    try {
+      const parts: string[] = [];
+
+      // 1. 开场白：systemMessage
+      if (historyData.systemMessage) {
+        parts.push(`开场白：${historyData.systemMessage}`);
+      }
+
+      // 2. 历史信息：压缩的历史对话
+      const compressedHistory = this.getCompressedHistory(historyData.historyDialogue, memoryLength);
+      if (compressedHistory) {
+        parts.push(`历史信息：${compressedHistory}`);
+      }
+
+      // 3. 最近故事：最近的对话
+      const recentHistory = this.getRecentHistory(historyData.recentDialogue, memoryLength);
+      if (recentHistory) {
+        parts.push(`最近故事：${recentHistory}`);
+      }
+
+      return parts.filter(Boolean).join("\n\n");
+    } catch (error) {
+      this.handleError(error as Error, "formatChatHistory");
+      return "";
+    }
+  }
+
   static getRecentHistory(dialogue: DialogueStory, memLen: number): string {
     try {
-      this.logExecution("getRecentHistory", { memLen });
-      
       if (!dialogue) return "";
       
       const startIndex = Math.max(0, dialogue.userInput.length - memLen);
@@ -126,8 +185,6 @@ export class ContextNodeTools extends NodeTool {
 
   static getCompressedHistory(dialogue: DialogueStory, memLen: number): string {
     try {
-      this.logExecution("getCompressedHistory", { memLen });
-      
       if (!dialogue) return "";
       
       const endIndex = Math.max(0, dialogue.responses.length - memLen);
@@ -135,50 +192,6 @@ export class ContextNodeTools extends NodeTool {
     } catch (error) {
       this.handleError(error as Error, "getCompressedHistory");
       return "";
-    }
-  }
-  
-  static getMessages(dialogue: DialogueStory): DialogueMessage[] {
-    try {
-      this.logExecution("getMessages");
-      
-      const messages: DialogueMessage[] = [];
-      
-      if (!dialogue) return messages;
-      
-      const length = Math.min(dialogue.userInput.length, dialogue.responses.length);
-      
-      for (let i = 0; i < length; i++) {
-        if (dialogue.userInput[i]) {
-          messages.push({
-            role: "user",
-            content: dialogue.userInput[i],
-            id: i * 2,
-          });
-        }
-
-        if (dialogue.responses[i]) {
-          messages.push({
-            role: "assistant",
-            content: dialogue.responses[i],
-            id: i * 2 + 1,
-          });
-        }
-      }
-
-      if (dialogue.userInput.length > dialogue.responses.length) {
-        const lastUserIndex = dialogue.userInput.length - 1;
-        messages.push({
-          role: "user",
-          content: dialogue.userInput[lastUserIndex],
-          id: messages.length,
-        });
-      }
-      
-      return messages;
-    } catch (error) {
-      this.handleError(error as Error, "getMessages");
-      return [];
     }
   }
 } 
