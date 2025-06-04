@@ -465,6 +465,18 @@ export default function CharacterPage() {
     }
   }, [character, isLoading, isInitializing, error, startCharacterTour]);
 
+  useEffect(() => {
+    const handleSwitchToPresetView = () => {
+      setActiveView("preset");
+    };
+    
+    window.addEventListener("switchToPresetView", handleSwitchToPresetView);
+    
+    return () => {
+      window.removeEventListener("switchToPresetView", handleSwitchToPresetView);
+    };
+  }, []);
+
   if (isLoading && !character) {
     return (
       <div className="flex justify-center items-center h-full fantasy-bg">

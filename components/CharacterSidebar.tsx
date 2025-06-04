@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useLanguage } from "@/app/i18n";
 import Link from "next/link";
-import PromptEditor from "@/components/PromptEditor";
 import DialogueTreeModal from "@/components/DialogueTreeModal";
 import { trackButtonClick } from "@/lib/utils/google-analytics";
 import { CharacterAvatarBackground } from "@/components/CharacterAvatarBackground";
@@ -96,17 +95,13 @@ const CharacterSidebar: React.FC<CharacterSidebarProps> = ({
   };
   
   const handleOpenPromptEditor = () => {
+    trackButtonClick("CharacterSidebar", "切换到预设编辑器");
     if (typeof window !== "undefined") {
-      const savedPrompts = localStorage.getItem(`customPrompts_${character.id}`);
-      if (savedPrompts) {
-        try {
-          setCustomPrompts(JSON.parse(savedPrompts));
-        } catch (e) {
-          console.error("Failed to parse saved prompts:", e);
-        }
-      }
+      const event = new CustomEvent("switchToPresetView", {
+        detail: { characterId: character.id },
+      });
+      window.dispatchEvent(event);
     }
-    setShowPromptEditor(true);
   };
   
   const handleSaveCustomPrompts = async (prompts: {
@@ -568,15 +563,6 @@ const CharacterSidebar: React.FC<CharacterSidebarProps> = ({
           ) : null}
         </div>
       </div>
-
-      <PromptEditor
-        isOpen={showPromptEditor}
-        onClose={() => setShowPromptEditor(false)}
-        characterId={character.id}
-        characterName={character.name}
-        onSave={handleSaveCustomPrompts}
-        initialPrompts={customPrompts}
-      />
       
       <DialogueTreeModal
         isOpen={showDialogueTreeModal}

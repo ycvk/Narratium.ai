@@ -25,8 +25,6 @@ export default function CharacterChatHeader({
   activeView,
   toggleSidebar,
   onSwitchToView,
-  onToggleView,
-  onToggleRegexEditor,
 }: Props) {
   const { t } = useLanguage();
 

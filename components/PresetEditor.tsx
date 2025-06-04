@@ -543,7 +543,6 @@ export default function PresetEditor({
 
   return (
     <div className="h-full flex flex-col breathing-bg text-[#eae6db]">
-      {/* Header */}
       <div className="p-3 border-b border-[#534741] bg-[#252220] relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-r from-amber-500/5 to-transparent opacity-50"></div>
         <div className="relative z-10 flex justify-between items-center min-h-[2rem]">
@@ -582,7 +581,6 @@ export default function PresetEditor({
         </div>
       </div>
       
-      {/* Controls */}
       <div className="p-3 border-b border-[#534741] bg-[#1a1816]">
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
           <div className="flex items-center space-x-2 flex-wrap">
@@ -618,7 +616,6 @@ export default function PresetEditor({
         </div>
       </div>
 
-      {/* Sorting and Filtering */}
       <div className="flex-1 overflow-hidden">
         <div className="h-full overflow-y-auto fantasy-scrollbar pb-15">
           <div className="mb-3 p-3 bg-gradient-to-r from-[#252220]/80 via-[#1a1816]/60 to-[#252220]/80 backdrop-blur-sm border border-[#534741]/40 rounded-lg shadow-lg">
@@ -721,7 +718,6 @@ export default function PresetEditor({
             </div>
           </div>
 
-          {/* Presets Table */}
           <table className="w-full table-fixed">
             <thead className="sticky top-0 bg-[#252220] border-b border-[#534741] z-10">
               <tr>
@@ -744,7 +740,6 @@ export default function PresetEditor({
                       transitionDelay: `${index * 50}ms`,
                     }}
                   >
-                    {/* Toggle Switch Column */}
                     <td className="p-3">
                       <button
                         onClick={() => handleTogglePreset(preset.id, preset.enabled === false)}
@@ -765,10 +760,8 @@ export default function PresetEditor({
                       </button>
                     </td>
                     
-                    {/* Status Display Column */}
                     <td className="p-3">
                       <div className="flex items-center space-x-2">
-                        {/* Status Display (Read-only) */}
                         <span className={`inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition-all duration-300 backdrop-blur-sm border ${
                           preset.enabled !== false 
                             ? preset.totalPrompts > 0
@@ -788,7 +781,6 @@ export default function PresetEditor({
                             : t("preset.disabled")}
                         </span>
                         
-                        {/* Expand/Collapse Button */}
                         <button
                           onClick={() => toggleRowExpansion(preset.id)}
                           className="w-6 h-6 flex items-center justify-center text-[#a18d6f] hover:text-[#eae6db] transition-colors duration-300 rounded hover:bg-[#333] ml-2"
