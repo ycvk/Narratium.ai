@@ -6,6 +6,27 @@ export interface RegexProcessorOptions {
 }
 
 export class RegexProcessor {
+  private static handleEscapeSequences(pattern: string): string {
+    const escapeSequences = ["\\t", "\\n", "\\r", "\\f", "\\v", "\\b", "\\0"];
+    
+    let modifiedPattern = pattern;
+    let hasEscapeSequence = false;
+    
+    for (const seq of escapeSequences) {
+      if (pattern.includes(seq)) {
+        const escapedSeq = seq.replace("\\", "\\\\");
+        modifiedPattern = modifiedPattern.replace(new RegExp(seq.replace("\\", "\\\\"), "g"), escapedSeq);
+        hasEscapeSequence = true;
+      }
+    }
+    
+    if (hasEscapeSequence) {
+      console.log(`[RegexProcessor] Escaped potential control sequences in pattern: '${pattern}' → '${modifiedPattern}'`);
+    }
+    
+    return modifiedPattern;
+  }
+
   static async processFullContext(
     fullContext: string,
     options: RegexProcessorOptions,
@@ -43,12 +64,18 @@ export class RegexProcessor {
         let regexPattern = script.findRegex;
         
         if (regexPattern) {
+          // Check for potential escape sequence issues
+          regexPattern = RegexProcessor.handleEscapeSequences(regexPattern);
+          
           const regexFormatMatch = regexPattern.match(/^\/(.*)\/(g|i|m|gi|gm|im|gim)?$/);
           
           if (regexFormatMatch) {
             try {
-              const pattern = regexFormatMatch[1];
+              let pattern = regexFormatMatch[1];
               const flags = regexFormatMatch[2] || "g";
+              
+              // Handle escape sequences in the pattern part too
+              pattern = RegexProcessor.handleEscapeSequences(pattern);
 
               const regex = new RegExp(pattern, flags);
               const prevText = processedText;
