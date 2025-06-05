@@ -65,3 +65,42 @@ export async function togglePromptEnabled(
     return { success: false, error: "Failed to toggle prompt" };
   }
 }
+
+export async function updatePromptInPreset(
+  presetId: string,
+  promptIdentifier: string,
+  updates: { content?: string; enabled?: boolean; position?: number },
+) {
+  try {
+    const preset = await PresetOperations.getPreset(presetId);
+    if (!preset) {
+      return { success: false, error: "Preset not found" };
+    }
+
+    const originalPrompt = preset.prompts.find(p => p.identifier === promptIdentifier);
+    if (!originalPrompt) {
+      return { success: false, error: "Prompt not found in preset" };
+    }
+
+    const promptData = {
+      identifier: promptIdentifier,
+      name: originalPrompt.name || promptIdentifier,
+      position: updates.position !== undefined ? updates.position : originalPrompt.position,
+      ...updates,
+    };
+
+    const success = await PresetOperations.updateCharacterPrompt(
+      presetId,
+      originalPrompt.group_id || 2,
+      promptData,
+    );
+    
+    if (!success) {
+      return { success: false, error: "Failed to update prompt" };
+    }
+    return { success: true };
+  } catch (error) {
+    console.error("Error updating prompt in preset:", error);
+    return { success: false, error: "Failed to update prompt" };
+  }
+}

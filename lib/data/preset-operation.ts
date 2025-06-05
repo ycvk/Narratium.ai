@@ -40,13 +40,26 @@ export class PresetOperations {
       const presets = await this.getPresets();
       const presetId = `preset_${Date.now()}`;
       
+      const newPresetIsActive = preset.enabled !== false;
+
       const newPreset = {
         ...preset,
         id: presetId,
-        enabled: preset.enabled !== false,
+        enabled: newPresetIsActive,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
       };
+      
+      if (newPresetIsActive) {
+        for (const existingPresetId in presets) {
+          if (presets.hasOwnProperty(existingPresetId) && existingPresetId !== presetId) {
+            if (presets[existingPresetId].enabled !== false) {
+              presets[existingPresetId].enabled = false;
+              presets[existingPresetId].updated_at = new Date().toISOString();
+            }
+          }
+        }
+      }
       
       presets[presetId] = newPreset;
       await this.savePresets(presets);
@@ -104,7 +117,7 @@ export class PresetOperations {
       
       const newPreset: Preset = {
         name: customName || presetData.name || "Imported Preset",
-        enabled: false,
+        enabled: true,
         prompts: [],
       };
 
@@ -164,7 +177,7 @@ export class PresetOperations {
     }
   }
 
-  static async getOrderedPrompts(presetId: string, characterId: string | number): Promise<PresetPrompt[]> {
+  static async getOrderedPrompts(presetId: string): Promise<PresetPrompt[]> {
     try {
       const preset = await this.getPreset(presetId);
       
@@ -197,6 +210,41 @@ export class PresetOperations {
       return orderedPrompts.filter(prompt => prompt.enabled !== false);
     } catch (error) {
       console.error("Error getting ordered prompts:", error);
+      return [];
+    }
+  }
+
+  static async getPromptsOrderedForDisplay(presetId: string): Promise<PresetPrompt[]> {
+    try {
+      const preset = await this.getPreset(presetId);
+      
+      if (!preset) {
+        return [];
+      }
+
+      let targetGroupId = 2;
+      let groupPrompts = preset.prompts.filter(
+        prompt => Number(prompt.group_id) === targetGroupId,
+      );
+      
+      if (groupPrompts.length === 0) {
+        targetGroupId = 1;
+        groupPrompts = preset.prompts.filter(
+          prompt => Number(prompt.group_id) === targetGroupId,
+        );
+      }
+
+      if (groupPrompts.length === 0) {
+        return preset.prompts;
+      }
+      
+      const orderedPrompts = [...groupPrompts].sort(
+        (a, b) => (a.position || 0) - (b.position || 0),
+      );
+      
+      return orderedPrompts;
+    } catch (error) {
+      console.error("Error getting ordered prompts for display:", error);
       return [];
     }
   }

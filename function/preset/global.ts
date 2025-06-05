@@ -77,3 +77,13 @@ export async function togglePresetEnabled(presetId: string, enabled: boolean) {
     return { success: false, error: "Failed to toggle preset" };
   }
 }
+
+export async function getPromptsForDisplay(presetId: string) {
+  try {
+    const prompts = await PresetOperations.getPromptsOrderedForDisplay(presetId);
+    return { success: true, data: prompts };
+  } catch (error) {
+    console.error("Error getting prompts for display:", error);
+    return { success: false, error: "Failed to get prompts for display" };
+  }
+}

@@ -8,7 +8,8 @@
     "switchToEnglish": "切换为英文",
     "switchToChinese": "切换为中文",
     "soundOn": "声音开启",
-    "soundOff": "声音关闭"
+    "soundOff": "声音关闭",
+    "saving": "保存中..."
   },
   "sidebar": {
     "home": "首页",
@@ -392,7 +393,10 @@
     "presetNameRequired": "预设名称不能为空",
     "creating": "创建中...",
     "create": "创建",
-    "cancel": "取消"
+    "cancel": "取消",
+    "editPrompt": "编辑提示词",
+    "promptContent": "提示词内容",
+    "saving": "保存中"
   },
   "importPreset": {
     "title": "导入预设",
@@ -416,7 +420,8 @@
     "maxFileSize": "最大文件大小：10MB",
     "selectJsonFile": "请选择JSON文件",
     "failedToImport": "导入失败",
-    "cancel": "取消"
+    "cancel": "取消",
+    "save": "保存"
   },
   "dialogue": {
     "treeVisualization": "剧情分支管理",

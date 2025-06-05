@@ -8,7 +8,8 @@
     "switchToEnglish": "Switch to English",
     "switchToChinese": "Switch to Chinese",
     "soundOn": "Sound On",
-    "soundOff": "Sound Off"
+    "soundOff": "Sound Off",
+    "saving": "Saving..."
   },
   "sidebar": {
     "home": "Home",
@@ -394,7 +395,11 @@
     "presetNameRequired": "Preset name is required",
     "creating": "Creating...",
     "create": "Create",
-    "cancel": "Cancel"
+    "cancel": "Cancel",
+    "editPrompt": "Edit Prompt",
+    "promptContent": "Prompt Content",
+    "saving": "Saving",
+    "save": "Save"
   },
   "importPreset": {
     "title": "Import Preset",
