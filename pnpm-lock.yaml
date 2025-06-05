@@ -54,7 +54,7 @@ importers:
         specifier: ^1.0.0
         version: 1.0.0
       react:
-        specifier: link:@vercel/analytics/react
+        specifier: ^19.0.0
         version: 19.1.0
       react-dom:
         specifier: ^19.0.0
