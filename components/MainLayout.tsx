@@ -41,7 +41,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
   }
 
   return (
-    <div className="flex h-screen overflow-hidden fantasy-bg relative">
+    <div className="flex h-full overflow-hidden fantasy-bg relative"> 
       <LoginModal 
         isOpen={isLoginModalOpen} 
         onClose={() => setIsLoginModalOpen(false)} 
@@ -54,13 +54,10 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
         />
       </div>
       <main
-        className={`flex-1 overflow-auto transition-all duration-300 ${
-          isMobile 
-            ? "ml-0" 
-            : (sidebarOpen ? "ml-72" : "ml-0")
-        } ${
-          modelSidebarOpen ? "mr-64" : "mr-0"
-        }`}
+        className={`flex-1 h-full overflow-auto transition-all duration-300
+            ${isMobile ? "ml-0" : (sidebarOpen ? "ml-72" : "ml-0")}
+            ${modelSidebarOpen ? "mr-64" : "mr-0"}
+          `}
       >
         <div className="h-full relative">
           <div className="absolute top-4 right-4 z-[999]">

@@ -22,20 +22,19 @@ export const metadata: Metadata = {
 
 export default function RootLayout({
   children,
-}: {
-  children: React.ReactNode
-}) {
+}: { children: React.ReactNode }) {
   return (
-    <html lang="en">
-      <body className="bg-[#171717] text-white">
+    <html lang="en" className="h-full">
+      <body className="h-full bg-[#171717] text-white">
         <GoogleAnalytics />
         <SoundProvider>
           <LanguageProvider>
             <MainLayout>{children}</MainLayout>
           </LanguageProvider>
         </SoundProvider>
-        <Analytics/> 
+        <Analytics />
       </body>
     </html>
   );
 }
+
