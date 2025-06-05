@@ -7,7 +7,9 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "preview": "serve -s out",
+    "pake": "pake out/index.html --name Narratium --use-local-file"
   },
   "dependencies": {
     "@langchain/core": "^0.3.44",
