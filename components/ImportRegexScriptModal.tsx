@@ -300,7 +300,6 @@ export default function ImportRegexScriptModal({
                 />
               </div>
 
-              {/* Compact Save as Global Option */}
               <div className="bg-gradient-to-br from-[#252220]/60 via-[#1a1816]/40 to-[#252220]/60 backdrop-blur-sm border border-[#534741]/40 rounded-lg p-3">
                 <label className="flex items-center space-x-2 cursor-pointer group">
                   <div className="relative">
@@ -358,7 +357,6 @@ export default function ImportRegexScriptModal({
               </div>
             </div>
           ) : (
-            // Global Import Tab
             <div className="space-y-3">
               {isLoadingGlobal ? (
                 <div className="flex items-center justify-center py-6">
@@ -465,7 +463,6 @@ export default function ImportRegexScriptModal({
             </div>
           )}
 
-          {/* Compact Import Results */}
           {importResult && (
             <div className="mt-3 p-2.5 bg-gradient-to-br from-[#252220]/60 via-[#1a1816]/40 to-[#252220]/60 backdrop-blur-sm border border-[#534741]/40 rounded-lg animate-in slide-in-from-bottom-2 duration-300">
               <h3 className={`text-xs font-medium text-[#eae6db] mb-1.5 ${serifFontClass}`}>
