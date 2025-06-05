@@ -45,6 +45,10 @@ export default function LoadingTransition({
   const completionSoundRef = useRef<HTMLAudioElement>(null);
   const [soundsLoaded, setSoundsLoaded] = useState(false);
 
+  const progressBarRef = useRef<HTMLDivElement>(null);
+  const progressBarFillRef = useRef<HTMLDivElement>(null);
+  const textRef = useRef<HTMLParagraphElement>(null);
+
   useEffect(() => {
     if (typeof window !== "undefined") {
       if (movementSoundRef.current && completionSoundRef.current) {
@@ -99,7 +103,7 @@ export default function LoadingTransition({
   }, [soundsLoaded, autoRedirect, redirectUrl]);
 
   const startAnimation = () => {
-    if (soundEnabled && movementSoundRef.current) {
+    if (soundEnabled && soundsLoaded && movementSoundRef.current) {
       movementSoundRef.current.muted = true;
       movementSoundRef.current.currentTime = 0;
       const playPromise = movementSoundRef.current.play();
@@ -123,26 +127,47 @@ export default function LoadingTransition({
       ease: "power1.in",
     });
 
-    const timeline = gsap.timeline().fromTo(
-      pathsRef.current,
-      {
-        strokeDashoffset: (i: number) => {
-          if (i === 0) return 0;
-          else return 480;
+    const timeline = gsap.timeline()
+      .fromTo(
+        pathsRef.current,
+        {
+          strokeDashoffset: (i: number) => {
+            if (i === 0) return 0;
+            else return 480;
+          },
         },
-      },
-      {
-        strokeDashoffset: (i: number) => {
-          if (i === 0) return -275;
-          else return 205;
+        {
+          strokeDashoffset: (i: number) => {
+            if (i === 0) return -275;
+            else return 205;
+          },
+          duration: 0.8,
+          ease: "power2.inOut",
+          onComplete: () => {
+            finishAnimation();
+          },
         },
-        duration: 0.8,
-        ease: "power2.inOut",
-        onComplete: () => {
-          finishAnimation();
-        },
-      },
-    );
+      );
+
+    gsap.to(progressBarFillRef.current, {
+      width: "100%",
+      duration: timeline.duration(),
+      ease: "power2.inOut",
+    });
+
+    gsap.to(progressBarFillRef.current, {
+      background: "linear-gradient(90deg, rgba(255,215,0,0.4) 0%, rgba(255,215,0,0.8) 50%, rgba(255,215,0,0.4) 100%)",
+      boxShadow: "0 0 8px rgba(255,215,0,0.6)",
+      duration: timeline.duration(),
+      ease: "power2.inOut",
+    });
+
+    gsap.to(textRef.current, {
+      opacity: 1,
+      duration: 0.5,
+      delay: 0.3,
+      ease: "power1.out",
+    });
   };
 
   const finishAnimation = () => {
@@ -274,7 +299,7 @@ export default function LoadingTransition({
         preload="auto"
         playsInline
       />
-      <div className="loading" style={{ position: "relative", width: "35rem", height: "35rem", display: "flex", justifyContent: "center", alignItems: "center" }}>
+      <div className="loading" style={{ position: "relative", width: "35rem", height: "35rem", display: "flex", justifyContent: "center", alignItems: "center", transform: "translateY(-10%)" }}>
         <svg viewBox="0 0 100 50" className="loading_icon" style={{ position: "absolute", width: "60%" }}>
           <path 
             d="M50,25c0-12.14,9.84-21.99,21.99-21.99S93.98,12.86,93.98,25s-9.84,21.99-21.99,21.99S50,37.21,50,25.06
@@ -336,6 +361,51 @@ export default function LoadingTransition({
             transform: "translate(-50%, -50%)",
           }}
         />
+        <div
+          ref={progressBarRef}
+          style={{
+            position: "absolute",
+            bottom: "25%",
+            width: "70%",
+            height: "8px",
+            background: "rgba(251, 165, 61, 0.2)",
+            borderRadius: "4px",
+            overflow: "hidden",
+            transform: "translate(-50%, -50%)",
+            left: "50%",
+            zIndex: 11,
+          }}
+        >
+          <div
+            ref={progressBarFillRef}
+            style={{
+              width: "0%",
+              height: "100%",
+              background: "linear-gradient(90deg, rgba(251,146,60,0.4) 0%, rgba(251,146,60,0.8) 50%, rgba(251,146,60,0.4) 100%)",
+              boxShadow: "0 0 8px rgba(251,146,60,0.6)",
+              borderRadius: "4px",
+            }}
+          ></div>
+        </div>
+        <p
+          ref={textRef}
+          style={{
+            position: "absolute",
+            bottom: "5%",
+            color: "#ffd76a",
+            fontSize: "1.2rem",
+            fontFamily: "var(--font-cinzel)",
+            textAlign: "center",
+            opacity: 0,
+            zIndex: 11,
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+            whiteSpace: "nowrap",
+            textShadow: "0 0 5px rgba(255,215,0,0.7)",
+          }}
+        >
+          To build a time machine takes only two steps: dream it, then do it.
+        </p>
       </div>
     </div>
   );
