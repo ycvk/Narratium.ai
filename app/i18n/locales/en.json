@@ -13,6 +13,8 @@
   },
   "sidebar": {
     "home": "Home",
+    "gameArea": "Game Area",
+    "creator": "Creator",
     "creationArea": "Creation Area",
     "historyRecords": "History Records",
     "newStory": "New Adventure",
@@ -21,7 +23,13 @@
     "characterMarket": "Character Market",
     "login": "Login & Explore",
     "nologin": "Define User Name",
-    "logout": "Logout"
+    "logout": "Logout",
+    "collapseHome": "Collapse Home",
+    "expandHome": "Expand Home",
+    "collapseCreation": "Collapse Game Area",
+    "expandCreation": "Expand Game Area",
+    "collapseCreator": "Collapse Creation Area",
+    "expandCreator": "Expand Creation Area"
   },
   "modelSettings": {
     "title": "Model Settings",

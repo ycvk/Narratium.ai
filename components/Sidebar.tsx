@@ -18,10 +18,10 @@ export default function Sidebar({ isOpen, toggleSidebar, openLoginModal }: Sideb
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [username, setUsername] = useState("");
   const [isHomeOpen, setIsHomeOpen] = useState(true);
-  const [isCreationOpen, setIsCreationOpen] = useState(true);
   const [isMobile, setIsMobile] = useState(false);
   const { t, language, fontClass } = useLanguage();
   const [animationComplete, setAnimationComplete] = useState(false);
+  const [isCreatorOpen, setIsCreatorOpen] = useState(true);
   
   useEffect(() => {
     const loggedIn = localStorage.getItem("isLoggedIn") === "true";
@@ -179,21 +179,21 @@ export default function Sidebar({ isOpen, toggleSidebar, openLoginModal }: Sideb
           <li className="min-h-[15px]">
             <div className="mb-4">
               <div className="px-2 py-1 flex justify-between items-center text-xs text-[#8a8a8a] uppercase tracking-wider font-medium text-[10px] transition-all duration-300 ease-in-out overflow-hidden" style={{ width: isOpen ? "auto" : "0", maxWidth: isOpen ? "100%" : "0", padding: isOpen ? "0.25rem 0.5rem" : "0", opacity: isOpen ? 1 : 0, whiteSpace: "nowrap", transitionDelay: isOpen ? "0ms" : "0ms" }}>
-                <span>{t("sidebar.creationArea")}</span>
+                <span>{t("sidebar.gameArea")}</span>
                 {isOpen && (
                   <button 
-                    onClick={() => setIsCreationOpen(!isCreationOpen)}
+                    onClick={() => setIsHomeOpen(!isHomeOpen)}
                     className="w-5 h-5 flex items-center justify-center text-[#8a8a8a] hover:text-amber-400 transition-colors duration-300 login-fantasy-bg rounded-sm"
-                    aria-label={isCreationOpen ? t("sidebar.collapseCreation") : t("sidebar.expandCreation")}
+                    aria-label={isHomeOpen ? t("sidebar.collapseCreation") : t("sidebar.expandCreation")}
                   >
-                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={`transition-transform duration-300 ${isCreationOpen ? "rotate-180" : ""}`}>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={`transition-transform duration-300 ${isHomeOpen ? "rotate-180" : ""}`}>
                       <path d="M19 9l-7 7-7-7" />
                     </svg>
                   </button>
                 )}
               </div>
 
-              <div className={`overflow-hidden transition-all duration-300 ${isOpen ? (isCreationOpen ? "max-h-20 opacity-100 mt-1" : "max-h-0 opacity-0 mt-0") : "max-h-20 opacity-100 mt-1"} mx-1`}>
+              <div className={`overflow-hidden transition-all duration-300 ${isOpen ? (isHomeOpen ? "max-h-20 opacity-100 mt-1" : "max-h-0 opacity-0 mt-0") : "max-h-20 opacity-100 mt-1"} mx-1`}>
                 <div className="relative group">
                   <div className="absolute inset-0 bg-gradient-to-br from-amber-500/5 to-transparent rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                   {!isOpen ? (
@@ -220,6 +220,72 @@ export default function Sidebar({ isOpen, toggleSidebar, openLoginModal }: Sideb
                         <div className={"ml-2 transition-all duration-300 ease-in-out overflow-hidden"} style={{ transitionDelay: isOpen ? "50ms" : "0ms", opacity: isOpen ? 1 : 0 }}>
                           <span className={`magical-text whitespace-nowrap block text-sm group-hover:text-amber-400 transition-colors duration-300 ${fontClass}`}>
                             {isOpen && t("sidebar.characterCards").split("").map((char, index) => (
+                              <span 
+                                key={index} 
+                                className="inline-block transition-all duration-300" 
+                                style={{ 
+                                  opacity: animationComplete ? 1 : 0,
+                                  transform: animationComplete ? "translateY(0)" : "translateY(8px)",
+                                  transitionDelay: `${200 + index * 30}ms`,
+                                  width: char === " " ? "0.25em" : "auto",
+                                }}
+                              >
+                                {char}
+                              </span>
+                            ))}
+                          </span>
+                        </div>
+                      </div>
+                    </Link>
+                  )}
+                </div>
+              </div>
+            </div>
+          </li>
+          <li className="min-h-[15px]">
+            <div className="mb-4">
+              <div className="px-2 py-1 flex justify-between items-center text-xs text-[#8a8a8a] uppercase tracking-wider font-medium text-[10px] transition-all duration-300 ease-in-out overflow-hidden" style={{ width: isOpen ? "auto" : "0", maxWidth: isOpen ? "100%" : "0", padding: isOpen ? "0.25rem 0.5rem" : "0", opacity: isOpen ? 1 : 0, whiteSpace: "nowrap", transitionDelay: isOpen ? "0ms" : "0ms" }}>
+                <span>{t("sidebar.creationArea")}</span>
+                {isOpen && (
+                  <button 
+                    onClick={() => setIsCreatorOpen(!isCreatorOpen)}
+                    className="w-5 h-5 flex items-center justify-center text-[#8a8a8a] hover:text-amber-400 transition-colors duration-300 login-fantasy-bg rounded-sm"
+                    aria-label={isCreatorOpen ? t("sidebar.collapseCreation") : t("sidebar.expandCreation")}
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={`transition-transform duration-300 ${isCreatorOpen ? "rotate-180" : ""}`}>
+                      <path d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </button>
+                )}
+              </div>
+
+              <div className={`overflow-hidden transition-all duration-300 ${isOpen ? (isCreatorOpen ? "max-h-20 opacity-100 mt-1" : "max-h-0 opacity-0 mt-0") : "max-h-20 opacity-100 mt-1"} mx-1`}>
+                <div className="relative group mt-1">
+                  <div className="absolute inset-0 bg-gradient-to-br from-amber-500/5 to-transparent rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                  {!isOpen ? (
+                    <Link href="/creator-area" className={"menu-item flex justify-center p-2 rounded-md cursor-pointer hover:bg-[#252525] transition-all duration-300"}>
+                      <div className={"flex items-center justify-center text-[#f4e8c1] bg-[#1c1c1c] rounded-lg border border-[#333333] shadow-inner transition-all duration-300 group-hover:border-[#444444] hover:text-amber-400 hover:border-[#444444] hover:shadow-[0_0_8px_rgba(251,146,60,0.4)] w-8 h-8"}>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="transition-transform duration-300">
+                          <path d="M12 20h9"></path>
+                          <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+                        </svg>
+                      </div>
+                    </Link>
+                  ) : (
+                    <Link href="/creator-area" className="focus:outline-none group relative overflow-hidden rounded-md w-full transition-all duration-300">
+                      <div className="absolute inset-0 bg-gradient-to-br from-amber-500/10 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                      <div className="relative flex items-center p-2 w-full transition-all duration-300 z-10">
+                        <div className="absolute inset-0 w-full h-full bg-[#333] opacity-0 group-hover:opacity-10 transition-opacity duration-300"></div>
+                        <div className="absolute bottom-0 left-0 h-[1px] bg-gradient-to-r from-transparent via-[#f8d36a] to-transparent w-0 group-hover:w-full transition-all duration-500"></div>
+                        <div className="w-8 h-8 flex items-center justify-center flex-shrink-0 text-[#f4e8c1] bg-[#1c1c1c] rounded-lg border border-[#333333] shadow-inner transition-all duration-300 group-hover:border-[#444444] group-hover:text-amber-400 group-hover:shadow-[0_0_8px_rgba(251,146,60,0.4)]">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="transition-transform duration-300">
+                            <path d="M12 20h9"></path>
+                            <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+                          </svg>
+                        </div>
+                        <div className={"ml-2 transition-all duration-300 ease-in-out overflow-hidden"} style={{ transitionDelay: isOpen ? "50ms" : "0ms", opacity: isOpen ? 1 : 0 }}>
+                          <span className={`magical-text whitespace-nowrap block text-sm group-hover:text-amber-400 transition-colors duration-300 ${fontClass}`}>
+                            {isOpen && t("sidebar.creator").split("").map((char, index) => (
                               <span 
                                 key={index} 
                                 className="inline-block transition-all duration-300" 

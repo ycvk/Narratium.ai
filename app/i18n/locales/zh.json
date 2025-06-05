@@ -13,6 +13,8 @@
   },
   "sidebar": {
     "home": "首页",
+    "gameArea": "游戏区",
+    "creator": "创造者",
     "creationArea": "创作区",
     "historyRecords": "历史记录",
     "newStory": "新冒险",
@@ -21,7 +23,13 @@
     "characterMarket": "角色市场",
     "login": "登录并探索更多",
     "nologin": "定义 User 名称",
-    "logout": "退出登录"
+    "logout": "退出登录",
+    "collapseHome": "收起首页",
+    "expandHome": "展开首页",
+    "collapseCreation": "收起游戏区",
+    "expandCreation": "展开游戏区",
+    "collapseCreator": "收起创作区",
+    "expandCreator": "展开创作区"
   },
   "modelSettings": {
     "title": "模型设置",
