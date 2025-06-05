@@ -258,7 +258,7 @@ export default function Sidebar({ isOpen, toggleSidebar, openLoginModal }: Sideb
                   </button>
                 )}
               </div>
-
+                
               <div className={`overflow-hidden transition-all duration-300 ${isOpen ? (isCreatorOpen ? "max-h-20 opacity-100 mt-1" : "max-h-0 opacity-0 mt-0") : "max-h-20 opacity-100 mt-1"} mx-1`}>
                 <div className="relative group mt-1">
                   <div className="absolute inset-0 bg-gradient-to-br from-amber-500/5 to-transparent rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>

@@ -200,8 +200,10 @@ export default function ImportWorldBookModal({
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-3">
       <div className="relative bg-gradient-to-br from-[#1a1816]/95 via-[#252220]/95 to-[#1a1816]/95 backdrop-blur-xl border border-[#534741]/60 rounded-xl shadow-2xl max-w-xl w-full max-h-[85vh] overflow-hidden">
+        {/* Animated background gradient */}
         <div className="absolute inset-0 bg-gradient-to-br from-amber-500/5 via-transparent to-blue-500/5 opacity-50 animate-pulse"></div>
         
+        {/* Header */}
         <div className="relative p-3 border-b border-[#534741]/40 bg-gradient-to-r from-[#252220]/80 via-[#1a1816]/60 to-[#252220]/80 backdrop-blur-sm">
           <div className="flex justify-between items-center">
             <h2 className={`text-base font-semibold text-[#eae6db] ${serifFontClass} bg-gradient-to-r from-amber-300 via-amber-200 to-amber-300 bg-clip-text text-transparent`}>
@@ -217,7 +219,8 @@ export default function ImportWorldBookModal({
               </svg>
             </button>
           </div>
-
+          
+          {/* Compact Tab Navigation */}
           <div className="flex mt-2 space-x-0.5 bg-[#1a1816]/60 backdrop-blur-sm rounded-lg p-0.5 border border-[#534741]/30">
             <button
               onClick={() => setActiveTab("file")}
@@ -260,9 +263,13 @@ export default function ImportWorldBookModal({
             </button>
           </div>
         </div>
+
+        {/* Content */}
         <div className="relative p-3 max-h-[55vh] overflow-y-auto scrollbar-thin scrollbar-track-[#1a1816] scrollbar-thumb-[#534741] hover:scrollbar-thumb-[#6b5b4f]">
           {activeTab === "file" ? (
+            // File Import Tab
             <div className="space-y-3">
+              {/* Compact Drag & Drop Area */}
               <div
                 className={`relative border-2 border-dashed rounded-lg p-4 text-center transition-all duration-300 cursor-pointer group ${
                   isDragging
@@ -298,7 +305,9 @@ export default function ImportWorldBookModal({
                   onChange={handleFileInputChange}
                   className="hidden"
                 />
-              </div>  
+              </div>
+
+              {/* Compact Save as Global Option */}
               <div className="bg-gradient-to-br from-[#252220]/60 via-[#1a1816]/40 to-[#252220]/60 backdrop-blur-sm border border-[#534741]/40 rounded-lg p-3">
                 <label className="flex items-center space-x-2 cursor-pointer group">
                   <div className="relative">
@@ -461,6 +470,8 @@ export default function ImportWorldBookModal({
               )}
             </div>
           )}
+
+          {/* Compact Import Results */}
           {importResult && (
             <div className="mt-3 p-2.5 bg-gradient-to-br from-[#252220]/60 via-[#1a1816]/40 to-[#252220]/60 backdrop-blur-sm border border-[#534741]/40 rounded-lg animate-in slide-in-from-bottom-2 duration-300">
               <h3 className={`text-xs font-medium text-[#eae6db] mb-1.5 ${serifFontClass}`}>

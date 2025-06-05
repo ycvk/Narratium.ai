@@ -9,7 +9,8 @@
     "switchToChinese": "Switch to Chinese",
     "soundOn": "Sound On",
     "soundOff": "Sound Off",
-    "saving": "Saving..."
+    "saving": "Saving...",
+    "defaultAutoFillFileName": "Default: Auto-fill from file name"
   },
   "sidebar": {
     "home": "Home",
@@ -446,8 +447,8 @@
     "saveAsGlobalWorldBook": "Save as Global World Book",
     "globalName": "Global Name",
     "description": "Description (Optional)",
-    "enterGlobalWorldBookName": "Enter global world book name",
-    "enterDescriptionForThisGlobalWorldBook": "Enter description for this global world book",
+    "enterGlobalWorldBookName": "Default to use filename",
+    "enterDescriptionForThisGlobalWorldBook": "Default to empty description",
     "importWorldBook": "Import World Book",
     "dragDropJson": "Drag and drop JSON file here",
     "jsonFileOnly": "JSON files only",
@@ -631,8 +632,8 @@
     "saveAsGlobalRegexScript": "Save as Global Regex Script",
     "globalName": "Global Name",
     "description": "Description",
-    "enterGlobalRegexScriptName": "Enter global regex script name",
-    "enterDescriptionForThisGlobalRegexScript": "Enter description for this global regex script",
+    "enterGlobalRegexScriptName": "Default to use filename",
+    "enterDescriptionForThisGlobalRegexScript": "Default to empty description",
     "importing": "Importing...",
     "importResults": "Import Results",
     "importedScripts": "Imported {count} scripts",
