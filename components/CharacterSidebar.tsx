@@ -394,8 +394,6 @@ const CharacterSidebar: React.FC<CharacterSidebarProps> = ({
           </div>
         </div>
         <div className="mx-4 menu-divider my-2"></div>
-
-        <div className="mx-4 menu-divider my-2"></div>
             
         {!isCollapsed && (
           <>
@@ -423,8 +421,7 @@ const CharacterSidebar: React.FC<CharacterSidebarProps> = ({
                 </div>
               </div>
             </div>
-            
-            {/* GitHub 预设下拉菜单 */}
+
             <div className="relative">
               <div 
                 className={`menu-item flex items-center p-2 mx-6 rounded-md hover:bg-[#252525] cursor-pointer overflow-hidden transition-all duration-300 group ${showGithubPresetDropdown ? "bg-[#252525]" : ""}`}
