@@ -5,6 +5,7 @@ import { useLanguage } from "@/app/i18n";
 import { RegexScript, RegexScriptSettings } from "@/lib/models/regex-script-model";
 import { trackButtonClick } from "@/lib/utils/google-analytics";
 import RegexScriptEntryEditor from "@/components/RegexScriptEntryEditor";
+import ImportRegexScriptModal from "@/components/ImportRegexScriptModal";
 import { updateRegexScriptSettings } from "@/function/regex/update-setting";
 import { getRegexScripts } from "@/function/regex/get";
 import { getRegexScriptSettings } from "@/function/regex/get-setting";
@@ -34,6 +35,7 @@ export default function RegexScriptEditor({ onClose, characterName, characterId 
   const [sortBy, setSortBy] = useState<string>("priority");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
   const [filterBy, setFilterBy] = useState<string>("all");
+  const [isImportModalOpen, setIsImportModalOpen] = useState(false);
 
   useEffect(() => {
     loadScriptsAndSettings();
@@ -308,6 +310,23 @@ export default function RegexScriptEditor({ onClose, characterName, characterId 
                   <line x1="5" y1="12" x2="19" y2="12"></line>
                 </svg>
                 {t("regexScriptEditor.addNewScript")}
+              </span>
+            </button>
+            
+            <button
+              onClick={() => {
+                trackButtonClick("page", "打开正则导入");
+                setIsImportModalOpen(true);
+              }}
+              className="px-3 py-1.5 bg-gradient-to-r from-[#1a1c1f] to-[#0e1013] hover:from-[#252528] hover:to-[#13161a] text-[#8dc0e9] hover:text-[#aed6f6] rounded-md transition-all duration-300 text-sm font-medium shadow-lg hover:shadow-[#58b7f8]/20 group flex-shrink-0 border border-[#333a40]"
+            >
+              <span className={`flex items-center ${serifFontClass}`}>
+                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-1.5 transition-transform duration-300 group-hover:scale-110">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                  <polyline points="7 10 12 15 17 10"></polyline>
+                  <line x1="12" y1="15" x2="12" y2="3"></line>
+                </svg>
+                {t("regexScriptEditor.importScript")}
               </span>
             </button>
           </div>
@@ -609,6 +628,16 @@ export default function RegexScriptEditor({ onClose, characterName, characterId 
         onClose={() => setEditingScript(null)}
         onSave={handleSaveScript}
         onScriptChange={(script) => setEditingScript(script)}
+      />
+
+      <ImportRegexScriptModal
+        isOpen={isImportModalOpen}
+        characterId={characterId}
+        onClose={() => setIsImportModalOpen(false)}
+        onImportSuccess={() => {
+          setIsImportModalOpen(false);
+          loadScriptsAndSettings();
+        }}
       />
     </div>
   );

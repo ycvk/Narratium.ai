@@ -5,6 +5,7 @@ export interface RegexScriptSettings {
   enabled: boolean;
   applyToPrompt: boolean;
   applyToResponse: boolean;
+  metadata?: any;
 }
 
 const DEFAULT_SETTINGS: RegexScriptSettings = {

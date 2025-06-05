@@ -21,8 +21,8 @@ const AVAILABLE_PRESETS: GithubPreset[] = [
   {
     name: "belle_cat",
     displayName: {
-      zh: "贝露喵",
-      en: "Belle Cat",
+      zh: "贝露喵提示词",
+      en: "Belle Cat Prompt",
     },
     description: {
       zh: "表演家——超强人物演绎",

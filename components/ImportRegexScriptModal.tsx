@@ -3,22 +3,22 @@
 import React, { useState, useRef, useEffect } from "react";
 import { toast } from "react-hot-toast";
 import { useLanguage } from "@/app/i18n";
-import { importWorldBookFromJson } from "@/function/worldbook/import";
-import { listGlobalWorldBooks, importFromGlobalWorldBook, GlobalWorldBook, deleteGlobalWorldBook } from "@/function/worldbook/global";
+import { importRegexScriptFromJson } from "@/function/regex/import";
+import { listGlobalRegexScripts, importFromGlobalRegexScript, GlobalRegexScript, deleteGlobalRegexScript } from "@/function/regex/global";
 
-interface ImportWorldBookModalProps {
+interface ImportRegexScriptModalProps {
   isOpen: boolean;
   characterId: string;
   onClose: () => void;
   onImportSuccess: () => void;
 }
 
-export default function ImportWorldBookModal({
+export default function ImportRegexScriptModal({
   isOpen,
   characterId,
   onClose,
   onImportSuccess,
-}: ImportWorldBookModalProps) {
+}: ImportRegexScriptModalProps) {
   const { t, fontClass, serifFontClass } = useLanguage();
   const [isDragging, setIsDragging] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
@@ -29,29 +29,29 @@ export default function ImportWorldBookModal({
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [activeTab, setActiveTab] = useState<"file" | "global">("file");
-  const [globalWorldBooks, setGlobalWorldBooks] = useState<GlobalWorldBook[]>([]);
+  const [globalRegexScripts, setGlobalRegexScripts] = useState<GlobalRegexScript[]>([]);
   const [selectedGlobalId, setSelectedGlobalId] = useState<string>("");
   const [isLoadingGlobal, setIsLoadingGlobal] = useState(false);
   const [isDeleting, setIsDeleting] = useState<string | null>(null);
 
   useEffect(() => {
     if (activeTab === "global" && isOpen) {
-      loadGlobalWorldBooks();
+      loadGlobalRegexScripts();
     }
   }, [activeTab, isOpen]);
 
-  const loadGlobalWorldBooks = async () => {
+  const loadGlobalRegexScripts = async () => {
     setIsLoadingGlobal(true);
     try {
-      const result = await listGlobalWorldBooks();
+      const result = await listGlobalRegexScripts();
       if (result.success) {
-        setGlobalWorldBooks(result.globalWorldBooks);
+        setGlobalRegexScripts(result.globalRegexScripts);
       } else {
-        toast.error("Failed to load global world books");
+        toast.error("Failed to load global regex scripts");
       }
     } catch (error) {
-      console.error("Failed to load global world books:", error);
-      toast.error("Failed to load global world books");
+      console.error("Failed to load global regex scripts:", error);
+      toast.error("Failed to load global regex scripts");
     } finally {
       setIsLoadingGlobal(false);
     }
@@ -59,13 +59,13 @@ export default function ImportWorldBookModal({
 
   const handleImportFromGlobal = async () => {
     if (!selectedGlobalId) {
-      toast.error("Please select a global world book");
+      toast.error("Please select a global regex script");
       return;
     }
 
     setIsImporting(true);
     try {
-      const result = await importFromGlobalWorldBook(characterId, selectedGlobalId);
+      const result = await importFromGlobalRegexScript(characterId, selectedGlobalId);
       
       if (result.success) {
         setImportResult({
@@ -108,7 +108,7 @@ export default function ImportWorldBookModal({
         sourceCharacterName: undefined,
       } : undefined;
 
-      const result = await importWorldBookFromJson(characterId, jsonData, options);
+      const result = await importRegexScriptFromJson(characterId, jsonData, options);
       setImportResult(result);
 
       if (result.success) {
@@ -169,26 +169,26 @@ export default function ImportWorldBookModal({
     onClose();
   };
 
-  const handleDeleteGlobalWorldBook = async (globalId: string, event: React.MouseEvent) => {
+  const handleDeleteGlobalScript = async (globalId: string, event: React.MouseEvent) => {
     event.stopPropagation();
     event.preventDefault();
     
-    if (window.confirm(t("worldBook.confirmDeleteGlobalWorldBook"))) {
+    if (window.confirm(t("regexScriptEditor.confirmDeleteGlobalScript"))) {
       setIsDeleting(globalId);
       try {
-        const result = await deleteGlobalWorldBook(globalId);
+        const result = await deleteGlobalRegexScript(globalId);
         if (result.success) {
-          toast.success(t("worldBook.globalWorldBookDeleted"));
-          loadGlobalWorldBooks();
+          toast.success(t("regexScriptEditor.globalScriptDeleted"));
+          loadGlobalRegexScripts();
           if (selectedGlobalId === globalId) {
             setSelectedGlobalId("");
           }
         } else {
-          toast.error(result.message || t("worldBook.failedToDeleteGlobalWorldBook"));
+          toast.error(result.message || t("regexScriptEditor.failedToDeleteGlobalScript"));
         }
       } catch (error: any) {
-        console.error("Failed to delete global world book:", error);
-        toast.error(`${t("worldBook.failedToDeleteGlobalWorldBook")}: ${error.message}`);
+        console.error("Failed to delete global regex script:", error);
+        toast.error(`${t("regexScriptEditor.failedToDeleteGlobalScript")}: ${error.message}`);
       } finally {
         setIsDeleting(null);
       }
@@ -201,11 +201,11 @@ export default function ImportWorldBookModal({
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-3">
       <div className="relative bg-gradient-to-br from-[#1a1816]/95 via-[#252220]/95 to-[#1a1816]/95 backdrop-blur-xl border border-[#534741]/60 rounded-xl shadow-2xl max-w-xl w-full max-h-[85vh] overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-amber-500/5 via-transparent to-blue-500/5 opacity-50 animate-pulse"></div>
-        
+
         <div className="relative p-3 border-b border-[#534741]/40 bg-gradient-to-r from-[#252220]/80 via-[#1a1816]/60 to-[#252220]/80 backdrop-blur-sm">
           <div className="flex justify-between items-center">
             <h2 className={`text-base font-semibold text-[#eae6db] ${serifFontClass} bg-gradient-to-r from-amber-300 via-amber-200 to-amber-300 bg-clip-text text-transparent`}>
-              {t("worldBook.importWorldBook")}
+              {t("regexScriptEditor.importRegexScript")}
             </h2>
             <button
               onClick={handleClose}
@@ -232,7 +232,7 @@ export default function ImportWorldBookModal({
                   <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
                   <polyline points="14 2 14 8 20 8"></polyline>
                 </svg>
-                {t("worldBook.importFromJson")}
+                {t("regexScriptEditor.importFromJson")}
               </span>
               {activeTab === "file" && (
                 <div className="absolute inset-0 bg-gradient-to-r from-amber-400/20 to-amber-600/20 rounded-md animate-pulse"></div>
@@ -252,7 +252,7 @@ export default function ImportWorldBookModal({
                   <path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"></path>
                   <path d="M2 12h20"></path>
                 </svg>
-                {t("worldBook.importFromGlobal")}
+                {t("regexScriptEditor.importFromGlobal")}
               </span>
               {activeTab === "global" && (
                 <div className="absolute inset-0 bg-gradient-to-r from-blue-400/20 to-blue-600/20 rounded-md animate-pulse"></div>
@@ -287,8 +287,8 @@ export default function ImportWorldBookModal({
                     <div className="absolute -top-1 -right-1 w-3 h-3 bg-gradient-to-br from-amber-400 to-amber-600 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300 animate-pulse"></div>
                   </div>
                   <div>
-                    <p className={`text-[#eae6db] font-medium text-sm ${serifFontClass}`}>{t("worldBook.dragDropJson")}</p>
-                    <p className="text-[#a18d6f] text-xs mt-0.5">{t("worldBook.jsonFileOnly")}</p>
+                    <p className={`text-[#eae6db] font-medium text-sm ${serifFontClass}`}>{t("regexScriptEditor.dragDropJson")}</p>
+                    <p className="text-[#a18d6f] text-xs mt-0.5">{t("regexScriptEditor.jsonFileOnly")}</p>
                   </div>
                 </div>
                 <input
@@ -298,7 +298,9 @@ export default function ImportWorldBookModal({
                   onChange={handleFileInputChange}
                   className="hidden"
                 />
-              </div>  
+              </div>
+
+              {/* Compact Save as Global Option */}
               <div className="bg-gradient-to-br from-[#252220]/60 via-[#1a1816]/40 to-[#252220]/60 backdrop-blur-sm border border-[#534741]/40 rounded-lg p-3">
                 <label className="flex items-center space-x-2 cursor-pointer group">
                   <div className="relative">
@@ -321,7 +323,7 @@ export default function ImportWorldBookModal({
                     </div>
                   </div>
                   <span className={`text-[#eae6db] text-sm font-medium ${serifFontClass}`}>
-                    {t("worldBook.saveAsGlobalWorldBook")}
+                    {t("regexScriptEditor.saveAsGlobalRegexScript")}
                   </span>
                 </label>
                 
@@ -329,24 +331,24 @@ export default function ImportWorldBookModal({
                   <div className="mt-2 space-y-2 animate-in slide-in-from-top-2 duration-300">
                     <div>
                       <label className={`block text-xs font-medium text-[#a18d6f] mb-1 ${serifFontClass}`}>
-                        {t("worldBook.globalName")}
+                        {t("regexScriptEditor.globalName")}
                       </label>
                       <input
                         type="text"
                         value={globalName}
                         onChange={(e) => setGlobalName(e.target.value)}
-                        placeholder={t("worldBook.enterGlobalWorldBookName")}
+                        placeholder={t("regexScriptEditor.enterGlobalRegexScriptName")}
                         className="w-full px-2 py-1.5 text-sm bg-[#1a1816]/60 backdrop-blur-sm border border-[#534741]/60 rounded-md text-[#eae6db] placeholder-[#a18d6f]/60 focus:border-amber-500/60 focus:outline-none focus:ring-2 focus:ring-amber-500/20 transition-all duration-300"
                       />
                     </div>
                     <div>
                       <label className={`block text-xs font-medium text-[#a18d6f] mb-1 ${serifFontClass}`}>
-                        {t("worldBook.description")}
+                        {t("regexScriptEditor.description")}
                       </label>
                       <textarea
                         value={globalDescription}
                         onChange={(e) => setGlobalDescription(e.target.value)}
-                        placeholder={t("worldBook.enterDescriptionForThisGlobalWorldBook")}
+                        placeholder={t("regexScriptEditor.enterDescriptionForThisGlobalRegexScript")}
                         rows={2}
                         className="w-full px-2 py-1.5 text-sm bg-[#1a1816]/60 backdrop-blur-sm border border-[#534741]/60 rounded-md text-[#eae6db] placeholder-[#a18d6f]/60 focus:border-amber-500/60 focus:outline-none focus:ring-2 focus:ring-amber-500/20 resize-none transition-all duration-300"
                       />
@@ -356,6 +358,7 @@ export default function ImportWorldBookModal({
               </div>
             </div>
           ) : (
+            // Global Import Tab
             <div className="space-y-3">
               {isLoadingGlobal ? (
                 <div className="flex items-center justify-center py-6">
@@ -364,10 +367,10 @@ export default function ImportWorldBookModal({
                       <div className="w-4 h-4 border-2 border-blue-500/30 border-t-blue-500 rounded-full animate-spin"></div>
                       <div className="absolute inset-0 w-4 h-4 border-2 border-transparent border-r-blue-400 rounded-full animate-spin animate-reverse"></div>
                     </div>
-                    <span className={`text-[#a18d6f] text-sm ${serifFontClass}`}>{t("worldBook.loading")}</span>
+                    <span className={`text-[#a18d6f] text-sm ${serifFontClass}`}>{t("regexScriptEditor.loading")}</span>
                   </div>
                 </div>
-              ) : globalWorldBooks.length === 0 ? (
+              ) : globalRegexScripts.length === 0 ? (
                 <div className="text-center py-6">
                   <div className="relative inline-block">
                     <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="mx-auto mb-3 text-[#a18d6f]/50">
@@ -376,16 +379,16 @@ export default function ImportWorldBookModal({
                     </svg>
                     <div className="absolute -top-1 -right-1 w-3 h-3 bg-gradient-to-br from-blue-400/50 to-blue-600/50 rounded-full animate-pulse"></div>
                   </div>
-                  <p className={`text-[#a18d6f] text-sm ${serifFontClass}`}>{t("worldBook.noGlobalWorldBooks")}</p>
-                  <p className="text-[#a18d6f]/70 text-xs mt-1">{t("worldBook.createGlobalWorldBookFirst")}</p>
+                  <p className={`text-[#a18d6f] text-sm ${serifFontClass}`}>{t("regexScriptEditor.noGlobalRegexScripts")}</p>
+                  <p className="text-[#a18d6f]/70 text-xs mt-1">{t("regexScriptEditor.createGlobalRegexScriptFirst")}</p>
                 </div>
               ) : (
                 <div className="space-y-2">
                   <h3 className={`text-xs font-medium text-[#a18d6f] mb-2 ${serifFontClass}`}>
-                    {t("worldBook.selectGlobalWorldBook")}
+                    {t("regexScriptEditor.selectGlobalRegexScript")}
                   </h3>
                   <div className="space-y-1.5 max-h-48 overflow-y-auto scrollbar-thin scrollbar-track-[#1a1816] scrollbar-thumb-[#534741]">
-                    {globalWorldBooks.map((globalBook) => (
+                    {globalRegexScripts.map((globalBook) => (
                       <label
                         key={globalBook.id}
                         className={`relative block p-2.5 border rounded-lg cursor-pointer transition-all duration-300 group ${
@@ -397,7 +400,7 @@ export default function ImportWorldBookModal({
                         <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 via-transparent to-purple-500/5 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                         <input
                           type="radio"
-                          name="globalWorldBook"
+                          name="globalRegexScript"
                           value={globalBook.id}
                           checked={selectedGlobalId === globalBook.id}
                           onChange={(e) => setSelectedGlobalId(e.target.value)}
@@ -412,7 +415,7 @@ export default function ImportWorldBookModal({
                             <div className="flex items-center space-x-3 mt-1.5 text-xs text-[#a18d6f]/80">
                               <span className="flex items-center">
                                 <span className="w-1.5 h-1.5 bg-blue-400/60 rounded-full mr-1"></span>
-                                {globalBook.entryCount}
+                                {globalBook.scriptCount}
                               </span>
                               <span className="flex items-center">
                                 <span className="w-1.5 h-1.5 bg-amber-400/60 rounded-full mr-1"></span>
@@ -428,10 +431,10 @@ export default function ImportWorldBookModal({
                           </div>
                           <div className="flex items-center space-x-2">
                             <button
-                              onClick={(e) => handleDeleteGlobalWorldBook(globalBook.id, e)}
+                              onClick={(e) => handleDeleteGlobalScript(globalBook.id, e)}
                               disabled={isDeleting === globalBook.id}
                               className="w-6 h-6 flex items-center justify-center text-[#a18d6f]/70 hover:text-red-400 transition-all duration-300 rounded-full hover:bg-red-500/10 group-hover:opacity-100 opacity-0"
-                              title={t("worldBook.deleteGlobalWorldBook")}
+                              title={t("regexScriptEditor.deleteGlobalScript")}
                             >
                               {isDeleting === globalBook.id ? (
                                 <div className="w-3 h-3 border-2 border-red-400/30 border-t-red-400 rounded-full animate-spin"></div>
@@ -461,27 +464,29 @@ export default function ImportWorldBookModal({
               )}
             </div>
           )}
+
+          {/* Compact Import Results */}
           {importResult && (
             <div className="mt-3 p-2.5 bg-gradient-to-br from-[#252220]/60 via-[#1a1816]/40 to-[#252220]/60 backdrop-blur-sm border border-[#534741]/40 rounded-lg animate-in slide-in-from-bottom-2 duration-300">
               <h3 className={`text-xs font-medium text-[#eae6db] mb-1.5 ${serifFontClass}`}>
-                {t("worldBook.importResults")}
+                {t("regexScriptEditor.importResults")}
               </h3>
               <div className="space-y-1 text-xs">
                 <p className="text-green-400 flex items-center">
                   <span className="w-1.5 h-1.5 bg-green-400 rounded-full mr-2 animate-pulse"></span>
-                  {t("worldBook.importedEntries").replace("{count}", importResult.importedCount.toString())}
+                  {t("regexScriptEditor.importedScripts").replace("{count}", importResult.importedCount.toString())}
                 </p>
                 {importResult.skippedCount > 0 && (
                   <p className="text-yellow-400 flex items-center">
                     <span className="w-1.5 h-1.5 bg-yellow-400 rounded-full mr-2"></span>
-                    {t("worldBook.skippedEntries").replace("{count}", importResult.skippedCount.toString())}
+                    {t("regexScriptEditor.skippedScripts").replace("{count}", importResult.skippedCount.toString())}
                   </p>
                 )}
                 {importResult.errors && importResult.errors.length > 0 && (
                   <div>
                     <p className="text-red-400 font-medium flex items-center">
                       <span className="w-1.5 h-1.5 bg-red-400 rounded-full mr-2"></span>
-                      {t("worldBook.importErrors")}:
+                      {t("regexScriptEditor.importErrors")}:
                     </p>
                     <ul className="list-none text-red-400/80 ml-3 space-y-0.5">
                       {importResult.errors.map((error: string, index: number) => (
@@ -497,8 +502,6 @@ export default function ImportWorldBookModal({
             </div>
           )}
         </div>
-
-        {/* Compact Footer */}
         <div className="relative p-3 border-t border-[#534741]/40 bg-gradient-to-r from-[#252220]/80 via-[#1a1816]/60 to-[#252220]/80 backdrop-blur-sm flex justify-end space-x-2">
           <button
             onClick={handleClose}
@@ -516,7 +519,7 @@ export default function ImportWorldBookModal({
               {isImporting && (
                 <div className="relative w-3 h-3 border border-white/30 border-t-white rounded-full animate-spin"></div>
               )}
-              <span className="relative">{isImporting ? t("worldBook.importing") : t("worldBook.importFromGlobal")}</span>
+              <span className="relative">{isImporting ? t("regexScriptEditor.importing") : t("regexScriptEditor.importFromGlobal")}</span>
             </button>
           )}
         </div>

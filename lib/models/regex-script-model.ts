@@ -26,4 +26,5 @@ export interface RegexScriptSettings {
   enabled: boolean;
   applyToPrompt: boolean;
   applyToResponse: boolean;
+  metadata?: any;
 }
