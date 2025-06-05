@@ -2,13 +2,14 @@
 
 import { useState, useEffect } from "react";
 import { toast } from "react-hot-toast";
-import { getAllPresets, getPreset, deletePreset, togglePresetEnabled } from "@/function/preset/global";
+import { getAllPresets, getPreset, deletePreset, togglePresetEnabled, getPromptsForDisplay } from "@/function/preset/global";
 import { deletePromptFromPreset, togglePromptEnabled } from "@/function/preset/edit";
 import { useLanguage } from "@/app/i18n";
 import ImportPresetModal from "@/components/ImportPresetModal";
 import CreatePresetModal from "@/components/CreatePresetModal";
 import "@/app/styles/fantasy-ui.css";
 import React from "react";
+import EditPromptModal from "@/components/EditPromptModal";
 
 interface PresetEditorProps {
   onClose: () => void;
@@ -58,6 +59,8 @@ export default function PresetEditor({
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [filterBy, setFilterBy] = useState<string>("all");
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [currentEditingPrompt, setCurrentEditingPrompt] = useState<PresetPromptData | null>(null);
 
   const SORT_STORAGE_KEY = `preset_sort_${characterId || "global"}`;
   const FILTER_STORAGE_KEY = `preset_filter_${characterId || "global"}`;
@@ -288,6 +291,11 @@ export default function PresetEditor({
     try {
       const result = await getPreset(presetId);
       if (result.success && result.data) {
+        const orderedPromptsResult = await getPromptsForDisplay(presetId);
+        if (!orderedPromptsResult.success || !orderedPromptsResult.data) {
+          toast.error(t("preset.loadDetailsFailed"));
+          return;
+        }
         const formattedPreset = {
           ...result.data,
           totalPrompts: result.data.prompts?.length || 0,
@@ -295,6 +303,7 @@ export default function PresetEditor({
           lastUpdated: new Date(result.data.updated_at || result.data.created_at || Date.now()).getTime(),
           enabled: result.data.enabled !== false,
           id: result.data.id,
+          prompts: orderedPromptsResult.data,
         };
         setSelectedPreset(formattedPreset as PresetData);
       } else {
@@ -336,6 +345,22 @@ export default function PresetEditor({
     } catch (error) {
       console.error("Delete prompt failed:", error);
       toast.error(t("preset.deletePromptFailed"));
+    }
+  };
+
+  const handleEditPrompt = (prompt: PresetPromptData) => {
+    setCurrentEditingPrompt(prompt);
+    setIsEditModalOpen(true);
+  };
+
+  const handleCloseEditModal = () => {
+    setIsEditModalOpen(false);
+    setCurrentEditingPrompt(null);
+  };
+
+  const handleSaveEditPrompt = async () => {
+    if (selectedPreset) {
+      await handleSelectPreset(selectedPreset.id);
     }
   };
 
@@ -856,6 +881,21 @@ export default function PresetEditor({
                     <td className="p-3">
                       <div className="flex items-center space-x-1">
                         <button
+                          onClick={() => {
+                            toggleRowExpansion(preset.id);
+                            if (!expandedRows.has(preset.id)) {
+                              handleSelectPreset(preset.id);
+                            }
+                          }}
+                          className="w-6 h-6 flex items-center justify-center text-[#a18d6f] hover:text-[#eae6db] transition-colors duration-300 rounded hover:bg-[#333] group"
+                          title={t("preset.edit")}
+                        >
+                          <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="transition-transform duration-300 group-hover:scale-110">
+                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                          </svg>
+                        </button>
+                        <button
                           onClick={() => handleDeletePreset(preset.id)}
                           className="w-6 h-6 flex items-center justify-center text-red-400 hover:text-red-300 transition-colors duration-300 rounded hover:bg-[#333] group"
                           title={t("preset.deletePreset")}
@@ -924,20 +964,35 @@ export default function PresetEditor({
                                         </span>
                                       )}
                                     </div>
-                                    <button
-                                      onClick={() => handleDeletePrompt(selectedPreset.id, prompt.identifier)}
-                                      className="text-red-400 hover:text-red-300 transition-colors duration-300"
-                                      title={t("preset.deletePrompt")}
-                                    >
-                                      <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                        <polyline points="3 6 5 6 21 6"></polyline>
-                                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2 2h4a2 2 0 0 1 2 2v2"></path>
-                                      </svg>
-                                    </button>
+                                    <div className="flex items-center space-x-4">
+                                      <button
+                                        onClick={() => handleEditPrompt(prompt)}
+                                        className="w-6 h-6 flex items-center justify-center text-[#a18d6f] hover:text-[#eae6db] transition-colors duration-300 rounded hover:bg-[#333] group"
+                                        title={t("preset.edit")}
+                                      >
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="transition-transform duration-300 group-hover:scale-110">
+                                          <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                                          <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                                        </svg>
+                                      </button>
+                                      <button
+                                        onClick={() => handleDeletePrompt(selectedPreset.id, prompt.identifier)}
+                                        className="w-6 h-6 flex items-center justify-center text-red-400 hover:text-red-300 transition-colors duration-300 rounded hover:bg-[#333] group"
+                                        title={t("preset.deletePrompt")}
+                                      >
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="transition-transform duration-300 group-hover:scale-110">
+                                          <polyline points="3 6 5 6 21 6"></polyline>
+                                          <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2 2h4a2 2 0 0 1 2 2v2"></path>
+                                        </svg>
+                                      </button>
+                                    </div>
                                   </div>
                                   <h5 className="text-sm font-medium text-[#eae6db] mb-2">{prompt.name}</h5>
                                   {prompt.content && (
-                                    <div className="bg-[#1a1816] border border-[#534741] rounded p-2 text-xs text-[#c0a480] max-h-20 overflow-y-auto">
+                                    <div
+                                      className="bg-[#1a1816] border border-[#534741] rounded p-2 text-xs text-[#c0a480] max-h-20 overflow-y-auto cursor-pointer hover:bg-[#1f1d1b] transition-colors duration-200"
+                                      onClick={() => handleEditPrompt(prompt)}
+                                    >
                                       {prompt.content.substring(0, 200)}
                                       {prompt.content.length > 200 && "..."}
                                     </div>
@@ -986,6 +1041,13 @@ export default function PresetEditor({
           setIsCreateModalOpen(false);
           loadPresetData();
         }}
+      />
+      <EditPromptModal
+        isOpen={isEditModalOpen}
+        onClose={handleCloseEditModal}
+        presetId={selectedPreset?.id || ""}
+        prompt={currentEditingPrompt}
+        onSave={handleSaveEditPrompt}
       />
     </div>
   );
