@@ -51,10 +51,18 @@ export function getPresetDescription(presetName: string, language: "zh" | "en" =
 export async function isPresetDownloaded(presetName: string): Promise<boolean> {
   try {
     const downloadedPresets = localStorage.getItem("downloaded_github_presets");
+    let isMarkedAsDownloaded = false;
+    
     if (downloadedPresets) {
       const presets = JSON.parse(downloadedPresets);
-      return presets.includes(presetName);
+      isMarkedAsDownloaded = presets.includes(presetName);
     }
+    
+    if (isMarkedAsDownloaded) {
+      const exists = await doesPresetExist(presetName);
+      return exists;
+    }
+    
     return false;
   } catch (error) {
     console.error("Error checking if preset is downloaded:", error);
