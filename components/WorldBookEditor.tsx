@@ -504,8 +504,6 @@ export default function WorldBookEditor({
   };
 
   const handleDeleteEntry = async (entryId: string) => {
-    if (!confirm(t("worldBook.confirmDelete"))) return;
-
     try {
       const result = await deleteWorldBookEntry(characterId, entryId);
       if (result.success) {

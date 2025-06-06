@@ -173,25 +173,23 @@ export default function ImportRegexScriptModal({
     event.stopPropagation();
     event.preventDefault();
     
-    if (window.confirm(t("regexScriptEditor.confirmDeleteGlobalScript"))) {
-      setIsDeleting(globalId);
-      try {
-        const result = await deleteGlobalRegexScript(globalId);
-        if (result.success) {
-          toast.success(t("regexScriptEditor.globalScriptDeleted"));
-          loadGlobalRegexScripts();
-          if (selectedGlobalId === globalId) {
-            setSelectedGlobalId("");
-          }
-        } else {
-          toast.error(result.message || t("regexScriptEditor.failedToDeleteGlobalScript"));
+    setIsDeleting(globalId);
+    try {
+      const result = await deleteGlobalRegexScript(globalId);
+      if (result.success) {
+        toast.success(t("regexScriptEditor.globalScriptDeleted"));
+        loadGlobalRegexScripts();
+        if (selectedGlobalId === globalId) {
+          setSelectedGlobalId("");
         }
-      } catch (error: any) {
-        console.error("Failed to delete global regex script:", error);
-        toast.error(`${t("regexScriptEditor.failedToDeleteGlobalScript")}: ${error.message}`);
-      } finally {
-        setIsDeleting(null);
+      } else {
+        toast.error(result.message || t("regexScriptEditor.failedToDeleteGlobalScript"));
       }
+    } catch (error: any) {
+      console.error("Failed to delete global regex script:", error);
+      toast.error(`${t("regexScriptEditor.failedToDeleteGlobalScript")}: ${error.message}`);
+    } finally {
+      setIsDeleting(null);
     }
   };
 

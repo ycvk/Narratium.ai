@@ -65,7 +65,6 @@ export default function CharacterCards() {
       fetchCharacters();
     } catch (err) {
       console.error("Error deleting character:", err);
-      alert(t("characterCardsPage.deleteFailed"));
       setIsLoading(false);
     }
   };

@@ -668,7 +668,6 @@ export default function DialogueTreeModal({ isOpen, onClose, characterId, onDial
         }
       } catch (error) {
         console.error("Error saving edited content:", error);
-        alert(t("common.errorSaving"));
       } finally {
         setIsSaving(false);
       }

@@ -155,8 +155,6 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
       setError("请输入名称");
       return;
     }
-
-    alert("验证码已发送到您的邮箱");
   };
 
   const renderInput = () => {

@@ -173,25 +173,23 @@ export default function ImportWorldBookModal({
     event.stopPropagation();
     event.preventDefault();
     
-    if (window.confirm(t("worldBook.confirmDeleteGlobalWorldBook"))) {
-      setIsDeleting(globalId);
-      try {
-        const result = await deleteGlobalWorldBook(globalId);
-        if (result.success) {
-          toast.success(t("worldBook.globalWorldBookDeleted"));
-          loadGlobalWorldBooks();
-          if (selectedGlobalId === globalId) {
-            setSelectedGlobalId("");
-          }
-        } else {
-          toast.error(result.message || t("worldBook.failedToDeleteGlobalWorldBook"));
+    setIsDeleting(globalId);
+    try {
+      const result = await deleteGlobalWorldBook(globalId);
+      if (result.success) {
+        toast.success(t("worldBook.globalWorldBookDeleted"));
+        loadGlobalWorldBooks();
+        if (selectedGlobalId === globalId) {
+          setSelectedGlobalId("");
         }
-      } catch (error: any) {
-        console.error("Failed to delete global world book:", error);
-        toast.error(`${t("worldBook.failedToDeleteGlobalWorldBook")}: ${error.message}`);
-      } finally {
-        setIsDeleting(null);
+      } else {
+        toast.error(result.message || t("worldBook.failedToDeleteGlobalWorldBook"));
       }
+    } catch (error: any) {
+      console.error("Failed to delete global world book:", error);
+      toast.error(`${t("worldBook.failedToDeleteGlobalWorldBook")}: ${error.message}`);
+    } finally {
+      setIsDeleting(null);
     }
   };
 
@@ -200,7 +198,6 @@ export default function ImportWorldBookModal({
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-3">
       <div className="relative bg-gradient-to-br from-[#1a1816]/95 via-[#252220]/95 to-[#1a1816]/95 backdrop-blur-xl border border-[#534741]/60 rounded-xl shadow-2xl max-w-xl w-full max-h-[85vh] overflow-hidden">
-        {/* Animated background gradient */}
         <div className="absolute inset-0 bg-gradient-to-br from-amber-500/5 via-transparent to-blue-500/5 opacity-50 animate-pulse"></div>
         
         {/* Header */}

@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useLanguage } from "@/app/i18n";
 import { RegexScript } from "@/lib/models/regex-script-model";
+import { toast } from "react-hot-toast";
 
 interface RegexScriptEntryEditorProps {
   isOpen: boolean;
@@ -54,7 +55,7 @@ export default function RegexScriptEntryEditor({
 
   const handleSave = async () => {
     if (!localScript.scriptName || !localScript.findRegex || !localScript.replaceString) {
-      alert(t("regexScriptEditor.requiredFields") || "Please fill in all required fields");
+      toast.error(t("regexScriptEditor.requiredFields") || "Please fill in all required fields");
       return;
     }
     try {
@@ -62,7 +63,7 @@ export default function RegexScriptEntryEditor({
       onClose();
     } catch (error) {
       console.error("Error saving script:", error);
-      alert(t("regexScriptEditor.saveError") || "Failed to save script");
+      toast.error(t("regexScriptEditor.saveError") || "Failed to save script");
     }
   };
 

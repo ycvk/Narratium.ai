@@ -270,8 +270,6 @@ export default function PresetEditor({
   };
 
   const handleDeletePreset = async (presetId: string) => {
-    if (!confirm(t("preset.deleteConfirm"))) return;
-
     try {
       const result = await deletePreset(presetId);
       if (result.success) {
@@ -331,8 +329,6 @@ export default function PresetEditor({
   };
 
   const handleDeletePrompt = async (presetId: string, promptIdentifier: string) => {
-    if (!confirm(t("preset.deletePromptConfirm"))) return;
-
     try {
       const result = await deletePromptFromPreset(presetId, promptIdentifier);
       if (result.success) {

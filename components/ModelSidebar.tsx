@@ -229,9 +229,6 @@ export default function ModelSidebar({ isOpen, toggleSidebar }: ModelSidebarProp
   };
 
   const handleDeleteConfig = (id: string) => {
-    const confirmDelete = window.confirm(t("modelSettings.confirmDelete") || "Are you sure you want to delete this configuration?");
-    if (!confirmDelete) return;
-
     const updatedConfigs = configs.filter(config => config.id !== id);
     setConfigs(updatedConfigs);
 

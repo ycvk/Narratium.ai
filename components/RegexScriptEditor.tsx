@@ -99,8 +99,6 @@ export default function RegexScriptEditor({ onClose, characterName, characterId 
   };
 
   const handleDeleteScript = async (scriptId: string) => {
-    if (!confirm(t("regexScriptEditor.confirmDelete") || "Are you sure you want to delete this script?")) return;
-
     try {
       await deleteRegexScript(characterId, scriptId);
       
@@ -117,7 +115,6 @@ export default function RegexScriptEditor({ onClose, characterName, characterId 
       });
     } catch (error) {
       console.error("Error deleting script:", error);
-      alert(t("regexScriptEditor.deleteError") || "Failed to delete script");
     }
   };
 
