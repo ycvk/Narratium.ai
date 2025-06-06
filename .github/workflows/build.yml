@@ -39,21 +39,16 @@ jobs:
     - name: Install Linux dependencies
       if: matrix.os == 'ubuntu-latest'
       run: |
-        sudo apt-get update
-        sudo apt-get install -y \
-          libgtk-3-dev \
-          libwebkit2gtk-4.0-dev \
-          libappindicator3-dev \
-          librsvg2-dev \
-          patchelf \
-          libglib2.0-dev \
+        sudo apt update
+        sudo apt install -y libwebkit2gtk-4.1-dev \
           build-essential \
           curl \
           wget \
+          file \
+          libxdo-dev \
           libssl-dev \
           libayatana-appindicator3-dev \
-          libsoup2.4-dev \
-          libjavascriptcoregtk-4.0-dev
+          librsvg2-dev
 
     - name: Install pnpm
       uses: pnpm/action-setup@v2
@@ -83,94 +78,39 @@ jobs:
     - name: Install Pake CLI
       run: npm install -g pake-cli
 
-    - name: Debug - List Rust version and info (Linux)
-      if: matrix.os == 'ubuntu-latest'
+    - name: Debug - Check icon files
+      if: matrix.os != 'windows-latest'
       run: |
-        rustc --version || echo "Rust not installed"
-        cargo --version || echo "Cargo not installed"
-        echo "Installing Rust if needed..."
-        curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
-        source $HOME/.cargo/env
-        rustc --version
-        cargo --version
+        echo "Checking icon files:"
+        ls -la public/
+        echo "Icon file exists:"
+        if [ -f "public/icon.ico" ]; then echo "Yes"; else echo "No"; fi
+        if [ -f "public/icon.png" ]; then echo "Yes"; else echo "No"; fi
+        if [ -f "public/icon.icns" ]; then echo "Yes"; else echo "No"; fi
+
+    - name: Debug - Check icon files (Windows)
+      if: matrix.os == 'windows-latest'
+      run: |
+        echo "Checking icon files:"
+        Get-ChildItem -Path public/
+        echo "Icon file exists:"
+        if (Test-Path -Path "public/icon.ico") { echo "Yes" } else { echo "No" }
+        if (Test-Path -Path "public/icon.png") { echo "Yes" } else { echo "No" }
+        if (Test-Path -Path "public/icon.icns") { echo "Yes" } else { echo "No" }
 
     - name: Build with Pake (Linux)
       if: matrix.os == 'ubuntu-latest'
-      run: |
-        source $HOME/.cargo/env
-        pake out/index.html --name Narratium --use-local-file --icon public/icon.png
-
-    - name: Debug - List files (Linux)
-      if: matrix.os == 'ubuntu-latest'
-      run: |
-        echo "Current directory:"
-        pwd
-        echo "Files in current directory:"
-        ls -la
-        echo "Files in pake directory (if exists):"
-        ls -la pake || echo "pake directory not found"
-        echo "Finding Linux executable:"
-        find . -name "Narratium*"
-
-    - name: Debug - Check icon file (Windows)
-      if: matrix.os == 'windows-latest'
-      shell: pwsh
-      run: |
-        Write-Host "Current directory:"
-        Get-Location
-        Write-Host "Checking if icon file exists:"
-        if (Test-Path "public\icon.ico") {
-          Write-Host "Icon file exists at public\icon.ico"
-        } else {
-          Write-Host "Icon file not found at public\icon.ico"
-        }
-        Write-Host "Listing files in public directory:"
-        Get-ChildItem -Path "public" -Force
-        Write-Host "Creating icon file if it doesn't exist (using PowerShell):"
-        if (-not (Test-Path "public\icon.ico")) {
-          Write-Host "Converting png to ico if png exists"
-          if (Test-Path "public\icon.png") {
-            # 使用 Node.js 脚本转换 PNG 到 ICO
-            $script = @"
-            const fs = require('fs');
-            const path = require('path');
-            console.log('Creating empty .ico file as placeholder');
-            fs.copyFileSync('public/icon.png', 'public/icon.ico');
-            console.log('Created icon.ico file');
-            "@
-            $script | Out-File -FilePath "convert-icon.js" -Encoding utf8
-            node convert-icon.js
-          } else {
-            # 创建空的 ICO 文件作为后备
-            [byte[]]$bytes = @(0, 0, 1, 0, 1, 0, 16, 16, 0, 0, 1, 0, 32, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
-            [System.IO.File]::WriteAllBytes("public\icon.ico", $bytes)
-            Write-Host "Created empty icon.ico file as fallback"
-          }
-        }
+      run: pake out/index.html --name Narratium --use-local-file --icon public/icon.png
 
     - name: Build with Pake (Windows)
       if: matrix.os == 'windows-latest'
-      shell: pwsh
       run: |
-        # 使用反斜杠路径
-        pake out/index.html --name Narratium --use-local-file --icon "public\icon.ico"
-
-    - name: Debug - List files (Windows)
-      if: matrix.os == 'windows-latest'
-      shell: pwsh
-      run: |
-        Write-Host "Current directory:"
-        Get-Location
-        Write-Host "Files in current directory:"
-        Get-ChildItem -Force
-        Write-Host "Files in pake directory (if exists):"
-        if (Test-Path "pake") {
-          Get-ChildItem -Path "pake" -Force -Recurse
-        } else {
-          Write-Host "pake directory not found"
-        }
-        Write-Host "Finding Windows executable:"
-        Get-ChildItem -Path "." -Filter "Narratium*.exe" -Recurse -Force -File
+        # Create icon directory in case it doesn't exist
+        mkdir -p pake/icons
+        # Copy icon to pake directory
+        Copy-Item "public\icon.ico" "pake\icons\icon.ico" -Force
+        # Run pake with minimal arguments
+        pake out/index.html --name Narratium
 
     - name: Build with Pake (macOS)
       if: matrix.os == 'macos-latest'
@@ -188,132 +128,56 @@ jobs:
         echo "Finding DMG files:"
         find . -name "*.dmg"
 
-    # 添加解锁指南文件到 macOS 包
-    - name: Create Mac usage guide
-      if: matrix.os == 'macos-latest'
-      run: |
-        cat > "HOW_TO_OPEN_ON_MAC.txt" << 'EOF'
-        # 如何在 macOS 上打开 Narratium
-
-        由于 Narratium 未经 Apple 签名和公证，首次运行时可能会显示"应用程序已损坏"的警告。
-        请按照以下步骤解决：
-
-        ## 方法 1: 右键打开
-        1. 找到应用程序 (Narratium.app)
-        2. 按住 Control 键并点击应用图标（或右键点击）
-        3. 从菜单中选择"打开"
-        4. 在弹出的对话框中点击"打开"
-
-        ## 方法 2: 使用终端命令
-        如果方法 1 不起作用，请打开终端并运行以下命令：
-        ```
-        xattr -d com.apple.quarantine /Applications/Narratium.app
-        ```
-        (请确保应用已经复制到应用程序文件夹)
-
-        ## 方法 3: 调整安全设置
-        1. 打开系统偏好设置 > 安全性与隐私
-        2. 点击"通用"选项卡
-        3. 点击"仍要打开"或"无论如何打开"
-        EOF
-        
-        # 如果 DMG 文件存在，尝试将指南添加到 DMG 中
-        DMG_FILE=$(find . -name "Narratium*.dmg" | head -n 1)
-        if [ -n "$DMG_FILE" ]; then
-          echo "Found DMG file: $DMG_FILE"
-          cp HOW_TO_OPEN_ON_MAC.txt dist/
-        fi
-
-    - name: Create AppImage (Linux)
+    - name: Package artifacts (Linux)
       if: matrix.os == 'ubuntu-latest'
       run: |
-        # 安装 AppImage 工具
-        sudo apt-get install -y libfuse2
-        mkdir -p AppDir/usr/bin AppDir/usr/share/applications AppDir/usr/share/icons/hicolor/256x256/apps
+        mkdir -p dist
+        echo "Current directory:"
+        pwd
+        echo "Files in current directory:"
+        ls -la
         
-        # 复制可执行文件
-        if [ -d "${{ matrix.output_dir }}" ]; then
-          cp -r ${{ matrix.output_dir }}/* AppDir/usr/bin/
-          chmod +x AppDir/usr/bin/Narratium || echo "Executable not found or not named Narratium"
+        # Look for .deb file
+        if [ -f "pake.deb" ]; then
+          echo "Found pake.deb file, using it as the artifact"
+          cp pake.deb dist/${{ matrix.asset_name }}
         else
-          echo "Output directory not found, searching for executable..."
-          EXEC_FILE=$(find . -name "Narratium" -type f -executable | head -n 1)
-          if [ -z "$EXEC_FILE" ]; then
-            echo "Error: Executable not found"
-            exit 1
+          # Try to find any .deb file
+          DEB_FILE=$(find . -name "*.deb" | head -n 1)
+          if [ -n "$DEB_FILE" ]; then
+            echo "Found .deb file: $DEB_FILE"
+            cp "$DEB_FILE" dist/${{ matrix.asset_name }}
           else
-            echo "Found executable: $EXEC_FILE"
-            cp "$EXEC_FILE" AppDir/usr/bin/
-            chmod +x AppDir/usr/bin/Narratium
+            echo "No .deb file found, trying to find Narratium directory"
+            NARRATIUM_DIR=$(find . -type d -name "Narratium*" | grep -v "node_modules" | head -n 1)
+            if [ -z "$NARRATIUM_DIR" ]; then
+              echo "Error: Could not find Narratium directory or .deb file"
+              exit 1
+            else
+              echo "Found Narratium directory: $NARRATIUM_DIR"
+              tar -czf dist/${{ matrix.asset_name }} "$NARRATIUM_DIR"
+            fi
           fi
-        fi
-        
-        # 复制图标
-        cp public/icon.png AppDir/usr/share/icons/hicolor/256x256/apps/narratium.png
-        
-        # 创建 .desktop 文件
-        cat > AppDir/usr/share/applications/narratium.desktop << EOF
-        [Desktop Entry]
-        Name=Narratium
-        Exec=Narratium
-        Icon=narratium
-        Type=Application
-        Categories=Utility;
-        EOF
-        
-        # 创建 AppRun 文件
-        cat > AppDir/AppRun << EOF
-        #!/bin/sh
-        SELF=\$(readlink -f "\$0")
-        HERE=\${SELF%/*}
-        export PATH="\${HERE}/usr/bin:\${PATH}"
-        export LD_LIBRARY_PATH="\${HERE}/usr/lib:\${LD_LIBRARY_PATH}"
-        exec "\${HERE}/usr/bin/Narratium" "\$@"
-        EOF
-        
-        chmod +x AppDir/AppRun
-        
-        # 尝试下载 AppImageTool
-        wget -q https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage -O appimagetool
-        chmod +x appimagetool
-        
-        # 创建 AppImage
-        ./appimagetool AppDir dist/Narratium-x86_64.AppImage || echo "Failed to create AppImage"
-        
-        # 如果 AppImage 创建失败，则回退到 tar.gz
-        if [ ! -f dist/Narratium-x86_64.AppImage ]; then
-          echo "Falling back to tar.gz packaging"
-          mkdir -p dist
-          tar -czf dist/${{ matrix.asset_name }} ${{ matrix.output_dir }} || echo "Failed to create tar.gz"
-        else
-          # 重命名 AppImage 为期望的文件名
-          mv dist/Narratium-x86_64.AppImage dist/${{ matrix.asset_name }}
         fi
 
     - name: Package artifacts (Windows)
       if: matrix.os == 'windows-latest'
-      shell: pwsh
       run: |
-        New-Item -Path "dist" -ItemType Directory -Force
-        # 查找 Narratium-win32 目录或 Narratium.exe
-        if (Test-Path "${{ matrix.output_dir }}") {
-          Compress-Archive -Path "${{ matrix.output_dir }}" -DestinationPath "dist\${{ matrix.asset_name }}"
+        mkdir -p dist
+        # Find the actual MSI file
+        $msiFile = Get-ChildItem -Path "C:\npm\prefix\node_modules\pake-cli\src-tauri\target\release\bundle\msi\*.msi" -File | Select-Object -First 1
+        if ($msiFile) {
+          echo "Found MSI file: $($msiFile.FullName)"
+          Copy-Item $msiFile.FullName -Destination "dist/${{ matrix.asset_name }}"
         } else {
-          Write-Host "Output directory not found, searching for executable..."
-          $execFile = Get-ChildItem -Path "." -Filter "Narratium*.exe" -Recurse -Force -File | Select-Object -First 1
-          if ($null -eq $execFile) {
-            Write-Host "Error: Executable not found"
-            exit 1
+          # Fallback search in case the path changed
+          $msiFile = Get-ChildItem -Path . -Recurse -Filter "*.msi" | Where-Object { $_.FullName -like "*Narratium*.msi" } | Select-Object -First 1
+          if ($msiFile) {
+            echo "Found MSI file via fallback search: $($msiFile.FullName)"
+            Copy-Item $msiFile.FullName -Destination "dist/${{ matrix.asset_name }}"
           } else {
-            Write-Host "Found executable: $($execFile.FullName)"
-            # 创建临时目录
-            New-Item -Path "temp-package" -ItemType Directory -Force
-            Copy-Item -Path $execFile.FullName -Destination "temp-package\Narratium.exe"
-            # 复制可能需要的其他文件
-            if (Test-Path "public") {
-              Copy-Item -Path "public" -Destination "temp-package\" -Recurse
-            }
-            Compress-Archive -Path "temp-package\*" -DestinationPath "dist\${{ matrix.asset_name }}"
+            echo "Error: Could not find MSI file"
+            exit 1
           }
         }
 
@@ -329,15 +193,13 @@ jobs:
         else
           echo "Found DMG file: $DMG_FILE"
           cp "$DMG_FILE" dist/${{ matrix.asset_name }}
-          # 添加使用指南到发布包
-          cp HOW_TO_OPEN_ON_MAC.txt dist/
         fi
 
     - name: Upload artifacts
       uses: actions/upload-artifact@v4
       with:
         name: ${{ matrix.artifact_name }}
-        path: dist/
+        path: dist/${{ matrix.asset_name }}
         retention-days: 30
 
   release:
@@ -355,8 +217,8 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           files: |
-            artifacts/Narratium-linux/*
-            artifacts/Narratium-windows/*
-            artifacts/Narratium-macos/*
+            artifacts/Narratium-linux/narratium-linux.tar.gz
+            artifacts/Narratium-windows/narratium-windows.zip
+            artifacts/Narratium-macos/narratium-macos.dmg
           draft: false
           prerelease: false 
