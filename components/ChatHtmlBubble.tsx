@@ -24,7 +24,7 @@ function convertMarkdown(str: string): string {
   str = str.replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>");
   str = str.replace(/\*([^*]+)\*/g, "<em>$1</em>");
 
-  str = str.replace(/(<[^>]+>)|(["“][^"”]+["”])/g, (_match, tag, quote) => {
+  str = str.replace(/(<[^>]+>)|(["""][^""]+["""])/g, (_match, tag, quote) => {
     if (tag) return tag;
     return `<span class="dialogue">${quote}</span>`;
   });
@@ -278,11 +278,23 @@ export default memo(function ChatHtmlBubble({
   const html = convertMarkdown(rawHtml);
   const processedHtml = replaceTags(html).replace(/^[\s\r\n]+|[\s\r\n]+$/g, "");
 
-  const srcDoc = `<!DOCTYPE html><html><head><meta charset="utf-8"><style>*,*::before,*::after{box-sizing:border-box;max-width:100%}html,body{margin:0;padding:0;color:#f4e8c1;font:16px/${1.5} serif;background:transparent;word-wrap:break-word;overflow-wrap:break-word;hyphens:auto;white-space:pre-wrap;}img,video,iframe{max-width:100%;height:auto;display:block;margin:0 auto}table{width:100%;border-collapse:collapse;overflow-x:auto;display:block}code,pre{font-family:monospace;font-size:0.9rem;white-space:pre-wrap;background:rgba(40,40,40,0.8);padding:4px 8px;border-radius:4px;border:1px solid rgba(255,255,255,0.1);}pre{background:rgba(40,40,40,0.8);padding:12px;border-radius:6px;border:1px solid rgba(255,255,255,0.1);margin:8px 0;}blockquote{margin:8px 0;padding:8px 12px;border-left:4px solid #93c5fd;background:rgba(147,197,253,0.08);border-radius:0 4px 4px 0;font-style:italic;color:#93c5fd;}strong{color:#fb7185;font-weight:bold;}em{color:#c4b5fd;font-style:italic;}.dialogue{color:#fda4af;}a{color:#93c5fd}.tag-styled{white-space:inherit;}</style></head><body><div id="content-wrapper">${processedHtml}</div><script>let lastHeight=0;let lastWidth=0;let calculationCount = 0;const MAX_CALCULATIONS = 10; // 限制计算次数，防止无限计算
+  const srcDoc = `<!DOCTYPE html><html><head><meta charset="utf-8"><style>*,*::before,*::after{box-sizing:border-box;max-width:100%}html,body{margin:0;padding:0;color:#f4e8c1;font:16px/${1.5} serif;background:transparent;word-wrap:break-word;overflow-wrap:break-word;hyphens:auto;white-space:pre-wrap;}img,video,iframe{max-width:100%;height:auto;display:block;margin:0 auto}table{width:100%;border-collapse:collapse;overflow-x:auto;display:block}code,pre{font-family:monospace;font-size:0.9rem;white-space:pre-wrap;background:rgba(40,40,40,0.8);padding:4px 8px;border-radius:4px;border:1px solid rgba(255,255,255,0.1);}pre{background:rgba(40,40,40,0.8);padding:12px;border-radius:6px;border:1px solid rgba(255,255,255,0.1);margin:8px 0;}blockquote{margin:8px 0;padding:8px 12px;border-left:4px solid #93c5fd;background:rgba(147,197,253,0.08);border-radius:0 4px 4px 0;font-style:italic;color:#93c5fd;}strong{color:#fb7185;font-weight:bold;}em{color:#c4b5fd;font-style:italic;}.dialogue{color:#fda4af;}a{color:#93c5fd}.tag-styled{white-space:inherit;}</style></head><body><div id="content-wrapper">${processedHtml}</div><script>
+let lastHeight = 0;
+let lastWidth = 0;
+let calculationCount = 0;
+const MAX_CALCULATIONS = 5; // Reduced from 10 to 5
+const MAX_CALCULATIONS_PER_SECOND = 3; // Maximum allowed calculations per second
+const DEBOUNCE_TIME = 100; // Debounce time in ms
+const SIGNIFICANT_CHANGE_THRESHOLD = 8; // Minimum pixels change to consider significant
+
+let calculationsInLastSecond = 0;
+let lastCalculationTime = 0;
+let pendingCalculationTimeout = null;
+let isCalculationThrottled = false;
+
 const contentWrapper = document.getElementById('content-wrapper');
 
 function getAccurateHeight() {
-  // 使用更精确的高度计算方法，只考虑内容高度
   return contentWrapper ? contentWrapper.offsetHeight : Math.max(
     document.documentElement.scrollHeight,
     document.body.scrollHeight,
@@ -291,18 +303,55 @@ function getAccurateHeight() {
   );
 }
 
+function throttleCalculation(fn) {
+  const now = Date.now();
+  if (now - lastCalculationTime > 1000) {
+    // Reset counter each second
+    calculationsInLastSecond = 0;
+    lastCalculationTime = now;
+  }
+  
+  if (calculationsInLastSecond >= MAX_CALCULATIONS_PER_SECOND) {
+    if (!isCalculationThrottled) {
+      console.log('Height calculation throttled');
+      isCalculationThrottled = true;
+      setTimeout(() => {
+        isCalculationThrottled = false;
+        calculationsInLastSecond = 0;
+      }, 1000);
+    }
+    return;
+  }
+  
+  calculationsInLastSecond++;
+  lastCalculationTime = now;
+  fn();
+}
+
+function debounceCalculation(fn) {
+  if (pendingCalculationTimeout) {
+    clearTimeout(pendingCalculationTimeout);
+  }
+  pendingCalculationTimeout = setTimeout(() => {
+    pendingCalculationTimeout = null;
+    throttleCalculation(fn);
+  }, DEBOUNCE_TIME);
+}
+
 function checkSizeChanges() {
   try {
-    if(calculationCount > MAX_CALCULATIONS) return;
+    if (calculationCount >= MAX_CALCULATIONS) {
+      return;
+    }
     calculationCount++;
     
     const w = document.body.clientWidth;
     const h = getAccurateHeight();
 
-    if(Math.abs(h - lastHeight) > 5 || Math.abs(w - lastWidth) > 5) {
+    if (Math.abs(h - lastHeight) > SIGNIFICANT_CHANGE_THRESHOLD || 
+        Math.abs(w - lastWidth) > SIGNIFICANT_CHANGE_THRESHOLD) {
       lastHeight = h;
       lastWidth = w;
-      // Add a fixed buffer of 20px to avoid layout jumps during sidebar transitions
       parent.postMessage({__chatBubbleHeight: h + 20, __chatBubbleWidth: w}, '*');
     }
   } catch(e) {
@@ -311,9 +360,8 @@ function checkSizeChanges() {
 }
 
 function delayedChecks() {
-  setTimeout(checkSizeChanges, 50);
-  setTimeout(checkSizeChanges, 200);
-  setTimeout(checkSizeChanges, 500);
+  setTimeout(() => debounceCalculation(checkSizeChanges), 100);
+  setTimeout(() => debounceCalculation(checkSizeChanges), 500);
 }
 
 window.addEventListener('load', function() {
@@ -327,29 +375,46 @@ document.addEventListener('DOMContentLoaded', function() {
   checkSizeChanges();
 });
 
+let resizeTimeout;
 window.addEventListener('resize', function() {
-  calculationCount = 0;
-  checkSizeChanges();
+  if (resizeTimeout) clearTimeout(resizeTimeout);
+  resizeTimeout = setTimeout(() => {
+    calculationCount = 0;
+    throttleCalculation(checkSizeChanges);
+  }, 100);
 });
 
 const resizeObserver = new ResizeObserver(function() {
-  calculationCount = 0;
-  checkSizeChanges();
+  debounceCalculation(() => {
+    calculationCount = 0;
+    checkSizeChanges();
+  });
 });
+
 resizeObserver.observe(document.body);
-if(contentWrapper) {
+if (contentWrapper) {
   resizeObserver.observe(contentWrapper);
 }
 
+let lastRecalculateRequest = 0;
 window.addEventListener('message', function(e) {
-  if(e.data && e.data.__recalculateHeight) {
+  if (e.data && e.data.__recalculateHeight) {
+    const now = Date.now();
+    if (now - lastRecalculateRequest < 300) {
+      return;
+    }
+    lastRecalculateRequest = now;
+    
     calculationCount = 0;
-    checkSizeChanges();
+    debounceCalculation(checkSizeChanges);
     delayedChecks();
   }
-});</script></body></html>`;
+});
+</script></body></html>`;
 
   const containerWidthRef = useRef<number | null>(null);
+  const lastResizeTimeRef = useRef<number>(0);
+  const resizeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     if (showLoader) return;
@@ -367,9 +432,16 @@ window.addEventListener('message', function(e) {
         frameRef.current!.style.height = `${e.data.__chatBubbleHeight}px`;
         
         const currentWidth = frameRef.current.parentElement?.clientWidth || 0;
-        if (containerWidthRef.current && Math.abs(currentWidth - containerWidthRef.current) > (containerWidthRef.current * 0.1)) {
-          containerWidthRef.current = currentWidth;
-          frameRef.current.contentWindow?.postMessage({ __recalculateHeight: true }, "*");
+        if (
+          containerWidthRef.current && 
+          Math.abs(currentWidth - containerWidthRef.current) > (containerWidthRef.current * 0.1)
+        ) {
+          const now = Date.now();
+          if (now - lastResizeTimeRef.current > 500) {
+            lastResizeTimeRef.current = now;
+            containerWidthRef.current = currentWidth;
+            frameRef.current.contentWindow?.postMessage({ __recalculateHeight: true }, "*");
+          }
         }
       }
     };
@@ -377,14 +449,27 @@ window.addEventListener('message', function(e) {
     window.addEventListener("message", handler);
     
     const resizeHandler = () => {
-      if (frameRef.current && frameRef.current.contentWindow) {
-        frameRef.current.contentWindow.postMessage({ __recalculateHeight: true }, "*");
+      if (resizeTimeoutRef.current) {
+        clearTimeout(resizeTimeoutRef.current);
       }
+      
+      resizeTimeoutRef.current = setTimeout(() => {
+        if (frameRef.current && frameRef.current.contentWindow) {
+          const now = Date.now();
+          if (now - lastResizeTimeRef.current > 300) {
+            lastResizeTimeRef.current = now;
+            frameRef.current.contentWindow.postMessage({ __recalculateHeight: true }, "*");
+          }
+        }
+      }, 200);
     };
     
     window.addEventListener("resize", resizeHandler);
     
     return () => {
+      if (resizeTimeoutRef.current) {
+        clearTimeout(resizeTimeoutRef.current);
+      }
       window.removeEventListener("message", handler);
       window.removeEventListener("resize", resizeHandler);
     };
