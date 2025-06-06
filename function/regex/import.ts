@@ -42,6 +42,7 @@ export async function importRegexScriptFromJson(
     }
 
     const scripts = await RegexScriptOperations.getRegexScripts(characterId) || {};
+    const now = Date.now();
     
     let scriptEntries: any[] = [];
     
@@ -79,6 +80,10 @@ export async function importRegexScriptFromJson(
           trimStrings: Array.isArray(scriptData.trimStrings) ? scriptData.trimStrings : [],
           placement: Array.isArray(scriptData.placement) ? scriptData.placement : [scriptData.placement || 999],
           disabled: scriptData.disabled === true,
+          extensions: {
+            imported: true,
+            importedAt: now,
+          },
         };
 
         scripts[scriptId] = regexScript;

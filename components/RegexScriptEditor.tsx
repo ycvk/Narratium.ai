@@ -182,6 +182,8 @@ export default function RegexScriptEditor({ onClose, characterName, characterId 
         return !script.disabled;
       case "disabled":
         return script.disabled;
+      case "imported":
+        return script.extensions?.imported === true;
       default:
         return true;
       }
@@ -435,6 +437,7 @@ export default function RegexScriptEditor({ onClose, characterName, characterId 
                 <option value="all" className="bg-[#1a1816] text-[#eae6db]">{t("regexScriptEditor.filterAll")}</option>
                 <option value="enabled" className="bg-[#1a1816] text-[#eae6db]">{t("regexScriptEditor.filterEnabled")}</option>
                 <option value="disabled" className="bg-[#1a1816] text-[#eae6db]">{t("regexScriptEditor.filterDisabled")}</option>
+                <option value="imported" className="bg-[#1a1816] text-[#eae6db]">{t("regexScriptEditor.filterImported")}</option>
               </select>
               <div className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
                 <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-[#a18d6f]">
@@ -572,6 +575,12 @@ export default function RegexScriptEditor({ onClose, characterName, characterId 
                           }`}></span>
                           {script.disabled ? t("regexScriptEditor.disabled") : t("regexScriptEditor.enabled")}
                         </span>
+                        {script.extensions?.imported && (
+                          <span className="inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-300 backdrop-blur-sm border bg-gradient-to-br from-slate-800/60 via-blue-700/40 to-slate-800/60 text-blue-300/90 border-blue-500/30 hover:from-slate-700/70 hover:via-blue-600/50 hover:to-slate-700/70 hover:border-blue-400/40 hover:text-blue-200 hover:shadow-lg hover:shadow-blue-500/10">
+                            <span className="w-2 h-2 bg-blue-400/80 rounded-full mr-2 shadow-sm shadow-blue-400/50"></span>
+                            {t("worldBook.imported")}
+                          </span>
+                        )}
                       </div>
                       
                       {!isExpanded && (

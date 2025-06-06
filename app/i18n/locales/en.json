@@ -616,6 +616,7 @@
     "filterAll": "All",
     "filterEnabled": "Enabled",
     "filterDisabled": "Disabled",
+    "filterImported": "Global",
     "name": "Name",
     "status": "Status",
     "globalEnabled": "Global Enabled",

@@ -134,6 +134,7 @@ export async function importFromGlobalRegexScript(
 
     const characterScripts = await RegexScriptOperations.getRegexScripts(characterId) || {};
     let importedCount = 0;
+    const now = Date.now();
 
     for (const [scriptId, script] of Object.entries(globalResult.scripts)) {
       const newScriptId = `script_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
@@ -141,6 +142,13 @@ export async function importFromGlobalRegexScript(
       characterScripts[newScriptId] = {
         ...script,
         scriptKey: newScriptId,
+        extensions: {
+          imported: true,
+          importedAt: now,
+          globalSource: true,
+          globalSourceId: globalId,
+          globalSourceName: globalResult.metadata?.name,
+        },
       };
       importedCount++;
     }

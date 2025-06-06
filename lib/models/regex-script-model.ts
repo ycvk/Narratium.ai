@@ -7,6 +7,13 @@ export interface RegexScript {
   trimStrings: string[];
   placement: number[];
   disabled?: boolean;
+  extensions?: {
+    imported?: boolean;
+    importedAt?: number;
+    globalSource?: boolean;
+    globalSourceId?: string;
+    globalSourceName?: string;
+  };
 }
 
 export enum RegexScriptOwnerType {
