@@ -1,0 +1,113 @@
+name: Build and Package
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        include:
+          - os: ubuntu-latest
+            artifact_name: Narratium-linux
+            asset_name: narratium-linux.tar.gz
+            output_dir: pake/Narratium-linux
+          - os: windows-latest
+            artifact_name: Narratium-windows
+            asset_name: narratium-windows.zip
+            output_dir: pake/Narratium-win32
+          - os: macos-latest
+            artifact_name: Narratium-macos
+            asset_name: narratium-macos.dmg
+            output_dir: pake/Narratium.app
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '20'
+        cache: 'pnpm'
+
+    - name: Install pnpm
+      uses: pnpm/action-setup@v2
+      with:
+        version: 8
+        run_install: false
+
+    - name: Install dependencies
+      run: pnpm install
+
+    - name: Build Next.js app
+      run: pnpm build
+
+    - name: Install Pake CLI
+      run: npm install -g pake-cli
+
+    - name: Build with Pake (Linux)
+      if: matrix.os == 'ubuntu-latest'
+      run: pake out/index.html --name Narratium --use-local-file --icon public/icon.png
+
+    - name: Build with Pake (Windows)
+      if: matrix.os == 'windows-latest'
+      run: pake out/index.html --name Narratium --use-local-file --icon public/icon.ico
+
+    - name: Build with Pake (macOS)
+      if: matrix.os == 'macos-latest'
+      run: pake out/index.html --name Narratium --use-local-file --icon public/icon.icns
+
+    - name: Package artifacts (Linux)
+      if: matrix.os == 'ubuntu-latest'
+      run: |
+        mkdir -p dist
+        tar -czf dist/${{ matrix.asset_name }} ${{ matrix.output_dir }}
+
+    - name: Package artifacts (Windows)
+      if: matrix.os == 'windows-latest'
+      run: |
+        mkdir -p dist
+        Compress-Archive -Path ${{ matrix.output_dir }} -DestinationPath dist/${{ matrix.asset_name }}
+
+    - name: Package artifacts (macOS)
+      if: matrix.os == 'macos-latest'
+      run: |
+        mkdir -p dist
+        # Pake on macOS directly creates a DMG file
+        cp pake/Narratium.dmg dist/${{ matrix.asset_name }}
+
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: ${{ matrix.artifact_name }}
+        path: dist/${{ matrix.asset_name }}
+
+  release:
+    name: Create Release
+    needs: build
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v3
+        with:
+          path: artifacts
+
+      - name: Create Release
+        id: create_release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            artifacts/Narratium-linux/narratium-linux.tar.gz
+            artifacts/Narratium-windows/narratium-windows.zip
+            artifacts/Narratium-macos/narratium-macos.dmg
+          draft: false
+          prerelease: false 
