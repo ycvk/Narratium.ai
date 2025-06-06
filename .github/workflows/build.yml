@@ -164,17 +164,41 @@ jobs:
       if: matrix.os == 'windows-latest'
       run: |
         mkdir -p dist
+        # Create a temporary directory to store files for zipping
+        New-Item -Path "temp_for_zip" -ItemType Directory -Force
+        
         # Find the actual MSI file
         $msiFile = Get-ChildItem -Path "C:\npm\prefix\node_modules\pake-cli\src-tauri\target\release\bundle\msi\*.msi" -File | Select-Object -First 1
         if ($msiFile) {
           echo "Found MSI file: $($msiFile.FullName)"
-          Copy-Item $msiFile.FullName -Destination "dist/${{ matrix.asset_name }}"
+          # Copy MSI to temp directory
+          Copy-Item $msiFile.FullName -Destination "temp_for_zip\Narratium.msi"
+          
+          # Look for any other related files like exe
+          $exeFile = Get-ChildItem -Path "C:\npm\prefix\node_modules\pake-cli\src-tauri\target\release\*.exe" -File | Select-Object -First 1
+          if ($exeFile) {
+            echo "Found EXE file: $($exeFile.FullName)"
+            Copy-Item $exeFile.FullName -Destination "temp_for_zip\Narratium.exe"
+          }
+          
+          # Create readme file
+          Set-Content -Path "temp_for_zip\README.txt" -Value "Narratium Windows Installation`n`nThis package contains:`n- Narratium.msi: Windows installer`n`nTo install, double-click the MSI file."
+          
+          # Create ZIP file
+          Compress-Archive -Path "temp_for_zip\*" -DestinationPath "dist\${{ matrix.asset_name }}" -Force
         } else {
-          # Fallback search in case the path changed
+          # Fallback search
           $msiFile = Get-ChildItem -Path . -Recurse -Filter "*.msi" | Where-Object { $_.FullName -like "*Narratium*.msi" } | Select-Object -First 1
           if ($msiFile) {
             echo "Found MSI file via fallback search: $($msiFile.FullName)"
-            Copy-Item $msiFile.FullName -Destination "dist/${{ matrix.asset_name }}"
+            # Copy MSI to temp directory
+            Copy-Item $msiFile.FullName -Destination "temp_for_zip\Narratium.msi"
+            
+            # Create readme file
+            Set-Content -Path "temp_for_zip\README.txt" -Value "Narratium Windows Installation`n`nThis package contains:`n- Narratium.msi: Windows installer`n`nTo install, double-click the MSI file."
+            
+            # Create ZIP file
+            Compress-Archive -Path "temp_for_zip\*" -DestinationPath "dist\${{ matrix.asset_name }}" -Force
           } else {
             echo "Error: Could not find MSI file"
             exit 1
