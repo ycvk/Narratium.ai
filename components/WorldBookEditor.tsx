@@ -654,51 +654,6 @@ export default function WorldBookEditor({
                 {t("worldBook.importWorldBook")}
               </span>
             </button>
-            
-            <div className="flex items-center space-x-2 flex-wrap">
-              <div className="flex items-center space-x-1 bg-[#252220]/80 backdrop-blur-sm px-2 py-1 rounded-lg border border-[#534741]/40">
-                <span className={`text-xs text-[#a18d6f] ${serifFontClass} whitespace-nowrap`}>
-                  {t("worldBook.bulkOperations")}:
-                </span>
-              </div>
-          
-              <button
-                onClick={() => handleBulkToggleAll(true)}
-                className={`relative group px-3 py-1.5 rounded-lg transition-all duration-300 text-xs font-medium flex items-center ${serifFontClass} 
-                  bg-gradient-to-br from-slate-800/60 via-amber-900/40 to-slate-800/60 
-                  backdrop-blur-sm border border-amber-600/30 text-amber-200/90
-                  hover:from-slate-700/70 hover:via-amber-800/50 hover:to-slate-700/70
-                  hover:border-amber-500/40 hover:text-amber-100 
-                  hover:shadow-lg hover:shadow-amber-500/10 flex-shrink-0
-                  disabled:opacity-50 disabled:cursor-not-allowed`}
-                disabled={filteredEntries.length === 0}
-                title={`${t("worldBook.enableAll")} ${filterBy !== "all" ? `(${t("worldBook.filtered")})` : ""} (${filteredEntries.length} ${t("worldBook.items")})`}
-              >
-                <div className="flex items-center">
-                  <div className="w-2.5 h-2.5 mr-1.5 rounded-full bg-amber-400/70 group-hover:bg-amber-400 transition-all duration-300"></div>
-                  <span>{t("worldBook.enableAll")}</span>
-                  <span className="ml-1 text-[10px] opacity-60 group-hover:opacity-80">({filteredEntries.length})</span>
-                </div>
-              </button>
-              <button
-                onClick={() => handleBulkToggleAll(false)}
-                className={`relative group px-3 py-1.5 rounded-lg transition-all duration-300 text-xs font-medium flex items-center ${serifFontClass} 
-                  bg-gradient-to-br from-slate-800/60 via-stone-700/40 to-slate-800/60 
-                  backdrop-blur-sm border border-stone-500/30 text-stone-300/90
-                  hover:from-slate-700/70 hover:via-stone-600/50 hover:to-slate-700/70
-                  hover:border-stone-400/40 hover:text-stone-200 
-                  hover:shadow-lg hover:shadow-stone-500/10 flex-shrink-0
-                  disabled:opacity-50 disabled:cursor-not-allowed`}
-                disabled={filteredEntries.length === 0}
-                title={`${t("worldBook.disableAll")} ${filterBy !== "all" ? `(${t("worldBook.filtered")})` : ""} - ${t("worldBook.confirmBulkDisable")}`}
-              >
-                <div className="flex items-center">
-                  <div className="w-2.5 h-2.5 mr-1.5 rounded-full bg-stone-400/70 group-hover:bg-stone-400 transition-all duration-300"></div>
-                  <span>{t("worldBook.disableAll")}</span>
-                  <span className="ml-1 text-[10px] opacity-60 group-hover:opacity-80">({filteredEntries.length})</span>
-                </div>
-              </button>
-            </div>
           </div>
           
           <div className="flex items-center space-x-2 text-xs text-[#a18d6f] bg-[#252220] px-2 py-1 rounded border border-[#534741] flex-shrink-0">
