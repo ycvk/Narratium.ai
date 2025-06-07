@@ -100,7 +100,6 @@ export async function initCharacterDialogue(options: InitCharacterDialogueOption
             compressedContent: "",
           },
           undefined,
-          2,
         );
         nodeIds.push(nodeId);
       }

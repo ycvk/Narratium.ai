@@ -56,7 +56,6 @@ export async function getCharacterDialogue(characterId: string, language: "en" |
         id: dialogueTree.id,
         character_id: dialogueTree.character_id,
         current_node_id: dialogueTree.current_node_id,
-        current_branch_id: dialogueTree.current_branch_id,
         created_at: dialogueTree.created_at,
         updated_at: dialogueTree.updated_at,
         messages,

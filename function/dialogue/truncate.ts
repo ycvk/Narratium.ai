@@ -61,7 +61,6 @@ export async function switchDialogueBranch({ characterId, nodeId }: SwitchDialog
       id: updatedDialogueTree.id,
       character_id: updatedDialogueTree.character_id,
       current_node_id: updatedDialogueTree.current_node_id,
-      current_branch_id: updatedDialogueTree.current_branch_id,
       created_at: updatedDialogueTree.created_at,
       updated_at: updatedDialogueTree.updated_at,
       messages,

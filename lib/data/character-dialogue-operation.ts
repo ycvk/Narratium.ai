@@ -14,7 +14,6 @@ export class LocalCharacterDialogueOperations {
       characterId,
       [],
       "root",
-      0,
     );
     
     filteredDialogues.push(dialogueTree); 
@@ -36,7 +35,6 @@ export class LocalCharacterDialogueOperations {
       dialogue.nodes?.map((node: any) => new DialogueNode(
         node.node_id,
         node.parent_node_id,
-        node.branch_id,
         node.user_input,
         node.assistant_response,
         node.full_response,
@@ -44,7 +42,6 @@ export class LocalCharacterDialogueOperations {
         node.created_at,
       )) || [],
       dialogue.current_node_id,
-      dialogue.current_branch_id,
       dialogue.created_at,
       dialogue.updated_at,
     );
@@ -58,7 +55,6 @@ export class LocalCharacterDialogueOperations {
     fullResponse: string,
     parsedContent?: ParsedResponse,
     nodeId?: string,
-    branchId?: number,
   ): Promise<string> {
     const dialogues = await readData(CHARACTER_DIALOGUES_FILE);
     const index = dialogues.findIndex((d: any) => d.id === dialogueId);
@@ -66,18 +62,10 @@ export class LocalCharacterDialogueOperations {
     if (!nodeId) {
       nodeId = uuidv4();
     }
-
-    let branch_id: number;
-    if (!branchId || branchId === undefined) {
-      branch_id = dialogues[index].current_branch_id + 1;
-    } else {
-      branch_id = branchId;
-    }
     
     const newNode = new DialogueNode(
       nodeId,
       parentNodeId,
-      branch_id,
       userInput,
       assistantResponse,
       fullResponse,
@@ -90,7 +78,6 @@ export class LocalCharacterDialogueOperations {
     
     dialogues[index].nodes.push(newNode);
     dialogues[index].current_node_id = nodeId;
-    dialogues[index].current_branch_id = branchId;
     dialogues[index].updated_at = new Date().toISOString();
     
     await writeData(CHARACTER_DIALOGUES_FILE, dialogues);
@@ -158,7 +145,6 @@ export class LocalCharacterDialogueOperations {
     }
     
     dialogueTree.current_node_id = nodeId;
-    dialogueTree.current_branch_id = node.branch_id;
     dialogueTree.updated_at = new Date().toISOString();
     
     await this.updateDialogueTree(dialogueId, dialogueTree);
@@ -175,7 +161,6 @@ export class LocalCharacterDialogueOperations {
     
     dialogueTree.nodes = [];
     dialogueTree.current_node_id = "root";
-    dialogueTree.current_branch_id = 0;
     dialogueTree.updated_at = new Date().toISOString();
     
     await this.updateDialogueTree(dialogueId, dialogueTree);
@@ -222,11 +207,6 @@ export class LocalCharacterDialogueOperations {
     if (nodesToDelete.has(dialogueTree.current_node_id)) {
       dialogueTree.current_node_id = nodeToDelete.parent_node_id;
       const newCurrentNode = dialogueTree.nodes.find(node => node.node_id === dialogueTree.current_node_id);
-      if (newCurrentNode) {
-        dialogueTree.current_branch_id = newCurrentNode.branch_id;
-      } else {
-        dialogueTree.current_branch_id = 0;
-      }
     }
     
     dialogueTree.updated_at = new Date().toISOString();
@@ -283,7 +263,6 @@ export class LocalCharacterDialogueOperations {
       data.nodes?.map((node: any) => new DialogueNode(
         node.node_id,
         node.parent_node_id,
-        node.branch_id,
         node.user_input,
         node.assistant_response,
         node.response_summary,
@@ -291,7 +270,6 @@ export class LocalCharacterDialogueOperations {
         node.created_at,
       )) || [],
       data.current_node_id,
-      data.current_branch_id,
       data.created_at,
       data.updated_at,
     );
@@ -320,15 +298,5 @@ export class LocalCharacterDialogueOperations {
     }
 
     return dialogueTree.nodes.some(node => node.node_id === nodeId);
-  }
-  
-  static async getLastBranchId(characterId: string): Promise<number> {
-    const dialogueTree = await this.getDialogueTreeById(characterId);
-    
-    if (!dialogueTree) {
-      return 0;
-    }
-    
-    return dialogueTree.current_branch_id;
   }
 }

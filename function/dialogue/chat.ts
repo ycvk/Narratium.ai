@@ -128,10 +128,8 @@ async function processPostResponseAsync({
       regexResult: screenContent,
       nextPrompts,
     };
-
     const dialogueTree = await LocalCharacterDialogueOperations.getDialogueTreeById(characterId);
     const parentNodeId = dialogueTree ? dialogueTree.current_node_id : "root";
-
     await LocalCharacterDialogueOperations.addNodeToDialogueTree(
       characterId,
       parentNodeId,
