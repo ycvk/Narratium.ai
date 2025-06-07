@@ -59,7 +59,12 @@ export class RegexNode extends NodeBase {
         .replace(/\n*\s*<events>[\s\S]*?<\/events>\s*\n*/g, "")
         .trim();
     } else {
-      mainContent = llmResponse;
+      mainContent = llmResponse
+        .replace(/\n*\s*<next_prompts>[\s\S]*?<\/next_prompts>\s*\n*/g, "")
+        .replace(/\n*\s*<events>[\s\S]*?<\/events>\s*\n*/g, "")
+        .replace(/\n*\s*<think>[\s\S]*?<\/think>\s*\n*/g, "")
+        .replace(/\n*\s*<thinking>[\s\S]*?<\/thinking>\s*\n*/g, "")
+        .trim();
 
       const promptsMatch = llmResponse.match(/<next_prompts>([\s\S]*?)<\/next_prompts>/);
       if (promptsMatch) {
