@@ -79,7 +79,7 @@ export class LLMNodeTools extends NodeTool {
     const defaultSettings = {
       temperature: 0.7,
       maxTokens: undefined,
-      timeout: undefined,
+      timeout: 1000000000,
       maxRetries: 0,
       topP: 0.7,
       frequencyPenalty: 0,

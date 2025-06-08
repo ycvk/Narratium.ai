@@ -29,6 +29,11 @@ function convertMarkdown(str: string): string {
     return `<span class="dialogue">${quote}</span>`;
   });
 
+  str = str.replace(/(<[^>]+>)|(["""][^""]+["""])/g, (_match, tag, quote) => {
+    if (tag) return tag;
+    return `<span class="dialogue">${quote}</span>`;
+  });
+
   str = str.replace(/\[([^\]]+)\]|【([^】]+)】/g, (_match, latinContent, cjkContent) => {
     const content = latinContent || cjkContent;
     return `<span class="bracket-content">${content}</span>`;
@@ -214,7 +219,7 @@ function replaceTags(html: string) {
       }
     });
   }
-
+  
   let result = processHtml(html);
   result = processSelfClosingTags(result);
 
@@ -279,6 +284,7 @@ export default memo(function ChatHtmlBubble({
   const processedHtml = replaceTags(html).replace(/^[\s\r\n]+|[\s\r\n]+$/g, "");
 
   const srcDoc = `<!DOCTYPE html><html><head><meta charset="utf-8"><style>*,*::before,*::after{box-sizing:border-box;max-width:100%}html,body{margin:0;padding:0;color:#f4e8c1;font:16px/${1.5} serif;background:transparent;word-wrap:break-word;overflow-wrap:break-word;hyphens:auto;white-space:pre-wrap;}img,video,iframe{max-width:100%;height:auto;display:block;margin:0 auto}table{width:100%;border-collapse:collapse;overflow-x:auto;display:block}code,pre{font-family:monospace;font-size:0.9rem;white-space:pre-wrap;background:rgba(40,40,40,0.8);padding:4px 8px;border-radius:4px;border:1px solid rgba(255,255,255,0.1);}pre{background:rgba(40,40,40,0.8);padding:12px;border-radius:6px;border:1px solid rgba(255,255,255,0.1);margin:8px 0;}blockquote{margin:8px 0;padding:8px 12px;border-left:4px solid #93c5fd;background:rgba(147,197,253,0.08);border-radius:0 4px 4px 0;font-style:italic;color:#93c5fd;}strong{color:#fb7185;font-weight:bold;}em{color:#c4b5fd;font-style:italic;}.dialogue{color:#fda4af;}a{color:#93c5fd}.tag-styled{white-space:inherit;}</style></head><body><div id="content-wrapper">${processedHtml}</div><script>
+// Configuration for height calculation
 let lastHeight = 0;
 let lastWidth = 0;
 let calculationCount = 0;
@@ -287,6 +293,7 @@ const MAX_CALCULATIONS_PER_SECOND = 3; // Maximum allowed calculations per secon
 const DEBOUNCE_TIME = 100; // Debounce time in ms
 const SIGNIFICANT_CHANGE_THRESHOLD = 8; // Minimum pixels change to consider significant
 
+// Tracking calculation rate
 let calculationsInLastSecond = 0;
 let lastCalculationTime = 0;
 let pendingCalculationTimeout = null;
@@ -303,6 +310,7 @@ function getAccurateHeight() {
   );
 }
 
+// Throttle function to limit calculations
 function throttleCalculation(fn) {
   const now = Date.now();
   if (now - lastCalculationTime > 1000) {
@@ -328,6 +336,7 @@ function throttleCalculation(fn) {
   fn();
 }
 
+// Debounce function to prevent rapid consecutive calls
 function debounceCalculation(fn) {
   if (pendingCalculationTimeout) {
     clearTimeout(pendingCalculationTimeout);
@@ -340,6 +349,7 @@ function debounceCalculation(fn) {
 
 function checkSizeChanges() {
   try {
+    // Hard limit on recalculations to prevent infinite loops
     if (calculationCount >= MAX_CALCULATIONS) {
       return;
     }
@@ -348,10 +358,12 @@ function checkSizeChanges() {
     const w = document.body.clientWidth;
     const h = getAccurateHeight();
 
+    // Only report significant changes to parent
     if (Math.abs(h - lastHeight) > SIGNIFICANT_CHANGE_THRESHOLD || 
         Math.abs(w - lastWidth) > SIGNIFICANT_CHANGE_THRESHOLD) {
       lastHeight = h;
       lastWidth = w;
+      // Add a fixed buffer to avoid layout jumps
       parent.postMessage({__chatBubbleHeight: h + 20, __chatBubbleWidth: w}, '*');
     }
   } catch(e) {
@@ -360,10 +372,12 @@ function checkSizeChanges() {
 }
 
 function delayedChecks() {
+  // Reduced number of checks and increased intervals
   setTimeout(() => debounceCalculation(checkSizeChanges), 100);
   setTimeout(() => debounceCalculation(checkSizeChanges), 500);
 }
 
+// Set up event listeners with throttling
 window.addEventListener('load', function() {
   calculationCount = 0;
   checkSizeChanges();
@@ -375,6 +389,7 @@ document.addEventListener('DOMContentLoaded', function() {
   checkSizeChanges();
 });
 
+// Throttle resize events
 let resizeTimeout;
 window.addEventListener('resize', function() {
   if (resizeTimeout) clearTimeout(resizeTimeout);
@@ -384,6 +399,7 @@ window.addEventListener('resize', function() {
   }, 100);
 });
 
+// Use ResizeObserver with throttling
 const resizeObserver = new ResizeObserver(function() {
   debounceCalculation(() => {
     calculationCount = 0;
@@ -396,10 +412,12 @@ if (contentWrapper) {
   resizeObserver.observe(contentWrapper);
 }
 
+// Handle recalculation requests from parent with throttling
 let lastRecalculateRequest = 0;
 window.addEventListener('message', function(e) {
   if (e.data && e.data.__recalculateHeight) {
     const now = Date.now();
+    // Limit recalculation requests to once per 300ms
     if (now - lastRecalculateRequest < 300) {
       return;
     }
@@ -431,13 +449,15 @@ window.addEventListener('message', function(e) {
       ) {
         frameRef.current!.style.height = `${e.data.__chatBubbleHeight}px`;
         
+        // Check if width changed significantly
         const currentWidth = frameRef.current.parentElement?.clientWidth || 0;
         if (
           containerWidthRef.current && 
           Math.abs(currentWidth - containerWidthRef.current) > (containerWidthRef.current * 0.1)
         ) {
+          // Throttle resize notifications to iframe
           const now = Date.now();
-          if (now - lastResizeTimeRef.current > 500) {
+          if (now - lastResizeTimeRef.current > 500) { // Max once per 500ms
             lastResizeTimeRef.current = now;
             containerWidthRef.current = currentWidth;
             frameRef.current.contentWindow?.postMessage({ __recalculateHeight: true }, "*");
@@ -448,6 +468,7 @@ window.addEventListener('message', function(e) {
     
     window.addEventListener("message", handler);
     
+    // Throttled resize handler
     const resizeHandler = () => {
       if (resizeTimeoutRef.current) {
         clearTimeout(resizeTimeoutRef.current);
@@ -456,7 +477,7 @@ window.addEventListener('message', function(e) {
       resizeTimeoutRef.current = setTimeout(() => {
         if (frameRef.current && frameRef.current.contentWindow) {
           const now = Date.now();
-          if (now - lastResizeTimeRef.current > 300) {
+          if (now - lastResizeTimeRef.current > 300) { // Max once per 300ms
             lastResizeTimeRef.current = now;
             frameRef.current.contentWindow.postMessage({ __recalculateHeight: true }, "*");
           }
