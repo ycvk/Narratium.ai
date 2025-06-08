@@ -114,6 +114,8 @@ pnpm install
 pnpm run dev
 ```
 
+Visit: [http://localhost:3000](http://localhost:3000)
+
 ### Self-packaging
 
 ```bash
@@ -137,7 +139,11 @@ For Windows, use the following command:
 pake-win
 ```
 
-Visit: [http://localhost:3000](http://localhost:3000)
+Solution for "damaged" display after macOS installation: Open the terminal and enter:
+
+```bash
+xattr -d com.apple.quarantine /Applications/Narratium.app
+```
 
 ## 🧩 Why Narratium?
 

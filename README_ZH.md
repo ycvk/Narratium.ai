@@ -116,6 +116,8 @@ pnpm install
 pnpm run dev
 ```
 
+访问：[http://localhost:3000](http://localhost:3000)
+
 ### 自己打包
 
 ```bash
@@ -139,7 +141,6 @@ pake-linux
 pake-win
 ```
 
-访问：[http://localhost:3000](http://localhost:3000)
 
 ## 🧩 为什么选择 Narratium
 
