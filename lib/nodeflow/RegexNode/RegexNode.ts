@@ -19,7 +19,7 @@ export class RegexNode extends NodeBase {
   }
 
   protected async _call(input: NodeInput): Promise<NodeOutput> {
-    const llmResponse = input.llmResponse;
+    let llmResponse = input.llmResponse;
     const characterId = input.characterId;
 
     if (!llmResponse) {
@@ -29,6 +29,11 @@ export class RegexNode extends NodeBase {
     if (!characterId) {
       throw new Error("Character ID is required for RegexNode");
     }
+
+    llmResponse = llmResponse
+      .replace(/\n*\s*<think>[\s\S]*?<\/think>\s*\n*/g, "")
+      .replace(/\n*\s*<thinking>[\s\S]*?<\/thinking>\s*\n*/g, "")
+      .trim();
 
     const outputMatch = llmResponse.match(/<output>([\s\S]*?)<\/output>/);
     let mainContent = "";
@@ -62,8 +67,6 @@ export class RegexNode extends NodeBase {
       mainContent = llmResponse
         .replace(/\n*\s*<next_prompts>[\s\S]*?<\/next_prompts>\s*\n*/g, "")
         .replace(/\n*\s*<events>[\s\S]*?<\/events>\s*\n*/g, "")
-        .replace(/\n*\s*<think>[\s\S]*?<\/think>\s*\n*/g, "")
-        .replace(/\n*\s*<thinking>[\s\S]*?<\/thinking>\s*\n*/g, "")
         .trim();
 
       const promptsMatch = llmResponse.match(/<next_prompts>([\s\S]*?)<\/next_prompts>/);
