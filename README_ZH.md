@@ -140,7 +140,11 @@ pake-linux
 ```bash
 pake-win
 ```
+mac 安装后显示损坏解决方案：打开命令行，输入：
 
+```bash
+xattr -d com.apple.quarantine /Applications/Narratium.app
+```
 
 ## 🧩 为什么选择 Narratium
 
