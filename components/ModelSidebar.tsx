@@ -21,24 +21,6 @@ interface APIConfig {
   apiKey?: string;
 }
 
-const DEFAULT_DEEPSEEK_CONFIG: APIConfig = {
-  id: "deepseek_default",
-  name: "【1】deepseek-v3.1",
-  type: "openai",
-  baseUrl: "https://narratiumshop.com/v1/",
-  model: "deepseek-v3",
-  apiKey: "sk-InlD6F9uJ9TpVzDZ7b14D7985e0b4d8a886b440a7eBf99B9",
-};
-
-const DEFAULT_GEMINI_CONFIG: APIConfig = {
-  id: "gemini_default",
-  name: "【1】gemini-pro",
-  type: "openai",
-  baseUrl: "https://narratiumshop.com/v1/",
-  model: "gemini-pro",
-  apiKey: "sk-MOtotVWt8bZoESmZD48c8fCc6b3447CfA60cAbBd3bA9573c",
-};
-
 export default function ModelSidebar({ isOpen, toggleSidebar }: ModelSidebarProps) {
   const { t, fontClass, serifFontClass } = useLanguage();
   
