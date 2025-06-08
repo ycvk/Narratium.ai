@@ -24,7 +24,7 @@ function convertMarkdown(str: string): string {
   str = str.replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>");
   str = str.replace(/\*([^*]+)\*/g, "<em>$1</em>");
 
-  str = str.replace(/(<[^>]+>)|(["""][^""]+["""])/g, (_match, tag, quote) => {
+  str = str.replace(/(<[^>]+>)|(["“”][^"“”]+["“”])/g, (_match, tag, quote) => {
     if (tag) return tag;
     return `<span class="dialogue">${quote}</span>`;
   });
