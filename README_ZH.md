@@ -1,6 +1,7 @@
 # Narratium
 
-> **在想象中重塑世界，在抉择中发现自我**
+> **世界很大，幻想先行**
+
 <p align="center">
   <img src="public/image.png" width="80%" />
 </p>

@@ -1,6 +1,6 @@
 # Narratium
 
-> **Reshape the world through imagination, discover yourself through choices.**
+> **The world is vast, let imagination lead**
 
 <p align="center">
   <img src="public/image.png" width="80%" />
