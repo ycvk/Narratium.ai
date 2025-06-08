@@ -35,52 +35,34 @@ export class RegexNode extends NodeBase {
       .replace(/\n*\s*<thinking>[\s\S]*?<\/thinking>\s*\n*/g, "")
       .trim();
 
-    const outputMatch = llmResponse.match(/<output>([\s\S]*?)<\/output>/);
     let mainContent = "";
     let nextPrompts: string[] = [];
     let event = "";
-    
-    if (outputMatch) {
-      const outputContent = outputMatch[1];
-      
-      const promptsMatch = outputContent.match(/<next_prompts>([\s\S]*?)<\/next_prompts>/);
-      if (promptsMatch) {
-        nextPrompts = promptsMatch[1]
-          .trim()
-          .split("\n")
-          .map((l: string) => l.trim())
-          .filter((l: string) => l.length > 0)
-          .map((l: string) => l.replace(/^[-*]\s*/, "").replace(/^\s*\[|\]\s*$/g, "").trim());
-      }
 
-      const eventsMatch = outputContent.match(/<events>([\s\S]*?)<\/events>/);
-      if (eventsMatch) {
-        event = eventsMatch[1].trim().replace(/\[|\]/g, "");
-        ;
-      }
+    const cleanedResponse = llmResponse
+      .replace(/\s*<\/?output>\s*/g, "")
+      .replace(/\s*<\/?outputFormat>\s*/g, "")
+      .trim();
 
-      mainContent = outputContent
-        .replace(/\n*\s*<next_prompts>[\s\S]*?<\/next_prompts>\s*\n*/g, "")
-        .replace(/\n*\s*<events>[\s\S]*?<\/events>\s*\n*/g, "")
-        .trim();
-    } else {
-      mainContent = llmResponse
-        .replace(/\n*\s*<next_prompts>[\s\S]*?<\/next_prompts>\s*\n*/g, "")
-        .replace(/\n*\s*<events>[\s\S]*?<\/events>\s*\n*/g, "")
-        .trim();
-
-      const promptsMatch = llmResponse.match(/<next_prompts>([\s\S]*?)<\/next_prompts>/);
-      if (promptsMatch) {
-        nextPrompts = promptsMatch[1]
-          .trim()
-          .split("\n")
-          .map((l: string) => l.trim())
-          .filter((l: string) => /^[-*]/.test(l) || /^\s*\[/.test(l) )
-          .map((l: string) => l.replace(/^[-*]\s*/, "").replace(/^\s*\[|\]\s*$/g, "").trim());
-      }
-      
-      event = llmResponse.match(/<event>([\s\S]*?)<\/event>/)?.[1]?.trim() || "";
+    const nextPromptsMatch = cleanedResponse.match(/<next_prompts>([\s\S]*?)<\/next_prompts>/);
+    if (nextPromptsMatch) {
+      nextPrompts = nextPromptsMatch[1]
+        .trim()
+        .split("\n")
+        .map((l: string) => l.trim())
+        .filter((l: string) => l.length > 0)
+        .map((l: string) => l.replace(/^[-*]\s*/, "").replace(/^\s*\[|\]\s*$/g, "").trim());
     }
+
+    const eventsMatch = cleanedResponse.match(/<events>([\s\S]*?)<\/events>/);
+    if (eventsMatch) {
+      event = eventsMatch[1].trim().replace(/\[|\]/g, "");
+    }
+
+    mainContent = cleanedResponse
+      .replace(/\n*\s*<next_prompts>[\s\S]*?<\/next_prompts>\s*\n*/g, "")
+      .replace(/\n*\s*<events>[\s\S]*?<\/events>\s*\n*/g, "")
+      .trim();
 
     const processedResult = await this.executeTool(
       "processRegex",

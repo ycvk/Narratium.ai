@@ -342,9 +342,71 @@ export default function ModelSidebar({ isOpen, toggleSidebar }: ModelSidebarProp
                   <span className="ml-2 text-[#f4e8c1]">{"•".repeat(Math.min(10, apiKey.length))}</span>
                 </div>
               )}
-              <div>
+              <div className="mb-2">
                 <span className="text-[#8a8a8a] text-xs">{t("modelSettings.model") || "Model"}:</span>
                 <span className="ml-2 text-[#f4e8c1]">{model}</span>
+              </div>
+              
+              {/* Quick model switcher */}
+              <div className="mt-3 pt-3 border-t border-[#534741]">
+                <label className={`block text-[#f4e8c1] text-xs mb-1 ${fontClass}`}>
+                  {t("modelSettings.quickModelSwitch") || "Quick Model Switch"}
+                </label>
+                <div className="flex gap-2">
+                  <select
+                    value={model}
+                    onChange={(e) => {
+                      trackButtonClick("ModelSidebar", "快速切换模型");
+                      const newModel = e.target.value;
+                      setModel(newModel);
+                      
+                      // Update the config in the configs array
+                      const updatedConfigs = configs.map(config => {
+                        if (config.id === activeConfigId) {
+                          return { ...config, model: newModel };
+                        }
+                        return config;
+                      });
+                      
+                      // Update both the configs state and localStorage
+                      setConfigs(updatedConfigs);
+                      localStorage.setItem("apiConfigs", JSON.stringify(updatedConfigs));
+                      localStorage.setItem(llmType === "openai" ? "openaiModel" : "ollamaModel", newModel);
+                      localStorage.setItem("modelName", newModel);
+                      
+                      // Show success message
+                      setSaveSuccess(true);
+                      setTimeout(() => {
+                        setSaveSuccess(false);
+                      }, 2000);
+                    }}
+                    className="flex-1 bg-[#292929] border border-[#534741] rounded py-1.5 px-2 text-[#d0d0d0] text-xs leading-tight focus:outline-none focus:border-[#d1a35c] transition-colors"
+                  >
+                    <option value="" disabled className="text-[#8a8a8a]">
+                      {t("modelSettings.selectModel") || "Select a model..."}
+                    </option>
+                    {(llmType === "openai" ? openaiModelList : ollamaModelOptions).map((option) => (
+                      <option
+                        key={option}
+                        value={option}
+                        className="bg-[#292929] text-[#d0d0d0]"
+                      >
+                        {option}
+                      </option>
+                    ))}
+                  </select>
+                  <button
+                    onClick={() => handleGetModelList(baseUrl, apiKey)}
+                    className="p-1.5 bg-[#292929] text-[#d0d0d0] rounded border border-[#534741] hover:bg-[#333333] transition-colors"
+                    title={t("modelSettings.getModelList") || "Get Model List"}
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <circle cx="12" cy="12" r="10"></circle>
+                      <line x1="12" y1="8" x2="12" y2="16"></line>
+                      <line x1="8" y1="12" x2="16" y2="12"></line>
+                    </svg>
+                  </button>
+                </div>
               </div>
             </div>
           )}
