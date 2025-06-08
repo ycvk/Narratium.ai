@@ -80,7 +80,7 @@ export class LLMNodeTools extends NodeTool {
       temperature: 0.7,
       maxTokens: undefined,
       timeout: undefined,
-      maxRetries: 2,
+      maxRetries: 0,
       topP: 0.7,
       frequencyPenalty: 0,
       presencePenalty: 0,
