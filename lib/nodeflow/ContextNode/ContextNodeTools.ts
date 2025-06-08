@@ -147,18 +147,15 @@ export class ContextNodeTools extends NodeTool {
     try {
       const parts: string[] = [];
 
-      // 1. 开场白：systemMessage
       if (historyData.systemMessage) {
         parts.push(`开场白：${historyData.systemMessage}`);
       }
 
-      // 2. 历史信息：压缩的历史对话
       const compressedHistory = this.getCompressedHistory(historyData.historyDialogue, memoryLength);
       if (compressedHistory) {
         parts.push(`历史信息：${compressedHistory}`);
       }
 
-      // 3. 最近故事：最近的对话
       const recentHistory = this.getRecentHistory(historyData.recentDialogue, memoryLength);
       if (recentHistory) {
         parts.push(`最近故事：${recentHistory}`);
@@ -167,7 +164,6 @@ export class ContextNodeTools extends NodeTool {
       return parts.filter(Boolean).join("\n\n");
     } catch (error) {
       this.handleError(error as Error, "formatChatHistory");
-      return "";
     }
   }
 
@@ -179,7 +175,6 @@ export class ContextNodeTools extends NodeTool {
       return dialogue.getStory(startIndex);
     } catch (error) {
       this.handleError(error as Error, "getRecentHistory");
-      return "";
     }
   }
 
@@ -191,7 +186,6 @@ export class ContextNodeTools extends NodeTool {
       return dialogue.getStory(0, endIndex);
     } catch (error) {
       this.handleError(error as Error, "getCompressedHistory");
-      return "";
     }
   }
 } 

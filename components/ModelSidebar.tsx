@@ -21,6 +21,24 @@ interface APIConfig {
   apiKey?: string;
 }
 
+const DEFAULT_DEEPSEEK_CONFIG: APIConfig = {
+  id: "deepseek_default",
+  name: "【1】deepseek-v3.1",
+  type: "openai",
+  baseUrl: "https://narratiumshop.com/v1/",
+  model: "deepseek-v3",
+  apiKey: "sk-InlD6F9uJ9TpVzDZ7b14D7985e0b4d8a886b440a7eBf99B9",
+};
+
+const DEFAULT_GEMINI_CONFIG: APIConfig = {
+  id: "gemini_default",
+  name: "【1】gemini-pro",
+  type: "openai",
+  baseUrl: "https://narratiumshop.com/v1/",
+  model: "gemini-pro",
+  apiKey: "sk-MOtotVWt8bZoESmZD48c8fCc6b3447CfA60cAbBd3bA9573c",
+};
+
 export default function ModelSidebar({ isOpen, toggleSidebar }: ModelSidebarProps) {
   const { t, fontClass, serifFontClass } = useLanguage();
   
@@ -49,10 +67,10 @@ export default function ModelSidebar({ isOpen, toggleSidebar }: ModelSidebarProp
 
   useEffect(() => {
     if (typeof window === "undefined") return;
-
+  
     const savedConfigsStr = localStorage.getItem("apiConfigs");
     let mergedConfigs: APIConfig[] = [];
-
+  
     if (savedConfigsStr) {
       try {
         mergedConfigs = JSON.parse(savedConfigsStr) as APIConfig[];
@@ -60,16 +78,52 @@ export default function ModelSidebar({ isOpen, toggleSidebar }: ModelSidebarProp
         console.error("Error parsing saved API configs", e);
       }
     }
-
+  
+    let hasDeepSeek = mergedConfigs.some((c) => c.id === DEFAULT_DEEPSEEK_CONFIG.id);
+    let firstInit = false;
+    
+    if (!hasDeepSeek) {
+      mergedConfigs = [...mergedConfigs, DEFAULT_DEEPSEEK_CONFIG];
+      firstInit = true;
+    }
+    
+    let hasGemini = mergedConfigs.some((c) => c.id === DEFAULT_GEMINI_CONFIG.id);
+    if (!hasGemini) {
+      mergedConfigs = [...mergedConfigs, DEFAULT_GEMINI_CONFIG];
+      firstInit = true;
+    }
+    
+    if (firstInit) {
+      localStorage.setItem("apiConfigs", JSON.stringify(mergedConfigs));
+    }
+  
     const storedActiveId = localStorage.getItem("activeConfigId");
     const activeIdCandidate = storedActiveId && mergedConfigs.some((c) => c.id === storedActiveId)
       ? storedActiveId
-      : (mergedConfigs[0]?.id || "");
-
+      : DEFAULT_DEEPSEEK_CONFIG.id;
+  
     setConfigs(mergedConfigs);
     setActiveConfigId(activeIdCandidate);
 
-    if (mergedConfigs.length > 0) {
+    if (firstInit || !storedActiveId) {
+      localStorage.setItem("activeConfigId", DEFAULT_DEEPSEEK_CONFIG.id);
+      localStorage.setItem("llmType", DEFAULT_DEEPSEEK_CONFIG.type);
+      localStorage.setItem(
+        DEFAULT_DEEPSEEK_CONFIG.type === "openai" ? "openaiBaseUrl" : "ollamaBaseUrl",
+        DEFAULT_DEEPSEEK_CONFIG.baseUrl,
+      );
+      localStorage.setItem(
+        DEFAULT_DEEPSEEK_CONFIG.type === "openai" ? "openaiModel" : "ollamaModel",
+        DEFAULT_DEEPSEEK_CONFIG.model,
+      );
+      if (DEFAULT_DEEPSEEK_CONFIG.type === "openai") {
+        localStorage.setItem("openaiApiKey", DEFAULT_DEEPSEEK_CONFIG.apiKey || "");
+        localStorage.setItem("apiKey", DEFAULT_DEEPSEEK_CONFIG.apiKey || "");
+      }
+      localStorage.setItem("modelBaseUrl", DEFAULT_DEEPSEEK_CONFIG.baseUrl);
+      localStorage.setItem("modelName", DEFAULT_DEEPSEEK_CONFIG.model);
+      loadConfigToForm(DEFAULT_DEEPSEEK_CONFIG);
+    } else {
       loadConfigToForm(mergedConfigs.find((c) => c.id === activeIdCandidate)!);
     }
   }, []);
@@ -366,11 +420,12 @@ export default function ModelSidebar({ isOpen, toggleSidebar }: ModelSidebarProp
                     setSaveSuccess(true);
                     setTimeout(() => setSaveSuccess(false), 2000);
                   }}
-                  className="bg-[#292929] border border-[#534741] rounded py-1 px-2 text-[#f4e8c1] text-xs"
+                  className="bg-[#292929] border border-[#534741] rounded py-1 px-2 text-[#f4e8c1] text-xs max-w-[200px] truncate"
+                  style={{ textOverflow: "ellipsis" }}
                 >
-                  <option value="" disabled>{t("modelSettings.selectModel") || "Select a model..."}</option>
+                  <option value="" disabled className="truncate">{t("modelSettings.selectModel") || "Select a model..."}</option>
                   {(llmType === "openai" ? openaiModelList : ollamaModelOptions).map((option) => (
-                    <option key={option} value={option}>{option}</option>
+                    <option key={option} value={option} className="truncate">{option}</option>
                   ))}
                 </select>
                 {modelListEmpty && (
