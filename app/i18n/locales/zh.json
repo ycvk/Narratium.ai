@@ -45,6 +45,7 @@
     "commonModels": "常用模型推荐:",
     "modelList": "模型列表",
     "selectModel": "选择模型",
+    "modelListUnavailable": "模型列表不可用",
     "configurations": "API 配置",
     "newConfig": "新建配置",
     "configName": "配置名称",

@@ -46,6 +46,7 @@
     "commonModels": "Common Models:",
     "modelList": "Model List",
     "selectModel": "Select a model...",
+    "modelListUnavailable": "Model list unavailable",
     "configurations": "API Configurations",
     "newConfig": "New Config",
     "configName": "Configuration Name",

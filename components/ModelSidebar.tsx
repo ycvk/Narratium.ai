@@ -21,6 +21,24 @@ interface APIConfig {
   apiKey?: string;
 }
 
+const DEFAULT_DEEPSEEK_CONFIG: APIConfig = {
+  id: "deepseek_default",
+  name: "【1】deepseek-v3.1",
+  type: "openai",
+  baseUrl: "https://narratiumshop.com/v1/",
+  model: "deepseek-v3",
+  apiKey: "sk-InlD6F9uJ9TpVzDZ7b14D7985e0b4d8a886b440a7eBf99B9",
+};
+
+const DEFAULT_GEMINI_CONFIG: APIConfig = {
+  id: "gemini_default",
+  name: "【1】gemini-pro",
+  type: "openai",
+  baseUrl: "https://narratiumshop.com/v1/",
+  model: "gemini-pro",
+  apiKey: "sk-MOtotVWt8bZoESmZD48c8fCc6b3447CfA60cAbBd3bA9573c",
+};
+
 export default function ModelSidebar({ isOpen, toggleSidebar }: ModelSidebarProps) {
   const { t, fontClass, serifFontClass } = useLanguage();
   
@@ -37,6 +55,8 @@ export default function ModelSidebar({ isOpen, toggleSidebar }: ModelSidebarProp
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [getModelListSuccess, setGetModelListSuccess] = useState(false);
   const [getModelListError, setGetModelListError] = useState(false);
+
+  const [modelListEmpty, setModelListEmpty] = useState(false);
   
   const ollamaModelOptions = [
     "llama3.3:8b",
@@ -47,10 +67,10 @@ export default function ModelSidebar({ isOpen, toggleSidebar }: ModelSidebarProp
 
   useEffect(() => {
     if (typeof window === "undefined") return;
-
+  
     const savedConfigsStr = localStorage.getItem("apiConfigs");
     let mergedConfigs: APIConfig[] = [];
-
+  
     if (savedConfigsStr) {
       try {
         mergedConfigs = JSON.parse(savedConfigsStr) as APIConfig[];
@@ -58,16 +78,52 @@ export default function ModelSidebar({ isOpen, toggleSidebar }: ModelSidebarProp
         console.error("Error parsing saved API configs", e);
       }
     }
-
+  
+    let hasDeepSeek = mergedConfigs.some((c) => c.id === DEFAULT_DEEPSEEK_CONFIG.id);
+    let firstInit = false;
+    
+    if (!hasDeepSeek) {
+      mergedConfigs = [...mergedConfigs, DEFAULT_DEEPSEEK_CONFIG];
+      firstInit = true;
+    }
+    
+    let hasGemini = mergedConfigs.some((c) => c.id === DEFAULT_GEMINI_CONFIG.id);
+    if (!hasGemini) {
+      mergedConfigs = [...mergedConfigs, DEFAULT_GEMINI_CONFIG];
+      firstInit = true;
+    }
+    
+    if (firstInit) {
+      localStorage.setItem("apiConfigs", JSON.stringify(mergedConfigs));
+    }
+  
     const storedActiveId = localStorage.getItem("activeConfigId");
     const activeIdCandidate = storedActiveId && mergedConfigs.some((c) => c.id === storedActiveId)
       ? storedActiveId
-      : (mergedConfigs[0]?.id || "");
-
+      : DEFAULT_DEEPSEEK_CONFIG.id;
+  
     setConfigs(mergedConfigs);
     setActiveConfigId(activeIdCandidate);
 
-    if (mergedConfigs.length > 0) {
+    if (firstInit || !storedActiveId) {
+      localStorage.setItem("activeConfigId", DEFAULT_DEEPSEEK_CONFIG.id);
+      localStorage.setItem("llmType", DEFAULT_DEEPSEEK_CONFIG.type);
+      localStorage.setItem(
+        DEFAULT_DEEPSEEK_CONFIG.type === "openai" ? "openaiBaseUrl" : "ollamaBaseUrl",
+        DEFAULT_DEEPSEEK_CONFIG.baseUrl,
+      );
+      localStorage.setItem(
+        DEFAULT_DEEPSEEK_CONFIG.type === "openai" ? "openaiModel" : "ollamaModel",
+        DEFAULT_DEEPSEEK_CONFIG.model,
+      );
+      if (DEFAULT_DEEPSEEK_CONFIG.type === "openai") {
+        localStorage.setItem("openaiApiKey", DEFAULT_DEEPSEEK_CONFIG.apiKey || "");
+        localStorage.setItem("apiKey", DEFAULT_DEEPSEEK_CONFIG.apiKey || "");
+      }
+      localStorage.setItem("modelBaseUrl", DEFAULT_DEEPSEEK_CONFIG.baseUrl);
+      localStorage.setItem("modelName", DEFAULT_DEEPSEEK_CONFIG.model);
+      loadConfigToForm(DEFAULT_DEEPSEEK_CONFIG);
+    } else {
       loadConfigToForm(mergedConfigs.find((c) => c.id === activeIdCandidate)!);
     }
   }, []);
@@ -77,6 +133,9 @@ export default function ModelSidebar({ isOpen, toggleSidebar }: ModelSidebarProp
     setBaseUrl(config.baseUrl);
     setModel(config.model);
     setApiKey(config.apiKey || "");
+    if (config.baseUrl && config.apiKey) {
+      handleGetModelList(config.baseUrl, config.apiKey);
+    }
   };
 
   const generateId = () => `api_${Date.now()}`;
@@ -253,21 +312,20 @@ export default function ModelSidebar({ isOpen, toggleSidebar }: ModelSidebarProp
         },
       });
       const data = await response.json();
-      setOpenaiModelList(data.data.map((item: any) => item.id));
-      
+      const modelList = data.data?.map((item: any) => item.id) || [];
+  
+      setOpenaiModelList(modelList);
+      setModelListEmpty(modelList.length === 0);
+  
       setGetModelListSuccess(true);
-      setTimeout(() => {
-        setGetModelListSuccess(false);
-      }, 2000);
+      setTimeout(() => setGetModelListSuccess(false), 2000);
     } catch (error) {
-      console.error(t("modelSettings.getModelListError"), error);
       setGetModelListError(true);
-      setTimeout(() => {
-        setGetModelListError(false);
-      }, 2000);
+      setModelListEmpty(true);
+      setTimeout(() => setGetModelListError(false), 2000);
     }
   };
-
+  
   return (
     <div
       className={`h-full magic-border border-l border-[#534741] breathing-bg text-[#d0d0d0] transition-all duration-300 overflow-hidden ${isOpen ? "w-64" : "w-0"
@@ -343,70 +401,37 @@ export default function ModelSidebar({ isOpen, toggleSidebar }: ModelSidebarProp
                 </div>
               )}
               <div className="mb-2">
-                <span className="text-[#8a8a8a] text-xs">{t("modelSettings.model") || "Model"}:</span>
-                <span className="ml-2 text-[#f4e8c1]">{model}</span>
-              </div>
-              
-              {/* Quick model switcher */}
-              <div className="mt-3 pt-3 border-t border-[#534741]">
-                <label className={`block text-[#f4e8c1] text-xs mb-1 ${fontClass}`}>
-                  {t("modelSettings.quickModelSwitch") || "Quick Model Switch"}
-                </label>
-                <div className="flex gap-2">
-                  <select
-                    value={model}
-                    onChange={(e) => {
-                      trackButtonClick("ModelSidebar", "快速切换模型");
-                      const newModel = e.target.value;
-                      setModel(newModel);
-                      
-                      // Update the config in the configs array
-                      const updatedConfigs = configs.map(config => {
-                        if (config.id === activeConfigId) {
-                          return { ...config, model: newModel };
-                        }
-                        return config;
-                      });
-                      
-                      // Update both the configs state and localStorage
-                      setConfigs(updatedConfigs);
-                      localStorage.setItem("apiConfigs", JSON.stringify(updatedConfigs));
-                      localStorage.setItem(llmType === "openai" ? "openaiModel" : "ollamaModel", newModel);
-                      localStorage.setItem("modelName", newModel);
-                      
-                      // Show success message
-                      setSaveSuccess(true);
-                      setTimeout(() => {
-                        setSaveSuccess(false);
-                      }, 2000);
-                    }}
-                    className="flex-1 bg-[#292929] border border-[#534741] rounded py-1.5 px-2 text-[#d0d0d0] text-xs leading-tight focus:outline-none focus:border-[#d1a35c] transition-colors"
-                  >
-                    <option value="" disabled className="text-[#8a8a8a]">
-                      {t("modelSettings.selectModel") || "Select a model..."}
-                    </option>
-                    {(llmType === "openai" ? openaiModelList : ollamaModelOptions).map((option) => (
-                      <option
-                        key={option}
-                        value={option}
-                        className="bg-[#292929] text-[#d0d0d0]"
-                      >
-                        {option}
-                      </option>
-                    ))}
-                  </select>
-                  <button
-                    onClick={() => handleGetModelList(baseUrl, apiKey)}
-                    className="p-1.5 bg-[#292929] text-[#d0d0d0] rounded border border-[#534741] hover:bg-[#333333] transition-colors"
-                    title={t("modelSettings.getModelList") || "Get Model List"}
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <circle cx="12" cy="12" r="10"></circle>
-                      <line x1="12" y1="8" x2="12" y2="16"></line>
-                      <line x1="8" y1="12" x2="16" y2="12"></line>
-                    </svg>
-                  </button>
-                </div>
+                <label className="text-[#8a8a8a] text-xs mr-2">{t("modelSettings.model") || "Model"}:</label>
+                <select
+                  value={model}
+                  onChange={(e) => {
+                    const newModel = e.target.value;
+                    setModel(newModel);
+                    const updatedConfigs = configs.map(config => {
+                      if (config.id === activeConfigId) {
+                        return { ...config, model: newModel };
+                      }
+                      return config;
+                    });
+                    setConfigs(updatedConfigs);
+                    localStorage.setItem("apiConfigs", JSON.stringify(updatedConfigs));
+                    localStorage.setItem(llmType === "openai" ? "openaiModel" : "ollamaModel", newModel);
+                    localStorage.setItem("modelName", newModel);
+                    setSaveSuccess(true);
+                    setTimeout(() => setSaveSuccess(false), 2000);
+                  }}
+                  className="bg-[#292929] border border-[#534741] rounded py-1 px-2 text-[#f4e8c1] text-xs"
+                >
+                  <option value="" disabled>{t("modelSettings.selectModel") || "Select a model..."}</option>
+                  {(llmType === "openai" ? openaiModelList : ollamaModelOptions).map((option) => (
+                    <option key={option} value={option}>{option}</option>
+                  ))}
+                </select>
+                {modelListEmpty && (
+                  <p className="mt-2 text-xs text-red-400">
+                    {t("modelSettings.modelListUnavailable")}
+                  </p>
+                )}
               </div>
             </div>
           )}
@@ -529,6 +554,11 @@ export default function ModelSidebar({ isOpen, toggleSidebar }: ModelSidebarProp
                       </option>
                     ))}
                   </select>
+                  {modelListEmpty && (
+                    <p className="mt-2 text-xs text-red-400">
+                      {t("modelSettings.modelListUnavailable")}
+                    </p>
+                  )}
                 </div>
               </div>
 
