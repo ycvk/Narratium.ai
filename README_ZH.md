@@ -127,18 +127,18 @@ npm install -g pake-cli
 对于 macOS 使用以下命令：
 
 ```bash
-pake-mac
+pnpm pake-mac
 ```
 对于 Linux 使用以下命令：
 
 ```bash
-pake-linux
+pnpm pake-linux
 ```
 
 对于 Windows 使用以下命令：
 
 ```bash
-pake-win
+pnpm pake-win
 ```
 mac 安装后显示损坏解决方案：打开命令行，输入：
 
