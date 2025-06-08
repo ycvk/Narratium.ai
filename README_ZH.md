@@ -116,6 +116,29 @@ pnpm install
 pnpm run dev
 ```
 
+### 自己打包
+
+```bash
+npm install -g pake-cli
+```
+
+对于 macOS 使用以下命令：
+
+```bash
+pake-mac
+```
+对于 Linux 使用以下命令：
+
+```bash
+pake-linux
+```
+
+对于 Windows 使用以下命令：
+
+```bash
+pake-win
+```
+
 访问：[http://localhost:3000](http://localhost:3000)
 
 ## 🧩 为什么选择 Narratium

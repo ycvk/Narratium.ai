@@ -114,6 +114,29 @@ pnpm install
 pnpm run dev
 ```
 
+### Self-packaging
+
+```bash
+npm install -g pake-cli
+```
+
+For macOS, use the following command:
+
+```bash
+pake-mac
+```
+For Linux, use the following command:
+
+```bash
+pake-linux
+```
+
+For Windows, use the following command:
+
+```bash
+pake-win
+```
+
 Visit: [http://localhost:3000](http://localhost:3000)
 
 ## 🧩 Why Narratium?
