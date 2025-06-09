@@ -9,14 +9,16 @@
     "start": "next start",
     "lint": "next lint",
     "preview": "serve -s out",
+    "test": "vitest",
     "pake-mac": "pake out/index.html --name Narratium --use-local-file --icon ./public/icon.icns",
     "pake-win": "pake out/index.html --name Narratium --use-local-file --icon ./public/icon.ico",
-    "pake-linux": "pake out/index.html --name Narratium --use-local-file --icon ./public/icon.png"
+    "pake-linux": "pake out/index.html --name narratium --use-local-file --icon ./public/icon.png"
   },
   "dependencies": {
     "@langchain/core": "^0.3.44",
     "@langchain/ollama": "^0.2.0",
     "@langchain/openai": "^0.5.5",
+    "@types/react-color": "^3.0.13",
     "@vercel/analytics": "^1.5.0",
     "better-sqlite3": "^11.9.1",
     "dotenv": "^16.5.0",
@@ -30,11 +32,13 @@
     "png-chunks-encode": "^1.0.0",
     "png-chunks-extract": "^1.0.0",
     "react": "^19.0.0",
+    "react-color": "^2.19.3",
     "react-dom": "^19.0.0",
     "react-hot-toast": "^2.5.2",
     "react-markdown": "^10.1.0",
     "reactflow": "^11.11.4",
-    "uuid": "^11.1.0"
+    "uuid": "^11.1.0",
+    "zustand": "^5.0.5"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",

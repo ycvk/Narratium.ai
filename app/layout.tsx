@@ -4,7 +4,7 @@ import "./styles/local-fonts.css";
 import "./styles/fonts.css";
 import MainLayout from "@/components/MainLayout";
 import { LanguageProvider } from "./i18n/LanguageProvider";
-import { SoundProvider } from "@/app/contexts/SoundContext";
+import { SoundProvider } from "@/contexts/SoundContext";
 import GoogleAnalytics from "@/components/GoogleAnalytics";
 import { Analytics } from "@vercel/analytics/react";
 

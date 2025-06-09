@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import { useLanguage } from "@/app/i18n";
-import { useSoundContext } from "@/app/contexts/SoundContext";
+import { useSoundContext } from "@/contexts/SoundContext";
 import LLMSettingsModal from "@/components/LLMSettingsModal";
 import { useTour } from "@/hooks/useTour";
 

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, memo, useState, useCallback } from "react";
+import { useSymbolColorStore } from "@/contexts/SymbolColorStore";
 
 function convertMarkdown(str: string): string {
   const imagePlaceholders: string[] = [];
@@ -26,17 +27,17 @@ function convertMarkdown(str: string): string {
 
   str = str.replace(/(<[^>]+>)|(["“”][^"“”]+["“”])/g, (_match, tag, quote) => {
     if (tag) return tag;
-    return `<span class="dialogue">${quote}</span>`;
+    return `<talk>${quote}</talk>`;
   });
 
   str = str.replace(/(<[^>]+>)|(["""][^""]+["""])/g, (_match, tag, quote) => {
     if (tag) return tag;
-    return `<span class="dialogue">${quote}</span>`;
+    return `<talk>${quote}</talk>`;
   });
 
   str = str.replace(/\[([^\]]+)\]|【([^】]+)】/g, (_match, latinContent, cjkContent) => {
     const content = latinContent || cjkContent;
-    return `<span class="bracket-content">${content}</span>`;
+    return `<bracket-content>${content}</bracket-content>`;
   });
 
   imagePlaceholders.forEach((html, i) => {
@@ -62,20 +63,25 @@ function detectHtmlTags(str: string) {
   let match: RegExpExecArray | null;
   while ((match = htmlTagRegex.exec(str)) !== null) tags.add(match[1].toLowerCase());
   while ((match = selfClosingTagRegex.exec(str)) !== null) tags.add(match[1].toLowerCase());
+  console.log(tags);
   return [...tags];
 }
 
 function generatePalette(uniqueTags: string[]): Record<string, string> {
-  const predefinedColors: Record<string, string> = {
-    "strong": "#fb7185",
-    "em": "#c4b5fd", 
-    "blockquote": "#93c5fd", 
-    "pre": "#86efac",        
-    "code": "#86efac",        
-    "dialogue": "#fda4af",    
-    "img": "#67e8f9",        
-    "a": "#93c5fd",    
-  };
+  const { symbolColors, getColorForHtmlTag } = useSymbolColorStore.getState();
+  
+  const colours: Record<string, string> = {};
+  const usedColors = new Set<string>();
+
+  uniqueTags.forEach(tag => {
+    const lowerTag = tag.toLowerCase();
+    const mappedColor = getColorForHtmlTag(lowerTag);
+    
+    if (mappedColor) {
+      colours[lowerTag] = mappedColor;
+      usedColors.add(mappedColor);
+    }
+  });
 
   const availableColors = [
     "#fde047", "#a78bfa", "#34d399", "#f59e0b", "#60a5fa",
@@ -84,18 +90,7 @@ function generatePalette(uniqueTags: string[]): Record<string, string> {
     "#d946ef", "#06b6d4", "#65a30d", "#dc2626", "#7c3aed", "#059669",
   ];
 
-  const colours: Record<string, string> = {};
-  const usedColors = new Set<string>();
-
-  uniqueTags.forEach(tag => {
-    const lowerTag = tag.toLowerCase();
-    if (predefinedColors[lowerTag]) {
-      colours[lowerTag] = predefinedColors[lowerTag];
-      usedColors.add(predefinedColors[lowerTag]);
-    }
-  });
-
-  const unassignedTags = uniqueTags.filter(tag => !predefinedColors[tag.toLowerCase()]);
+  const unassignedTags = uniqueTags.filter(tag => !colours[tag.toLowerCase()]);
   const unusedColors = availableColors.filter(color => !usedColors.has(color));
   
   unassignedTags.sort((a, b) => a.localeCompare(b)).forEach((tag, i) => {
@@ -113,6 +108,7 @@ function replaceTags(html: string) {
   const tags = detectHtmlTags(html);
   if (tags.length === 0) return html;
   const colours = generatePalette(tags);
+  const { getColorForHtmlTag } = useSymbolColorStore.getState();
 
   function processHtml(htmlStr: string): string {
     const tagRegex = /<([a-zA-Z][a-zA-Z0-9]*)\b([^>]*)>([\s\S]*?)<\/\1>/g;
@@ -127,9 +123,21 @@ function replaceTags(html: string) {
 
       const processedInner = processHtml(innerContent);
 
-      if (colours[lowerTagName]) {
+      let className = "";
+      const classMatch = attributes.match(/class\s*=\s*["']([^"']*)["']/i);
+      if (classMatch) {
+        className = classMatch[1];
+      }
+
+      let tagColor = getColorForHtmlTag(lowerTagName, className);
+      
+      if (!tagColor && colours[lowerTagName]) {
+        tagColor = colours[lowerTagName];
+      }
+
+      if (tagColor) {
         const preservedAttrs = attributes.trim();
-        const styleAttr = `style="color:${colours[lowerTagName]}"`;
+        const styleAttr = `style="color:${tagColor}"`;
         const dataAttr = `data-tag="${tagName}"`;
         const classAttr = "class=\"tag-styled\"";
         
@@ -142,7 +150,7 @@ function replaceTags(html: string) {
           
           if (styleMatch) {
             const existingStyle = styleMatch[1];
-            const newStyle = `${existingStyle}; color:${colours[lowerTagName]}`;
+            const newStyle = `${existingStyle}; color:${tagColor}`;
             modifiedAttrs = modifiedAttrs.replace(styleMatch[0], `style="${newStyle}"`);
           } else {
             modifiedAttrs += ` ${styleAttr}`;
@@ -179,9 +187,21 @@ function replaceTags(html: string) {
         return match;
       }
       
-      if (colours[lowerTagName]) {
+      let className = "";
+      const classMatch = attributes.match(/class\s*=\s*["']([^"']*)["']/i);
+      if (classMatch) {
+        className = classMatch[1];
+      }
+
+      let tagColor = getColorForHtmlTag(lowerTagName, className);
+      
+      if (!tagColor && colours[lowerTagName]) {
+        tagColor = colours[lowerTagName];
+      }
+      
+      if (tagColor) {
         const preservedAttrs = attributes.trim();
-        const styleAttr = `style="color:${colours[lowerTagName]}"`;
+        const styleAttr = `style="color:${tagColor}"`;
         const dataAttr = `data-tag="${tagName}"`;
         const classAttr = "class=\"tag-styled\"";
         
@@ -194,7 +214,7 @@ function replaceTags(html: string) {
           
           if (styleMatch) {
             const existingStyle = styleMatch[1];
-            const newStyle = `${existingStyle}; color:${colours[lowerTagName]}`;
+            const newStyle = `${existingStyle}; color:${tagColor}`;
             modifiedAttrs = modifiedAttrs.replace(styleMatch[0], `style="${newStyle}"`);
           } else {
             modifiedAttrs += ` ${styleAttr}`;

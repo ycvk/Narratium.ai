@@ -9,7 +9,8 @@
     "switchToChinese": "切换为中文",
     "soundOn": "声音开启",
     "soundOff": "声音关闭",
-    "saving": "保存中..."
+    "saving": "保存中...",
+    "defaultAutoFillFileName": "默认：自动填写文件名"
   },
   "sidebar": {
     "home": "首页",
@@ -325,7 +326,16 @@
     "loading":"加载中……正在解析状态，请稍等……",
     "worldBook": "世界书",
     "regex": "正则脚本",
-    "preset": "预设"
+    "preset": "预设",
+    "enabled": "启用",
+    "disabled": "禁用",
+    "filtered": "筛选",
+    "advancedSettings": "高级设置",
+    "tagColorEditor": "标签颜色编辑器",
+    "enterTagName": "输入标签名称...",
+    "add": "添加",
+    "saveChanges": "保存更改",
+    "enterSymbol": "当输入 tag 时，将对<tag>...</tag>进行匹配"
   },
   "preset": {
     "title": "预设编辑器",

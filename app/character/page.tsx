@@ -60,6 +60,7 @@ export default function CharacterPage() {
   });
 
   const switchToView = (targetView: "chat" | "worldbook" | "regex" | "preset") => {
+    console.log("switchToView", targetView);
     setActiveView(targetView);
   };
 
@@ -486,6 +487,10 @@ export default function CharacterPage() {
     };
   }, []);
 
+  const handleColorUpdate = async () => {
+    await fetchLatestDialogue();
+  };
+
   if (isLoading && !character) {
     return (
       <div className="flex justify-center items-center h-full fantasy-bg">
@@ -591,6 +596,12 @@ export default function CharacterPage() {
         isCollapsed={sidebarCollapsed}
         toggleSidebar={toggleSidebar}
         onDialogueEdit={() => fetchLatestDialogue()}
+        onViewSwitch={() => {
+          switchToView("worldbook");
+          setTimeout(() => {
+            switchToView("chat");
+          }, 1000);
+        }}
       />
 
       <div

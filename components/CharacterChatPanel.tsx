@@ -95,7 +95,7 @@ export default function CharacterChatPanel({
                 </svg>
               </div>
               <p className={`text-[#c0a480] ${serifFontClass}`}>
-                {t("characterChat.startConversation") || "Start a conversation..."}
+                {t("characterChat.startConversation")}
               </p>
             </div>
           ) : (

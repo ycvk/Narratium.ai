@@ -59,7 +59,8 @@
     "noConfigs": "No API configurations yet",
     "getModelList": "Get Model List",
     "getModelListSuccess": "Get Model List Success",
-    "getModelListError": "Get Model List Error"
+    "getModelListError": "Get Model List Error",
+    "configCreated": "Configuration created"
   },
   "llmSettings": {
     "title": "Settings",
@@ -328,7 +329,13 @@
     "preset": "Preset",
     "enabled": "Enabled",
     "disabled": "Disabled",
-    "filtered": "Filtered"
+    "filtered": "Filtered",
+    "advancedSettings": "Advanced Settings",
+    "tagColorEditor": "Tag Color Editor",
+    "enterTagName": "Enter tag name...",
+    "add": "Add",
+    "saveChanges": "Save Changes",
+    "enterSymbol": "When entering a tag, it will match <tag>...</tag>"
   },
   "preset": {
     "title": "Preset Manager",
@@ -561,7 +568,6 @@
     "filterAll": "All",
     "filterEnabled": "Enabled",
     "filterDisabled": "Disabled",
-    "filterConstant": "Constant",
     "filterImported": "Global",
     "filteredCount": "Filtered",
     "ascending": "Ascending",
