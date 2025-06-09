@@ -15,7 +15,7 @@
 
 [📖 DeepWiki Documentation](https://deepwiki.com/Narratium/Narratium.ai/)
 
-## 🌟 Product Overview
+## Product Overview
 
 Narratium aims to deliver a lightweight storytelling engine combining context compression, memory systems, and graph-based knowledge retrieval (Graph-RAG) to ensure character consistency and world coherence in long-form stories, significantly enhancing the immersion and continuity of AI-generated narratives.
 
@@ -23,7 +23,7 @@ Narratium is currently presented as a web-based interactive game:
 
 MVP Experience Version (Visual Novel with Diverse Rendering): [Narratium MVP](https://narratium.org)
 
-## 🖼️ Page Preview
+## Page Preview
 
 <div align="center">
   <table>
@@ -58,13 +58,13 @@ MVP Experience Version (Visual Novel with Diverse Rendering): [Narratium MVP](ht
   </table>
 </div>
 
-## 🚀 Features
+## Features
 
-* ✨ **Immersive Adventure Mode**: Generate personalized story worlds where users freely explore and make decisions to drive the narrative.
-* 🧠 **Efficient Memory Management**: Visual session management using React Flow; supports memory tracing, revisiting, and infinite branching.
-* 🛠 **Character Cards & World Settings**: Fully compatible with SillyTavern character cards; manage character states, world lore, and dialogue history in a unified system.
+**Immersive Adventure Mode**: Generate personalized story worlds where users freely explore and make decisions to drive the narrative.
+**Efficient Memory Management**: Visual session management using React Flow; supports memory tracing, revisiting, and infinite branching.
+**Character Cards & World Settings**: Fully compatible with SillyTavern character cards; manage character states, world lore, and dialogue history in a unified system.
 
-## 📅 Roadmap
+## Roadmap
 
 Current features include:
 
@@ -88,7 +88,7 @@ Planned features:
 * 🚧 **Open Community for Sharing Characters & Stories**
   Allow users to upload, share, and discuss character cards and story scripts, fostering an open creative community.
 
-## 🚀 Getting Started
+## Getting Started
 
 ### Clone the project
 
@@ -125,18 +125,18 @@ npm install -g pake-cli
 For macOS, use the following command:
 
 ```bash
-pake-mac
+pnpm pake-mac
 ```
 For Linux, use the following command:
 
 ```bash
-pake-linux
+pnpm pake-linux
 ```
 
 For Windows, use the following command:
 
 ```bash
-pake-win
+pnpm pake-win
 ```
 
 Solution for "damaged" display after macOS installation: Open the terminal and enter:
@@ -145,7 +145,7 @@ Solution for "damaged" display after macOS installation: Open the terminal and e
 xattr -d com.apple.quarantine /Applications/Narratium.app
 ```
 
-## 🧩 Why Narratium?
+## Why Narratium?
 
 In the world of AI-powered interactive storytelling, common pain points include:
 
@@ -165,7 +165,7 @@ We aim to make storytelling both simple and powerful:
 * **Open & Extensible**: Open-source with support for any LLM, expandable characters, worlds, and memories.
 * **Immersive & Consistent**: Focused on coherent storytelling, world logic, and character consistency, making every adventure a warm, personal, and traceable epic.
 
-## 📜 License Overview
+## License Overview
 
 This project consists of two distinct parts with independent licenses:
 
@@ -174,18 +174,18 @@ This project consists of two distinct parts with independent licenses:
 
 > For full license details, please refer to the [LICENSE.txt](./LICENSE.txt).
 
-## 📬 Contact & Support
+## Contact & Support
 
 * GitHub Issues
 * QQ & Discord community (coming soon)
 
 Special thanks to the SillyTavern community and countless character card contributors.If you'd like to join the contributor list, please contact: [qianzhang.happyfox@gmail.com](mailto:qianzhang.happyfox@gmail.com)
 
-## 👨‍💻 Code Contributer
+## Code Contributer
 
 [![Contributors](https://contrib.rocks/image?repo=Narratium/Narratium.ai)](https://github.com/Narratium/Narratium.ai/graphs/contributors)
 
-## 🙌 Cards Contributer
+## Cards Contributer
 
 [![Contributors](https://contrib.rocks/image?repo=Narratium/Character-Card)](https://github.com/Narratium/Narratium.ai/graphs/contributors)
 
@@ -193,7 +193,7 @@ Special thanks to the SillyTavern community and countless character card contrib
 
 Belle Cat Preset: Sponsored by @beilusaiying
 
-## ⭐ Star Growth
+## Star Growth
 
 [![Stargazers over time](https://starchart.cc/Narratium/Narratium.ai.svg?variant=dark)](https://starchart.cc/Narratium/Narratium.ai)
 
