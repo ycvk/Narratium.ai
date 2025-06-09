@@ -8,6 +8,7 @@
 
 ![GitHub stars](https://img.shields.io/github/stars/Narratium/Narratium.ai?style=social)
 ![GitHub commits](https://img.shields.io/github/commit-activity/m/Narratium/Narratium.ai)
+![GitHub Downloads](https://img.shields.io/github/downloads/Narratium/Narratium.ai/total)
 
 **Narratium** 是一个自由创造和冒险的故事宇宙，致力打造 AI Role Play 领域的 vscode；在这里，你的想象力将创造出前所未有的个人化冒险。无论是突破次元的情感共鸣、极地世界的生存挑战还是历史王朝的风起云涌，Narratium.ai 都将随你的每一个选择而演变，编织出独一无二的传奇故事 
 
@@ -197,6 +198,3 @@ Narratium 让讲故事变得简单又强大：
 ## Star Growth
 
 [![Stargazers over time](https://starchart.cc/Narratium/Narratium.ai.svg?variant=dark)](https://starchart.cc/Narratium/Narratium.ai)
-
-
-

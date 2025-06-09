@@ -8,6 +8,7 @@
 
 ![GitHub stars](https://img.shields.io/github/stars/Narratium/Narratium.ai?style=social)
 ![GitHub commits](https://img.shields.io/github/commit-activity/m/Narratium/Narratium.ai)
+![GitHub Downloads](https://img.shields.io/github/downloads/Narratium/Narratium.ai/total)
 
 [🇨🇳 中文文档](./README_ZH.md)
 
