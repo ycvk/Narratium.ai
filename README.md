@@ -2,9 +2,7 @@
 
 > **The world is vast, let imagination lead**
 
-<p align="center">
-  <img src="public/image.png" width="80%" />
-</p>
+![Narratium.ai](https://socialify.git.ci/Narratium/Narratium.ai/image?custom_description=Next+Vscode+in+AI+Role+Play&description=1&font=Rokkitt&forks=1&language=1&logo=https%3A%2F%2Fraw.githubusercontent.com%2FNarratium%2FResource%2Fmain%2Flogo.svg&name=1&owner=1&pattern=Circuit+Board&stargazers=1&theme=Dark)
 
 ![GitHub stars](https://img.shields.io/github/stars/Narratium/Narratium.ai?style=social)
 ![GitHub commits](https://img.shields.io/github/commit-activity/m/Narratium/Narratium.ai)
