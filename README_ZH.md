@@ -8,19 +8,20 @@
 ![GitHub commits](https://img.shields.io/github/commit-activity/m/Narratium/Narratium.ai)
 ![GitHub Downloads](https://img.shields.io/github/downloads/Narratium/Narratium.ai/total)
 
-**Narratium** 是一个自由创造和冒险的故事宇宙，致力打造 AI Role Play 领域的 vscode；在这里，你的想象力将创造出前所未有的个人化冒险。无论是突破次元的情感共鸣、极地世界的生存挑战还是历史王朝的风起云涌，Narratium.ai 都将随你的每一个选择而演变，编织出独一无二的传奇故事 
+## Quick Access
 
-[📖 DeepWiki 文档](https://deepwiki.com/Narratium/Narratium.ai/)
+- 🔗 [Live Demo](https://narratium.org)
+- 📖 [DeepWiki Documentation](https://deepwiki.com/Narratium/Narratium.ai/)
+- 🇨🇳  [中文文档](./README_ZH.md)
+- ⭐ [Give us a Star!](https://github.com/Narratium/Narratium.ai/stargazers)
+
+**Narratium** 是一个自由创造和冒险的故事宇宙，致力打造 AI Role Play 领域的 vscode；在这里，你的想象力将创造出前所未有的个人化冒险。无论是突破次元的情感共鸣、极地世界的生存挑战还是历史王朝的风起云涌，Narratium.ai 都将随你的每一个选择而演变，编织出独一无二的传奇故事 
 
 ## 产品概述
 
 Narratium 目标打造一套轻量化故事引擎，结合上下文压缩、记忆系统、图结构知识检索（Graph-RAG），支持在长篇故事中保持角色一致性和世界逻辑连续性，显著提升 AI 生成故事的沉浸感和连贯性。
 
-Narratium 目前以网页端交互游戏形式呈现：
-
-MVP 体验版本(多样化渲染的视觉小说)：[Narratium MVP](https://narratium.org)
-
-## 🖼️ 页面预览
+## 页面预览
 
 <div align="center">
   <table>
@@ -57,9 +58,9 @@ MVP 体验版本(多样化渲染的视觉小说)：[Narratium MVP](https://narra
 
 ## 当前功能
 
-**沉浸式冒险体验**：生成个性化故事世界，用户自由探索和决策推动剧情发展。
-**高效记忆管理**：基于 React Flow 集成流程图管理，支持记忆追踪、回溯、无限分支。
-**角色卡片与世界设定**：兼容 Sillytavern 角色卡，支持角色状态、世界知识、对话历史统一管理。
+- 🎭 **沉浸式冒险模式**: 创建个性化世界，做出重要决策。
+- 🧠 **可视化记忆管理**: 基于 React Flow 的会话追踪和分支管理。
+- 🧾 **角色卡与世界观**: 兼容 SillyTavern 角色卡，一站式管理所有内容。
 
 ## 目标规划
 
@@ -150,12 +151,15 @@ xattr -d com.apple.quarantine /Applications/Narratium.app
 在 AI 驱动的互动叙事领域，许多用户会遇到以下难题：
 
 ### SillyTavern
+
 功能强大，却对新手不友好。复杂的设置、难懂的角色卡格式、混乱的生态，让很多玩家在开始冒险前就被劝退。它更像是高级玩家的实验室，而非每个人都能轻松享受的冒险平台。
 
 ### AI Dungeon
+
 曾经开启无限故事的先驱，如今却逐渐筑起高墙。上下文受限、模型封闭、难以自定义世界，让玩家无法真正拥有自己的冒险。它给了世界，却不给钥匙。
 
 ### Narratium 想要改变这一切。
+
 我们希望改变这一切。
 Narratium 让讲故事变得简单又强大：
 

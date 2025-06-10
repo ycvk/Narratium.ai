@@ -8,19 +8,18 @@
 ![GitHub commits](https://img.shields.io/github/commit-activity/m/Narratium/Narratium.ai)
 ![GitHub Downloads](https://img.shields.io/github/downloads/Narratium/Narratium.ai/total)
 
-[🇨🇳 中文文档](./README_ZH.md)
+## Quick Access
+
+- 🔗 [Live Demo](https://narratium.org)
+- 📖 [DeepWiki Documentation](https://deepwiki.com/Narratium/Narratium.ai/)
+- 🇨🇳  [中文文档](./README_ZH.md)
+- ⭐ [Give us a Star!](https://github.com/Narratium/Narratium.ai/stargazers)
 
 **Narratium** is a universe of free creation and adventure, dedicated to building the "VSCode" of AI Role Play. Here, your imagination will create unprecedented personalized adventures. Whether it's cross-dimensional emotional resonance, polar survival challenges, or the rise and fall of historical dynasties, Narratium.ai will evolve with your every choice, weaving unique legendary stories.
-
-[📖 DeepWiki Documentation](https://deepwiki.com/Narratium/Narratium.ai/)
 
 ## Product Overview
 
 Narratium aims to deliver a lightweight storytelling engine combining context compression, memory systems, and graph-based knowledge retrieval (Graph-RAG) to ensure character consistency and world coherence in long-form stories, significantly enhancing the immersion and continuity of AI-generated narratives.
-
-Narratium is currently presented as a web-based interactive game:
-
-MVP Experience Version (Visual Novel with Diverse Rendering): [Narratium MVP](https://narratium.org)
 
 ## Page Preview
 
@@ -59,9 +58,9 @@ MVP Experience Version (Visual Novel with Diverse Rendering): [Narratium MVP](ht
 
 ## Features
 
-**Immersive Adventure Mode**: Generate personalized story worlds where users freely explore and make decisions to drive the narrative.
-**Efficient Memory Management**: Visual session management using React Flow; supports memory tracing, revisiting, and infinite branching.
-**Character Cards & World Settings**: Fully compatible with SillyTavern character cards; manage character states, world lore, and dialogue history in a unified system.
+- 🎭 **Immersive Adventure Mode**: Create personalized worlds and make decisions that matter.
+- 🧠 **Visual Memory Management**: React Flow-powered session tracing and branching.
+- 🧾 **Character Cards & Lore**: Compatible with SillyTavern cards, manage everything in one place.
 
 ## Roadmap
 
