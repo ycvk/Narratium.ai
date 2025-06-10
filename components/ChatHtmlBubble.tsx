@@ -468,7 +468,6 @@ window.addEventListener('message', function(e) {
         e.data.__chatBubbleHeight
       ) {
         frameRef.current!.style.height = `${e.data.__chatBubbleHeight}px`;
-
         const currentWidth = frameRef.current.parentElement?.clientWidth || 0;
         if (
           containerWidthRef.current && 
@@ -485,8 +484,7 @@ window.addEventListener('message', function(e) {
     };
     
     window.addEventListener("message", handler);
-    
-    // Throttled resize handler
+
     const resizeHandler = () => {
       if (resizeTimeoutRef.current) {
         clearTimeout(resizeTimeoutRef.current);
