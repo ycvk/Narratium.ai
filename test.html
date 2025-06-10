@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Token Stream Chat Demo</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background: #1a1a1a;
+            color: #f4e8c1;
+            font-family: serif;
+            line-height: 1.6;
+        }
+
+        .chat-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            min-height: 400px;
+        }
+
+        .message {
+            margin-bottom: 20px;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+
+        .token {
+            display: inline;
+            opacity: 0;
+            animation: tokenFadeIn 0.1s ease forwards;
+        }
+
+        @keyframes tokenFadeIn {
+            to {
+                opacity: 1;
+            }
+        }
+
+        /* Tag styles */
+        .tag-styled {
+            transition: color 0.3s ease;
+        }
+
+        /* Predefined tag colors */
+        talk { color: #fda4af; }
+        em { color: #c4b5fd; }
+        strong { color: #fb7185; }
+        bracket-content { color: #93c5fd; }
+        pre { 
+            color: #86efac;
+            background: rgba(40, 40, 40, 0.8);
+            padding: 12px;
+            border-radius: 6px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            margin: 8px 0;
+            white-space: pre-wrap;
+        }
+        blockquote {
+            color: #93c5fd;
+            margin: 8px 0;
+            padding: 8px 12px;
+            border-left: 4px solid #93c5fd;
+            background: rgba(147, 197, 253, 0.08);
+            border-radius: 0 4px 4px 0;
+            font-style: italic;
+        }
+        a { color: #67e8f9; }
+
+        /* Custom tag colors */
+        .custom-tag-1 { color: #fde047; }
+        .custom-tag-2 { color: #a78bfa; }
+        .custom-tag-3 { color: #34d399; }
+
+        /* Cursor animation */
+        .cursor {
+            display: inline-block;
+            width: 2px;
+            height: 1em;
+            background-color: #f4e8c1;
+            margin-left: 2px;
+            animation: blink 1s infinite;
+        }
+
+        @keyframes blink {
+            50% { opacity: 0; }
+        }
+    </style>
+</head>
+<body>
+    <div class="chat-container" id="chatContainer">
+        <div class="message" id="currentMessage"></div>
+    </div>
+
+    <script>
+        // Token stream processor
+        class TokenStreamProcessor {
+            constructor() {
+                this.buffer = '';
+                this.tagStack = [];
+                this.currentMessage = document.getElementById('currentMessage');
+                this.cursor = document.createElement('span');
+                this.cursor.className = 'cursor';
+                this.currentMessage.appendChild(this.cursor);
+                
+                // Define tag patterns with their opening and closing symbols
+                this.tagPatterns = {
+                    '**': { tag: 'strong', closing: '**' },
+                    '*': { tag: 'em', closing: '*' },
+                    '```': { tag: 'pre', closing: '```' },
+                    '>': { tag: 'blockquote', closing: '\n' },
+                    '"': { tag: 'talk', closing: '"' },
+                    '[': { tag: 'bracket-content', closing: ']' },
+                    '【': { tag: 'bracket-content', closing: '】' }
+                };
+            }
+
+            // Process a single token
+            processToken(token) {
+                this.buffer += token;
+                this.checkAndProcessTags();
+                this.updateDisplay();
+            }
+
+            // Check and process tags in real-time
+            checkAndProcessTags() {
+                // Check for new opening tags
+                for (const [pattern, config] of Object.entries(this.tagPatterns)) {
+                    if (this.buffer.endsWith(pattern)) {
+                        this.tagStack.push({
+                            pattern,
+                            tag: config.tag,
+                            closing: config.closing,
+                            position: this.buffer.length - pattern.length
+                        });
+                    }
+                }
+
+                // Check for closing tags and process unclosed tags
+                let processedBuffer = this.buffer;
+                let offset = 0;
+
+                // Process each tag in the stack
+                for (let i = 0; i < this.tagStack.length; i++) {
+                    const tagInfo = this.tagStack[i];
+                    const contentStart = tagInfo.position + tagInfo.pattern.length;
+                    const contentEnd = processedBuffer.length;
+
+                    // Check if we have a closing tag
+                    if (processedBuffer.endsWith(tagInfo.closing)) {
+                        // Complete the tag
+                        const content = processedBuffer.slice(contentStart, -tagInfo.closing.length);
+                        const replacement = `<${tagInfo.tag}>${content}</${tagInfo.tag}>`;
+                        processedBuffer = processedBuffer.slice(0, tagInfo.position) + replacement;
+                        this.tagStack.splice(i, 1);
+                        i--;
+                    } else {
+                        // Handle unclosed tag
+                        const content = processedBuffer.slice(contentStart);
+                        const tempClosing = `</${tagInfo.tag}>`;
+                        const replacement = `<${tagInfo.tag}>${content}${tempClosing}`;
+                        processedBuffer = processedBuffer.slice(0, contentStart) + replacement;
+                    }
+                }
+
+                // Update the display with processed content
+                this.currentMessage.innerHTML = this.convertMarkdown(processedBuffer);
+                this.currentMessage.appendChild(this.cursor);
+            }
+
+            // Update the display
+            updateDisplay() {
+                this.cursor.remove();
+                this.currentMessage.scrollIntoView({ behavior: 'smooth' });
+            }
+
+            // Convert markdown to HTML with enhanced tag handling
+            convertMarkdown(str) {
+                // Handle special cases for unclosed tags
+                str = str.replace(/<([^>]+)><\/\1>/g, ''); // Remove empty tags
+                
+                // Basic markdown conversion
+                str = str.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+                str = str.replace(/\*([^*]+)\*/g, '<em>$1</em>');
+                str = str.replace(/^>\s*(.+)$/gm, '<blockquote>$1</blockquote>');
+                str = str.replace(/```([\s\S]*?)```/g, '<pre>$1</pre>');
+                str = str.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2">$1</a>');
+                str = str.replace(/"([^"]+)"/g, '<talk>$1</talk>');
+                str = str.replace(/\[([^\]]+)\]|【([^】]+)】/g, '<bracket-content>$1$2</bracket-content>');
+                str = str.replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '<img src="$2" alt="$1">');
+                
+                return str;
+            }
+        }
+
+        // Demo content
+        const demoContent = [
+            "Hello! Let me show you some examples of different tags and formatting:\n\n",
+            "First, let's look at some **bold text** and *italic text*.\n\n",
+            "Here's a quote:\n> This is an important message that needs emphasis.\n\n",
+            "Let's see some code:\n```\nfunction hello() {\n    console.log('Hello, World!');\n}\n```\n\n",
+            "Here's a link: [Click here](https://example.com)\n\n",
+            "Some dialogue: \"Hello, how are you?\" \"I'm doing great, thank you!\"\n\n",
+            "Let's try some brackets: [Important Note] and 【特别说明】\n\n",
+            "Custom tags:\n<custom-tag-1>This is a custom tag</custom-tag-1>\n",
+            "<custom-tag-2>Another custom tag</custom-tag-2>\n",
+            "<custom-tag-3>And one more</custom-tag-3>\n\n",
+            "Let's add some images:\n![Image 1](https://picsum.photos/200/200)\n\n",
+            "And finally, some mixed content:\n",
+            "**Bold** and *italic* with \"dialogue\" and [brackets] in the same line.\n",
+            "> A quote with **bold** and *italic* text.\n",
+            "```\n// Code with comments\nconst x = 42; // This is a number\n```"
+        ];
+
+        // Function to stream content token by token
+        async function streamContent() {
+            const processor = new TokenStreamProcessor();
+            
+            for (const chunk of demoContent) {
+                // Split chunk into tokens (characters)
+                const tokens = chunk.split('');
+                
+                for (const token of tokens) {
+                    // Process each token
+                    processor.processToken(token);
+                    
+                    // Random delay between tokens (10-50ms)
+                    await new Promise(resolve => 
+                        setTimeout(resolve, Math.random() * 40 + 10)
+                    );
+                }
+                
+                // Add a small pause between chunks
+                await new Promise(resolve => setTimeout(resolve, 200));
+            }
+        }
+
+        // Start streaming when page loads
+        window.onload = streamContent;
+    </script>
+</body>
+</html>

@@ -468,16 +468,14 @@ window.addEventListener('message', function(e) {
         e.data.__chatBubbleHeight
       ) {
         frameRef.current!.style.height = `${e.data.__chatBubbleHeight}px`;
-        
-        // Check if width changed significantly
+
         const currentWidth = frameRef.current.parentElement?.clientWidth || 0;
         if (
           containerWidthRef.current && 
           Math.abs(currentWidth - containerWidthRef.current) > (containerWidthRef.current * 0.1)
         ) {
-          // Throttle resize notifications to iframe
           const now = Date.now();
-          if (now - lastResizeTimeRef.current > 500) { // Max once per 500ms
+          if (now - lastResizeTimeRef.current > 500) {
             lastResizeTimeRef.current = now;
             containerWidthRef.current = currentWidth;
             frameRef.current.contentWindow?.postMessage({ __recalculateHeight: true }, "*");
@@ -497,7 +495,7 @@ window.addEventListener('message', function(e) {
       resizeTimeoutRef.current = setTimeout(() => {
         if (frameRef.current && frameRef.current.contentWindow) {
           const now = Date.now();
-          if (now - lastResizeTimeRef.current > 300) { // Max once per 300ms
+          if (now - lastResizeTimeRef.current > 300) {
             lastResizeTimeRef.current = now;
             frameRef.current.contentWindow.postMessage({ __recalculateHeight: true }, "*");
           }

@@ -79,7 +79,7 @@ export class RegexProcessor {
 
               const regex = new RegExp(pattern, flags);
               const prevText = processedText;
-              processedText = processedText.replace(regex, script.replaceString);
+              processedText = processedText.replace(regex, script.replaceString as string);
               
               if (prevText !== processedText) {
                 result.appliedScripts.push(script.scriptKey);
@@ -122,7 +122,7 @@ export class RegexProcessor {
           }
 
           const prevText = processedText;
-          processedText = processedText.replace(regex, script.replaceString);
+          processedText = processedText.replace(regex, script.replaceString as string);
           
           if (prevText !== processedText) {
             result.appliedScripts.push(script.scriptKey);
