@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import ChatHtmlBubble from "@/components/ChatHtmlBubble";
 import { CharacterAvatarBackground } from "@/components/CharacterAvatarBackground";
-import { trackButtonClick, trackFormSubmit } from "@/lib/utils/google-analytics";
+import { trackButtonClick, trackFormSubmit } from "@/utils/google-analytics";
 
 interface Character {
   id: string;

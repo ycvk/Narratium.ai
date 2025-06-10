@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useLanguage } from "@/app/i18n";
-import { trackButtonClick } from "@/lib/utils/google-analytics";
+import { trackButtonClick } from "@/utils/google-analytics";
 
 interface PromptEditorProps {
   isOpen: boolean;

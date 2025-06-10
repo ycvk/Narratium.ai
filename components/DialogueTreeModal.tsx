@@ -18,7 +18,7 @@ import ReactFlow, {
   ReactFlowInstance,
 } from "reactflow";
 import "reactflow/dist/style.css";
-import { trackButtonClick } from "@/lib/utils/google-analytics";
+import { trackButtonClick } from "@/utils/google-analytics";
 import { switchDialogueBranch } from "@/function/dialogue/truncate";
 import { getCharacterDialogue } from "@/function/dialogue/info";
 import { editDialaogueNodeContent } from "@/function/dialogue/edit";

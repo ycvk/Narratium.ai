@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useLanguage } from "@/app/i18n";
 import Link from "next/link";
 import DialogueTreeModal from "@/components/DialogueTreeModal";
-import { trackButtonClick } from "@/lib/utils/google-analytics";
+import { trackButtonClick } from "@/utils/google-analytics";
 import { CharacterAvatarBackground } from "@/components/CharacterAvatarBackground";
 import { getAvailableGithubPresets, isPresetDownloaded, downloadPresetFromGithub, doesPresetExist, getPresetDisplayName, getPresetDescription } from "@/function/preset/download";
 import { toast } from "react-hot-toast";

@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useLanguage } from "@/app/i18n";
 import { RegexScript, RegexScriptSettings } from "@/lib/models/regex-script-model";
-import { trackButtonClick } from "@/lib/utils/google-analytics";
+import { trackButtonClick } from "@/utils/google-analytics";
 import RegexScriptEntryEditor from "@/components/RegexScriptEntryEditor";
 import ImportRegexScriptModal from "@/components/ImportRegexScriptModal";
 import { updateRegexScriptSettings } from "@/function/regex/update-setting";

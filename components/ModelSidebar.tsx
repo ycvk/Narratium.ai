@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import "@/app/styles/fantasy-ui.css";
 import { useLanguage } from "@/app/i18n";
-import { trackButtonClick } from "@/lib/utils/google-analytics";
+import { trackButtonClick } from "@/utils/google-analytics";
 
 interface ModelSidebarProps {
   isOpen: boolean;

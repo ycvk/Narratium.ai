@@ -8,7 +8,7 @@ import ImportCharacterModal from "@/components/ImportCharacterModal";
 import EditCharacterModal from "@/components/EditCharacterModal";
 import DownloadCharacterModal from "@/components/DownloadCharacterModal";
 import { CharacterAvatarBackground } from "@/components/CharacterAvatarBackground";
-import { trackButtonClick } from "@/lib/utils/google-analytics";
+import { trackButtonClick } from "@/utils/google-analytics";
 import { getAllCharacters } from "@/function/character/list";
 import { deleteCharacter } from "@/function/character/delete";
 

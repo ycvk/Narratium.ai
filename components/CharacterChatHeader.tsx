@@ -1,7 +1,7 @@
 "use client";
 
 import { CharacterAvatarBackground } from "@/components/CharacterAvatarBackground";
-import { trackButtonClick } from "@/lib/utils/google-analytics";
+import { trackButtonClick } from "@/utils/google-analytics";
 import { useLanguage } from "@/app/i18n";
 
 interface Props {

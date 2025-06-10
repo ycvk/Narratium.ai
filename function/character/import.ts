@@ -1,4 +1,4 @@
-import { parseCharacterCard } from "@/lib/utils/character-parser";
+import { parseCharacterCard } from "@/utils/character-parser";
 import { LocalCharacterRecordOperations } from "@/lib/data/character-record-operation";
 import { setBlob } from "@/lib/data/local-storage";
 import { WorldBookOperations } from "@/lib/data/world-book-operation";
