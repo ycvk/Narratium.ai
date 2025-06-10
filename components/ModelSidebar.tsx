@@ -305,6 +305,8 @@ export default function ModelSidebar({ isOpen, toggleSidebar }: ModelSidebarProp
   };
 
   const handleGetModelList = async (baseUrl: string, apiKey: string) => {
+    if (llmType === "ollama") return; // Skip for Ollama
+    
     try {
       const response = await fetch(`${baseUrl}/models`, {
         headers: {
@@ -402,36 +404,56 @@ export default function ModelSidebar({ isOpen, toggleSidebar }: ModelSidebarProp
               )}
               <div className="mb-2">
                 <label className="text-[#8a8a8a] text-xs mr-2">{t("modelSettings.model") || "Model"}:</label>
-                <select
-                  value={model}
-                  onChange={(e) => {
-                    const newModel = e.target.value;
-                    setModel(newModel);
-                    const updatedConfigs = configs.map(config => {
-                      if (config.id === activeConfigId) {
-                        return { ...config, model: newModel };
-                      }
-                      return config;
-                    });
-                    setConfigs(updatedConfigs);
-                    localStorage.setItem("apiConfigs", JSON.stringify(updatedConfigs));
-                    localStorage.setItem(llmType === "openai" ? "openaiModel" : "ollamaModel", newModel);
-                    localStorage.setItem("modelName", newModel);
-                    setSaveSuccess(true);
-                    setTimeout(() => setSaveSuccess(false), 2000);
-                  }}
-                  className="bg-[#292929] border border-[#534741] rounded py-1 px-2 text-[#f4e8c1] text-xs max-w-[200px] truncate"
-                  style={{ textOverflow: "ellipsis" }}
-                >
-                  <option value="" disabled className="truncate">{t("modelSettings.selectModel") || "Select a model..."}</option>
-                  {(llmType === "openai" ? openaiModelList : ollamaModelOptions).map((option) => (
-                    <option key={option} value={option} className="truncate">{option}</option>
-                  ))}
-                </select>
-                {modelListEmpty && (
-                  <p className="mt-2 text-xs text-red-400">
-                    {t("modelSettings.modelListUnavailable")}
-                  </p>
+                {llmType === "openai" && !modelListEmpty ? (
+                  <select
+                    value={model}
+                    onChange={(e) => {
+                      const newModel = e.target.value;
+                      setModel(newModel);
+                      const updatedConfigs = configs.map(config => {
+                        if (config.id === activeConfigId) {
+                          return { ...config, model: newModel };
+                        }
+                        return config;
+                      });
+                      setConfigs(updatedConfigs);
+                      localStorage.setItem("apiConfigs", JSON.stringify(updatedConfigs));
+                      localStorage.setItem(llmType === "openai" ? "openaiModel" : "ollamaModel", newModel);
+                      localStorage.setItem("modelName", newModel);
+                      setSaveSuccess(true);
+                      setTimeout(() => setSaveSuccess(false), 2000);
+                    }}
+                    className="bg-[#292929] border border-[#534741] rounded py-1 px-2 text-[#f4e8c1] text-xs max-w-[200px] truncate"
+                    style={{ textOverflow: "ellipsis" }}
+                  >
+                    <option value="" disabled className="truncate">{t("modelSettings.selectModel") || "Select a model..."}</option>
+                    {openaiModelList.map((option) => (
+                      <option key={option} value={option} className="truncate">{option}</option>
+                    ))}
+                  </select>
+                ) : (
+                  <input
+                    type="text"
+                    value={model}
+                    onChange={(e) => {
+                      const newModel = e.target.value;
+                      setModel(newModel);
+                      const updatedConfigs = configs.map(config => {
+                        if (config.id === activeConfigId) {
+                          return { ...config, model: newModel };
+                        }
+                        return config;
+                      });
+                      setConfigs(updatedConfigs);
+                      localStorage.setItem("apiConfigs", JSON.stringify(updatedConfigs));
+                      localStorage.setItem(llmType === "openai" ? "openaiModel" : "ollamaModel", newModel);
+                      localStorage.setItem("modelName", newModel);
+                      setSaveSuccess(true);
+                      setTimeout(() => setSaveSuccess(false), 2000);
+                    }}
+                    className="bg-[#292929] border border-[#534741] rounded py-1 px-2 text-[#f4e8c1] text-xs max-w-[200px]"
+                    placeholder={llmType === "openai" ? "gpt-4-turbo, claude-3-opus-20240229..." : "llama3, mistral, mixtral..."}
+                  />
                 )}
               </div>
             </div>
@@ -487,10 +509,12 @@ export default function ModelSidebar({ isOpen, toggleSidebar }: ModelSidebarProp
 
               <div className="mb-4">
                 <div className="relative">
-                  <button 
-                    className={`bg-[#3e3a3a] hover:bg-[#534741] text-[#f4e8c1] font-normal py-1.5 px-3 text-sm rounded-md border border-[#d1a35c] w-full transition-colors magical-text ${fontClass}`} 
-                    onClick={() => handleGetModelList(baseUrl, apiKey)}
-                  >{t("modelSettings.getModelList") || "Get Model List"}</button>
+                  {llmType === "openai" && (
+                    <button 
+                      className={`bg-[#3e3a3a] hover:bg-[#534741] text-[#f4e8c1] font-normal py-1.5 px-3 text-sm rounded-md border border-[#d1a35c] w-full transition-colors magical-text ${fontClass}`} 
+                      onClick={() => handleGetModelList(baseUrl, apiKey)}
+                    >{t("modelSettings.getModelList") || "Get Model List"}</button>
+                  )}
                   
                   {getModelListSuccess && (
                     <div className="absolute top-0 left-0 w-full h-full flex items-center justify-center bg-[#333333] bg-opacity-80 rounded transition-opacity">
@@ -532,35 +556,32 @@ export default function ModelSidebar({ isOpen, toggleSidebar }: ModelSidebarProp
                   value={model}
                   onChange={(e) => setModel(e.target.value)}
                 />
-                <div className="mt-2 text-xs text-[#8a8a8a]">
-                  <p className={`mb-1 ${fontClass}`}>{t("modelSettings.modelList") || "Model List"}</p>
-                  <select
-                    value={model}
-                    onChange={(e) => {
-                      trackButtonClick("ModelSidebar", t("modelSettings.selectModel") || "Select a model...");
-                      setModel(e.target.value);
-                    }}
-                    className="w-full bg-[#292929] border border-[#534741] rounded py-2 px-3 text-[#d0d0d0] text-sm leading-tight focus:outline-none focus:border-[#d1a35c] transition-colors"
-                  >
-                    <option value="" disabled className="text-[#8a8a8a]">
-                      {t("modelSettings.selectModel") || "Select a model..."}
-                    </option>
-                    {(llmType === "openai" ? openaiModelList : ollamaModelOptions).map((option) => (
-                      <option
-                        key={option}
-                        value={option}
-                        className="bg-[#292929] text-[#d0d0d0]"
-                      >
-                        {option}
+                {llmType === "openai" && (
+                  <div className="mt-2 text-xs text-[#8a8a8a]">
+                    <p className={`mb-1 ${fontClass}`}>{t("modelSettings.modelList") || "Model List"}</p>
+                    <select
+                      value={model}
+                      onChange={(e) => {
+                        trackButtonClick("ModelSidebar", t("modelSettings.selectModel") || "Select a model...");
+                        setModel(e.target.value);
+                      }}
+                      className="w-full bg-[#292929] border border-[#534741] rounded py-2 px-3 text-[#d0d0d0] text-sm leading-tight focus:outline-none focus:border-[#d1a35c] transition-colors"
+                    >
+                      <option value="" disabled className="text-[#8a8a8a]">
+                        {t("modelSettings.selectModel") || "Select a model..."}
                       </option>
-                    ))}
-                  </select>
-                  {modelListEmpty && (
-                    <p className="mt-2 text-xs text-red-400">
-                      {t("modelSettings.modelListUnavailable")}
-                    </p>
-                  )}
-                </div>
+                      {openaiModelList.map((option) => (
+                        <option
+                          key={option}
+                          value={option}
+                          className="bg-[#292929] text-[#d0d0d0]"
+                        >
+                          {option}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                )}
               </div>
 
               <div className="flex gap-2">
