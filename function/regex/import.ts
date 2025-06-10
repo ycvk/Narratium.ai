@@ -76,7 +76,7 @@ export async function importRegexScriptFromJson(
           scriptKey: scriptId,
           scriptName: scriptData.scriptName || scriptData.id || "Imported Script",
           findRegex: scriptData.findRegex,
-          replaceString: scriptData.replaceString || "",
+          replaceString: scriptData.replaceString,
           trimStrings: Array.isArray(scriptData.trimStrings) ? scriptData.trimStrings : [],
           placement: Array.isArray(scriptData.placement) ? scriptData.placement : [scriptData.placement || 999],
           disabled: scriptData.disabled === true,

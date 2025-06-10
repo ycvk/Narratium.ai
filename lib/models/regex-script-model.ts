@@ -3,7 +3,7 @@ export interface RegexScript {
   id?: string; 
   scriptName: string;
   findRegex: string;
-  replaceString: string;
+  replaceString?: string | null;
   trimStrings: string[];
   placement: number[];
   disabled?: boolean;

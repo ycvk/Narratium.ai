@@ -115,7 +115,7 @@ export class RegexScriptOperations {
     
     const scripts = Array.isArray(regexScripts)
       ? regexScripts.reduce((acc, script, i) => {
-        if (!script.findRegex || !script.replaceString) {
+        if (!script.findRegex) {
           console.warn("Skipping invalid regex script", script);
           return acc;
         }
@@ -127,7 +127,7 @@ export class RegexScriptOperations {
       }, {} as Record<string, RegexScript>)
       : Object.fromEntries(
         Object.entries(regexScripts).map(([key, script]) => {
-          if (!script.findRegex || !script.replaceString) {
+          if (!script.findRegex) {
             console.warn("Skipping invalid regex script", script);
             return [key, null];
           }
