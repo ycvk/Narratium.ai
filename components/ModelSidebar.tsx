@@ -73,7 +73,7 @@ export default function ModelSidebar({ isOpen, toggleSidebar }: ModelSidebarProp
       loadConfigToForm(mergedConfigs.find((c) => c.id === activeIdCandidate)!);
     }
   }, []);
-  
+
   const loadConfigToForm = (config: APIConfig) => {
     setLlmType(config.type);
     setBaseUrl(config.baseUrl);
@@ -579,13 +579,13 @@ export default function ModelSidebar({ isOpen, toggleSidebar }: ModelSidebarProp
           )}
 
           {configs.length === 0 && !showNewConfigForm && (
-            <div className="text-center py-3">
+            <div className="flex flex-col items-center justify-center py-3">
               <p className="text-xs text-[#8a8a8a] mb-2">
                 {t("modelSettings.noConfigs") || "No API configurations yet"}
               </p>
               <button
                 onClick={(e) => { trackButtonClick("ModelSidebar", "创建第一个配置"); e.stopPropagation(); handleCreateConfig(); }}
-                className={`bg-[#3e3a3a] hover:bg-[#534741] text-[#f4e8c1] font-normal py-1.5 px-2 text-xs rounded border border-[#d1a35c] transition-all duration-200 hover:shadow-[0_0_8px_rgba(209,163,92,0.2)] ${fontClass} flex items-center justify-center gap-1`}
+                className={`bg-[#3e3a3a] hover:bg-[#534741] text-[#f4e8c1] font-normal py-1.5 px-2 text-xs rounded border border-[#d1a35c] transition-all duration-200 hover:shadow-[0_0_8px_rgba(209,163,92,0.2)] ${fontClass} flex items-center justify-center gap-1 w-full max-w-[200px]`}
               >
                 <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M12 5v14M5 12h14" />
