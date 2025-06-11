@@ -194,5 +194,5 @@ Belle Cat Preset: Sponsored by @beilusaiying
 
 ## Star Growth
 
-[![Stargazers over time](https://starchart.cc/Narratium/Narratium.ai.svg?variant=dark)](https://starchart.cc/Narratium/Narratium.ai)
+[![Stargazers over time](https://starchart.cc/Narratium/Narratium.ai.svg?variant=adaptive)](https://starchart.cc/Narratium/Narratium.ai)
 
