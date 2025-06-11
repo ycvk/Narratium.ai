@@ -1,3 +1,26 @@
+/**
+ * Character Cards Page Component
+ * 
+ * This page serves as the main interface for managing character cards in the application.
+ * Features include:
+ * - Grid and carousel view modes for character cards
+ * - Character import functionality
+ * - Character editing capabilities
+ * - Character download options
+ * - Character deletion
+ * - Responsive design with fantasy-themed UI
+ * 
+ * The page integrates with various modals for character management and
+ * provides a rich user experience with animations and interactive elements.
+ * 
+ * Dependencies:
+ * - ImportCharacterModal: For importing new characters
+ * - EditCharacterModal: For editing existing characters
+ * - DownloadCharacterModal: For downloading character data
+ * - CharacterCardGrid: For displaying characters in grid view
+ * - Framer Motion: For animations
+ */
+
 "use client";
 
 import React, { useState, useEffect } from "react";
@@ -11,6 +34,9 @@ import { getAllCharacters } from "@/function/character/list";
 import { deleteCharacter } from "@/function/character/delete";
 import { trackButtonClick } from "@/utils/google-analytics";
 
+/**
+ * Interface defining the structure of a character object
+ */
 interface Character {
   id: string;
   name: string;
@@ -22,6 +48,17 @@ interface Character {
   avatar_path?: string;
 }
 
+/**
+ * Main character cards page component
+ * 
+ * Manages the display and interaction with character cards, including:
+ * - Fetching and displaying character data
+ * - Handling character operations (import, edit, delete)
+ * - Managing view modes (grid/carousel)
+ * - Providing loading states and empty states
+ * 
+ * @returns {JSX.Element} The complete character cards page interface
+ */
 export default function CharacterCards() {
   const { t, fontClass, serifFontClass } = useLanguage();
   const [characters, setCharacters] = useState<Character[]>([]);

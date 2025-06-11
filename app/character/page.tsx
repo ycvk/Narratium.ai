@@ -1,3 +1,27 @@
+/**
+ * Character Page Component
+ * 
+ * This is the main character interaction page that provides:
+ * - Real-time chat interface with character
+ * - World book editing capabilities
+ * - Regex script management
+ * - Preset management
+ * - Message history and regeneration
+ * - Branch switching in conversations
+ * - User tour functionality
+ * 
+ * The page handles all character interactions and provides a rich
+ * set of features for managing character dialogues and settings.
+ * 
+ * Dependencies:
+ * - CharacterSidebar: For character navigation
+ * - CharacterChatPanel: For chat interface
+ * - WorldBookEditor: For world book management
+ * - RegexScriptEditor: For regex script editing
+ * - PresetEditor: For preset management
+ * - UserTour: For user onboarding
+ */
+
 "use client";
 
 import { useState, useEffect, useRef } from "react";
@@ -19,6 +43,9 @@ import CharacterChatHeader from "@/components/CharacterChatHeader";
 import UserTour from "@/components/UserTour";
 import { useTour } from "@/hooks/useTour";
 
+/**
+ * Interface definitions for the component's data structures
+ */
 interface Character {
   id: string;
   name: string;
@@ -33,6 +60,19 @@ interface Message {
   timestamp?: string;
 }
 
+/**
+ * Main character interaction page component
+ * 
+ * Manages all character interactions and provides a comprehensive interface for:
+ * - Chat functionality with message history
+ * - World book editing
+ * - Regex script management
+ * - Preset configuration
+ * - Message regeneration and branch switching
+ * - User tour and onboarding
+ * 
+ * @returns {JSX.Element} The complete character interaction interface
+ */
 export default function CharacterPage() {
   const searchParams = useSearchParams();
   const characterId = searchParams.get("id");

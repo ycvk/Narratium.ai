@@ -1,3 +1,23 @@
+/**
+ * Character Chat Panel Component
+ * 
+ * This component implements the main chat interface for character interactions, featuring:
+ * - Real-time message display with HTML formatting
+ * - Character avatar and name display
+ * - Message regeneration and truncation capabilities
+ * - Suggested input system
+ * - Auto-scrolling chat history
+ * - Fantasy-themed UI elements
+ * 
+ * The component handles both user and character messages, with special formatting
+ * and interactive features for each message type.
+ * 
+ * Dependencies:
+ * - ChatHtmlBubble: For rendering formatted chat messages
+ * - CharacterAvatarBackground: For character avatar display
+ * - Google Analytics: For tracking user interactions
+ */
+
 "use client";
 
 import { useEffect, useRef, useState } from "react";
@@ -5,6 +25,9 @@ import ChatHtmlBubble from "@/components/ChatHtmlBubble";
 import { CharacterAvatarBackground } from "@/components/CharacterAvatarBackground";
 import { trackButtonClick, trackFormSubmit } from "@/utils/google-analytics";
 
+/**
+ * Interface definitions for the component's data structures
+ */
 interface Character {
   id: string;
   name: string;
@@ -37,6 +60,12 @@ interface Props {
   setActiveModes: React.Dispatch<React.SetStateAction<Record<string, any>>>;
 }
 
+/**
+ * Main chat panel component that handles character interactions
+ * 
+ * @param {Props} props - Component properties including character data, messages, and callbacks
+ * @returns {JSX.Element} The complete chat interface with message history and input controls
+ */
 export default function CharacterChatPanel({
   character,
   messages,

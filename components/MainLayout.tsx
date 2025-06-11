@@ -1,3 +1,23 @@
+/**
+ * Main layout component for the Narratium application
+ * 
+ * This component provides the core layout structure including:
+ * - Responsive sidebar navigation
+ * - Model settings sidebar
+ * - Login modal integration
+ * - Settings dropdown
+ * - Mobile responsiveness handling
+ * 
+ * The layout uses a fantasy-themed UI with dynamic sidebar states
+ * and responsive design considerations.
+ * 
+ * Dependencies:
+ * - Sidebar: Main navigation component
+ * - ModelSidebar: Model settings panel
+ * - SettingsDropdown: Global settings menu
+ * - LoginModal: Authentication modal
+ */
+
 "use client";
 
 import { useState, useEffect } from "react";
@@ -7,6 +27,13 @@ import SettingsDropdown from "@/components/SettingsDropdown";
 import LoginModal from "@/components/LoginModal";
 import "@/app/styles/fantasy-ui.css";
 
+/**
+ * Main layout wrapper component that manages the application's core structure
+ * 
+ * @param {Object} props - Component props
+ * @param {React.ReactNode} props.children - Child components to be rendered in the main content area
+ * @returns {JSX.Element} The complete layout structure with sidebars and content area
+ */
 export default function MainLayout({ children }: { children: React.ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [modelSidebarOpen, setModelSidebarOpen] = useState(false);
