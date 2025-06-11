@@ -35,7 +35,8 @@ const AdvancedSettingsEditor: React.FC<AdvancedSettingsEditorProps> = ({ isOpen,
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 backdrop-blur-md z-50 flex items-center justify-center p-4 transition-opacity duration-300 ease-in-out">
+    <div className="fixed inset-0 z-50 flex items-center justify-center overflow-hidden">
+      <div className="absolute inset-0 backdrop-blur-md"></div>
       <div 
         ref={modalRef} 
         className="relative bg-gradient-to-br from-[#232323] to-[#1a1a1a] rounded-xl shadow-2xl w-full max-w-3xl h-[calc(100vh-4rem)] max-h-[700px] flex flex-col overflow-hidden border border-neutral-700/50 transform transition-all duration-300 ease-in-out scale-95 opacity-0 animate-fadeInScaleUp"
