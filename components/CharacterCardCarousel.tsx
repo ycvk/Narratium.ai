@@ -51,13 +51,13 @@ const CharacterCardCarousel: React.FC<CharacterCardCarouselProps> = ({
   };
 
   return (
-    <div className="relative w-full h-[70vh] max-h-[600px] my-12 pt-40 flex items-center justify-center" style={{ perspective: '1500px' }}>
+    <div className="relative w-full h-[70vh] max-h-[600px] my-12 pt-40 flex items-center justify-center" style={{ perspective: "1500px" }}>
 
       <div 
         className="w-full h-full absolute transform-style-preserve-3d"
         style={{
-          transformOrigin: 'center center 0px',
-          transformStyle: 'preserve-3d',
+          transformOrigin: "center center 0px",
+          transformStyle: "preserve-3d",
           transform: `translateZ(-${translateZDistance}vw)`,
         }}
       >
@@ -72,18 +72,18 @@ const CharacterCardCarousel: React.FC<CharacterCardCarouselProps> = ({
           let opacity, filter, boxShadow, scale;
           if (isCentered) {
             opacity = 1;
-            filter = 'none';
-            boxShadow = '0 8px 25px rgba(0, 0, 0, 0.4)';
+            filter = "none";
+            boxShadow = "0 8px 25px rgba(0, 0, 0, 0.4)";
             scale = 1;
           } else if (isSideface) {
             opacity = 0.7;
-            filter = 'none';
-            boxShadow = '0 4px 15px rgba(0, 0, 0, 0.2)';
+            filter = "none";
+            boxShadow = "0 4px 15px rgba(0, 0, 0, 0.2)";
             scale = 0.9;
           } else {
             opacity = 0.4;
-            filter = 'none';
-            boxShadow = '0 2px 10px rgba(0, 0, 0, 0.1)';
+            filter = "none";
+            boxShadow = "0 2px 10px rgba(0, 0, 0, 0.1)";
             scale = 0.8;
           }
           
@@ -93,18 +93,18 @@ const CharacterCardCarousel: React.FC<CharacterCardCarouselProps> = ({
               className="absolute w-full h-full flex items-center justify-center"
               style={{
                 transform: `rotateY(${rotateY}deg) translateZ(${translateZDistance}vw) scale(${scale})`,
-                transformOrigin: 'center center',
-                maxWidth: '280px',
-                maxHeight: '350px',
-                width: '40vw',
-                height: '50vw',
-                left: 'calc(50% - 10vw)',
-                top: 'calc(50% - 15vw)',
+                transformOrigin: "center center",
+                maxWidth: "280px",
+                maxHeight: "350px",
+                width: "40vw",
+                height: "50vw",
+                left: "calc(50% - 10vw)",
+                top: "calc(50% - 15vw)",
                 boxShadow,
                 opacity,
                 filter,
-                borderRadius: '8px',
-                transition: isAnimating ? 'all 0.8s cubic-bezier(0.77, 0, 0.175, 1)' : 'opacity 0.3s ease, filter 0.3s ease, box-shadow 0.3s ease'
+                borderRadius: "8px",
+                transition: isAnimating ? "all 0.8s cubic-bezier(0.77, 0, 0.175, 1)" : "opacity 0.3s ease, filter 0.3s ease, box-shadow 0.3s ease",
               }}
             >
               <div className="relative session-card h-full w-full transition-all duration-300 overflow-hidden rounded">
@@ -217,7 +217,7 @@ const CharacterCardCarousel: React.FC<CharacterCardCarouselProps> = ({
         }
       `}</style>
     </div>
-  )
+  );
 };
 
 export default CharacterCardCarousel;
