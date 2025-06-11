@@ -14,6 +14,7 @@
 - 📖 [DeepWiki Documentation](https://deepwiki.com/Narratium/Narratium.ai/)
 - 🇨🇳  [中文文档](./README_ZH.md)
 - ⭐ [Give us a Star!](https://github.com/Narratium/Narratium.ai/stargazers)
+- 💾 [Download](https://github.com/Narratium/Narratium.ai/releases)
 
 **Narratium** is a universe of free creation and adventure, dedicated to building the "VSCode" of AI Role Play. Here, your imagination will create unprecedented personalized adventures. Whether it's cross-dimensional emotional resonance, polar survival challenges, or the rise and fall of historical dynasties, Narratium.ai will evolve with your every choice, weaving unique legendary stories.
 

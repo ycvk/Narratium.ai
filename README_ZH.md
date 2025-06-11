@@ -12,8 +12,8 @@
 
 - 🔗 [Live Demo](https://narratium.org)
 - 📖 [DeepWiki Documentation](https://deepwiki.com/Narratium/Narratium.ai/)
-- 🇨🇳  [中文文档](./README_ZH.md)
 - ⭐ [Give us a Star!](https://github.com/Narratium/Narratium.ai/stargazers)
+- 💾 [Download](https://github.com/Narratium/Narratium.ai/releases)
 
 **Narratium** 是一个自由创造和冒险的故事宇宙，致力打造 AI Role Play 领域的 vscode；在这里，你的想象力将创造出前所未有的个人化冒险。无论是突破次元的情感共鸣、极地世界的生存挑战还是历史王朝的风起云涌，Narratium.ai 都将随你的每一个选择而演变，编织出独一无二的传奇故事 
 
