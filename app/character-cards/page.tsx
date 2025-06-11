@@ -30,6 +30,7 @@ import ImportCharacterModal from "@/components/ImportCharacterModal";
 import EditCharacterModal from "@/components/EditCharacterModal";
 import DownloadCharacterModal from "@/components/DownloadCharacterModal";
 import CharacterCardGrid from "@/components/CharacterCardGrid";
+import CharacterCardCarousel from "@/components/CharacterCardCarousel";
 import { getAllCharacters } from "@/function/character/list";
 import { deleteCharacter } from "@/function/character/delete";
 import { trackButtonClick } from "@/utils/google-analytics";
@@ -68,6 +69,13 @@ export default function CharacterCards() {
   const [isDownloadModalOpen, setIsDownloadModalOpen] = useState(false);
   const [currentCharacter, setCurrentCharacter] = useState<Character | null>(null);
   const [viewMode, setViewMode] = useState<"grid" | "carousel">("grid");
+
+  useEffect(() => {
+    const savedViewMode = localStorage.getItem("characterCardsViewMode");
+    if (savedViewMode === "grid" || savedViewMode === "carousel") {
+      setViewMode(savedViewMode);
+    }
+  }, []);
 
   const fetchCharacters = async () => {
     setIsLoading(true);
@@ -161,7 +169,9 @@ export default function CharacterCards() {
                 transition={{ type: "spring", stiffness: 400, damping: 10 }}
                 onClick={() => {
                   trackButtonClick("view_mode_btn", "切换视图模式");
-                  setViewMode(viewMode === "grid" ? "carousel" : "grid");
+                  const newViewMode = viewMode === "grid" ? "carousel" : "grid";
+                  setViewMode(newViewMode);
+                  localStorage.setItem("characterCardsViewMode", newViewMode);
                 }}
               >
                 {viewMode === "grid" ? (
@@ -240,7 +250,7 @@ export default function CharacterCards() {
               onDeleteClick={handleDeleteCharacter}
             />
           ) : (
-            <CharacterCardGrid
+            <CharacterCardCarousel
               characters={characters}
               onEditClick={handleEditClick}
               onDeleteClick={handleDeleteCharacter}
