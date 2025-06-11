@@ -46,8 +46,8 @@ const CharacterCardGrid: React.FC<CharacterCardGridProps> = ({
           className="scale-[0.85]"
         >
           <Tilt
-            tiltMaxAngleX={-20}
-            tiltMaxAngleY={-20}
+            tiltMaxAngleX={-15}
+            tiltMaxAngleY={-15}
             glareEnable={true}
             glareMaxOpacity={0.1}
             glareColor="#ffffff"

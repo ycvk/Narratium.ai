@@ -4,6 +4,7 @@ import { setBlob } from "@/lib/data/local-storage";
 import { WorldBookOperations } from "@/lib/data/world-book-operation";
 import { RegexScriptOperations } from "@/lib/data/regex-script-operation";
 import { RegexScript } from "@/lib/models/regex-script-model";
+import { v4 as uuidv4 } from "uuid";
 
 export async function handleCharacterUpload(file: File) {
   if (!file || !file.name.toLowerCase().endsWith(".png")) {
@@ -25,6 +26,11 @@ export async function handleCharacterUpload(file: File) {
       const regexScripts = characterJson.data.extensions.regex_scripts;
 
       if (Array.isArray(regexScripts)) {
+        regexScripts.forEach(script => {
+          if (!script.scriptKey) {
+            script.scriptKey = `script_${uuidv4()}`;
+          }
+        });
         await RegexScriptOperations.updateRegexScripts(characterId, regexScripts);
       } 
       else if (typeof regexScripts === "object") {
@@ -33,6 +39,11 @@ export async function handleCharacterUpload(file: File) {
         ) as RegexScript[];
         
         if (scriptsArray.length > 0) {
+          scriptsArray.forEach(script => {
+            if (!script.scriptKey) {
+              script.scriptKey = `script_${uuidv4()}`;
+            }
+          });
           await RegexScriptOperations.updateRegexScripts(characterId, scriptsArray);
         }
       }

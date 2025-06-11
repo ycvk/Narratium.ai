@@ -50,7 +50,10 @@ export class RegexProcessor {
     }
 
     const enabledScripts = allScripts
-      .filter(script => !script.disabled)
+      .filter(script => {
+        const isDefaultDisabled = script.findRegex === "/[\\s\\S]*/gm" && script.replaceString === "";
+        return !script.disabled && !isDefaultDisabled;
+      })
       .sort((a, b) => {
         const aPos = a.placement && a.placement.length > 0 ? a.placement[0] : 999;
         const bPos = b.placement && b.placement.length > 0 ? b.placement[0] : 999;
@@ -64,7 +67,6 @@ export class RegexProcessor {
         let regexPattern = script.findRegex;
         
         if (regexPattern) {
-          // Check for potential escape sequence issues
           regexPattern = RegexProcessor.handleEscapeSequences(regexPattern);
           
           const regexFormatMatch = regexPattern.match(/^\/(.*)\/(g|i|m|gi|gm|im|gim)?$/);
@@ -74,7 +76,6 @@ export class RegexProcessor {
               let pattern = regexFormatMatch[1];
               const flags = regexFormatMatch[2] || "g";
               
-              // Handle escape sequences in the pattern part too
               pattern = RegexProcessor.handleEscapeSequences(pattern);
 
               const regex = new RegExp(pattern, flags);
