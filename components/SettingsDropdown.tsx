@@ -3,7 +3,6 @@
 import { useState, useRef, useEffect } from "react";
 import { useLanguage } from "@/app/i18n";
 import { useSoundContext } from "@/contexts/SoundContext";
-import LLMSettingsModal from "@/components/LLMSettingsModal";
 import { useTour } from "@/hooks/useTour";
 
 interface SettingsDropdownProps {
@@ -15,7 +14,6 @@ export default function SettingsDropdown({ toggleModelSidebar }: SettingsDropdow
   const dropdownRef = useRef<HTMLDivElement>(null);
   const { language, setLanguage, t } = useLanguage();
   const { soundEnabled, toggleSound } = useSoundContext();
-  const [isLLMSettingsOpen, setIsLLMSettingsOpen] = useState(false);
   const { resetTour } = useTour();
 
   useEffect(() => {
@@ -111,19 +109,6 @@ export default function SettingsDropdown({ toggleModelSidebar }: SettingsDropdow
             
             <button
               onClick={() => {
-                setIsLLMSettingsOpen(true);
-                setIsOpen(false);
-              }}
-              className="flex items-center w-full px-4 py-2 text-sm text-[#f4e8c1] hover:bg-[#252525] transition-colors"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2">
-                <path d="M12 3v3m0 12v3M3 12h3m12 0h3M5.636 5.636l2.122 2.122m8.484 8.484l2.122 2.122M5.636 18.364l2.122-2.122m8.484-8.484l2.122-2.122" />
-              </svg>
-              {t("llmSettings.title")}
-            </button>
-            
-            <button
-              onClick={() => {
                 resetTour();
                 setIsOpen(false);
                 window.location.reload();
@@ -140,14 +125,7 @@ export default function SettingsDropdown({ toggleModelSidebar }: SettingsDropdow
             </button>
           </div>
         </div>
-      )}
-      
-      <LLMSettingsModal 
-        isOpen={isLLMSettingsOpen} 
-        onClose={() => setIsLLMSettingsOpen(false)} 
-        onSave={(settings) => {
-        }}
-      />
+      )}      
     </div>
   );
 }
