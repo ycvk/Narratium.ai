@@ -335,7 +335,11 @@
     "enterTagName": "Enter tag name...",
     "add": "Add",
     "saveChanges": "Save Changes",
-    "enterSymbol": "When entering a tag, it will match <tag>...</tag>"
+    "enterSymbol": "When entering a tag, it will match <tag>...</tag>",
+    "enableStreaming": "Enable Streaming",
+    "disableStreaming": "Disable Streaming",
+    "jumpToMessage": "Jump to Message",
+    "regenerateMessage": "Regenerate Message"
   },
   "preset": {
     "title": "Preset Manager",

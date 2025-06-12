@@ -20,7 +20,7 @@
 
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import ChatHtmlBubble from "@/components/ChatHtmlBubble";
 import { CharacterAvatarBackground } from "@/components/CharacterAvatarBackground";
 import { trackButtonClick, trackFormSubmit } from "@/utils/google-analytics";
@@ -86,6 +86,20 @@ export default function CharacterChatPanel({
 }: Props) {
   const [streamingTarget, setStreamingTarget] = useState<number>(-1);
   const scrollRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const savedStreaming = localStorage.getItem("streamingEnabled");
+    if (savedStreaming !== null) {
+      const isStreamingEnabled = savedStreaming === "true";
+      setActiveModes(prev => ({
+        ...prev,
+        streaming: isStreamingEnabled,
+      }));
+      if (isStreamingEnabled) {
+        setStreamingTarget(messages.length + 1);
+      }
+    }
+  }, []);
 
   const scrollToBottom = () => {
     const el = scrollRef.current;
@@ -193,18 +207,23 @@ export default function CharacterChatPanel({
                             onClick={() => {
                               setActiveModes(prev => {
                                 const newStreaming = !prev.streaming;
-                                setStreamingTarget(newStreaming ? messages.length + 1 : -1);
                                 return { ...prev, streaming: newStreaming };
                               });
+                              const newStreaming = !activeModes.streaming;
+                              setStreamingTarget(newStreaming ? messages.length + 1 : -1);
+                              localStorage.setItem("streamingEnabled", String(newStreaming));
                               trackButtonClick("toggle_streaming", "流式输出切换");
                             }}
-                            className={`ml-2 p-1 rounded-md transition-all duration-300 ${
+                            className={`ml-2 p-1 rounded-md transition-all duration-300 group relative ${
                               activeModes.streaming 
                                 ? "text-amber-400 hover:text-amber-300" 
                                 : "text-[#8a8a8a] hover:text-[#a8a8a8]"
                             }`}
-                            title={activeModes.streaming ? t("characterChat.disableStreaming") : t("characterChat.enableStreaming")}
+                            data-tooltip={activeModes.streaming ? t("characterChat.disableStreaming") : t("characterChat.enableStreaming")}
                           >
+                            <div className="absolute -top-8 left-1/2 -translate-x-1/2 px-2 py-1 bg-[#2a261f] text-[#f4e8c1] text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap border border-[#534741]">
+                              {activeModes.streaming ? t("characterChat.disableStreaming") : t("characterChat.enableStreaming")}
+                            </div>
                             <svg
                               xmlns="http://www.w3.org/2000/svg"
                               className="h-4 w-4"
@@ -228,9 +247,12 @@ export default function CharacterChatPanel({
                             trackButtonClick("page", "跳转到此消息");
                             onTruncate(message.id);
                           }}
-                          className="ml-1 w-6 h-6 flex items-center justify-center text-[#a18d6f] hover:text-green-400 bg-[#1c1c1c] rounded-lg border border-[#333333] shadow-inner transition-all duration-300 hover:border-[#444444] hover:shadow-[0_0_8px_rgba(34,197,94,0.4)]"
-                          aria-label={t("跳转到此消息")}
+                          className="ml-1 w-6 h-6 flex items-center justify-center text-[#a18d6f] hover:text-green-400 bg-[#1c1c1c] rounded-lg border border-[#333333] shadow-inner transition-all duration-300 hover:border-[#444444] hover:shadow-[0_0_8px_rgba(34,197,94,0.4)] group relative"
+                          data-tooltip={t("characterChat.jumpToMessage")}
                         >
+                          <div className="absolute -top-8 left-1/2 -translate-x-1/2 px-2 py-1 bg-[#2a261f] text-[#f4e8c1] text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap border border-[#534741]">
+                            {t("characterChat.jumpToMessage")}
+                          </div>
                           <svg
                             xmlns="http://www.w3.org/2000/svg"
                             width="12"
@@ -251,11 +273,14 @@ export default function CharacterChatPanel({
                             trackButtonClick("page", "重新生成消息");
                             onRegenerate(message.id);
                           }}
-                          className={`ml-1 w-6 h-6 flex items-center justify-center text-[#a18d6f] hover:text-orange-400 bg-[#1c1c1c] rounded-lg border border-[#333333] shadow-inner transition-all duration-300 hover:border-[#444444] hover:shadow-[0_0_8px_rgba(249,115,22,0.4)] ${
+                          className={`ml-1 w-6 h-6 flex items-center justify-center text-[#a18d6f] hover:text-orange-400 bg-[#1c1c1c] rounded-lg border border-[#333333] shadow-inner transition-all duration-300 hover:border-[#444444] hover:shadow-[0_0_8px_rgba(249,115,22,0.4)] group relative ${
                             shouldShowRegenerateButton(message, index) ? "" : "hidden"
                           }`}
-                          aria-label={t("重新生成消息")}
+                          data-tooltip={t("characterChat.regenerateMessage")}
                         >
+                          <div className="absolute -top-8 left-1/2 -translate-x-1/2 px-2 py-1 bg-[#2a261f] text-[#f4e8c1] text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap border border-[#534741]">
+                            {t("characterChat.regenerateMessage")}
+                          </div>
                           <svg
                             xmlns="http://www.w3.org/2000/svg"
                             width="12"
@@ -284,7 +309,7 @@ export default function CharacterChatPanel({
                       enableStreaming={
                         activeModes.streaming &&
                         message.role === "assistant" &&
-                        index === streamingTarget
+                        index >= streamingTarget
                       }
                       onContentChange={
                         index === messages.length - 1 ? () => maybeScrollToBottom() : undefined
