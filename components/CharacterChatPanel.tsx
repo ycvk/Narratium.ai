@@ -40,6 +40,7 @@ interface Message {
   role: string;
   content: string;
   timestamp?: string;
+  isUser?: boolean;
 }
 
 interface Props {
@@ -83,6 +84,7 @@ export default function CharacterChatPanel({
   activeModes,
   setActiveModes,
 }: Props) {
+  const [streamingTarget, setStreamingTarget] = useState<number>(-1);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
@@ -90,6 +92,15 @@ export default function CharacterChatPanel({
     if (!el) return;
     el.scrollTo({ top: el.scrollHeight, behavior: "smooth" });
   };  
+
+  const maybeScrollToBottom = (threshold = 120) => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const distance = el.scrollHeight - el.scrollTop - el.clientHeight;
+    if (distance < threshold) {
+      scrollToBottom();
+    }
+  };
 
   const [suggestionsCollapsed, setSuggestionsCollapsed] = useState(false);
 
@@ -177,6 +188,41 @@ export default function CharacterChatPanel({
                         <span className={`text-sm font-medium text-[#f4e8c1] ${serifFontClass}`}>
                           {character.name}
                         </span>
+                        {message.role === "assistant" && shouldShowRegenerateButton(message, index) && (
+                          <button
+                            onClick={() => {
+                              setActiveModes(prev => {
+                                const newStreaming = !prev.streaming;
+                                setStreamingTarget(newStreaming ? messages.length + 1 : -1);
+                                return { ...prev, streaming: newStreaming };
+                              });
+                              trackButtonClick("toggle_streaming", "流式输出切换");
+                            }}
+                            className={`ml-2 p-1 rounded-md transition-all duration-300 ${
+                              activeModes.streaming 
+                                ? "text-amber-400 hover:text-amber-300" 
+                                : "text-[#8a8a8a] hover:text-[#a8a8a8]"
+                            }`}
+                            title={activeModes.streaming ? t("characterChat.disableStreaming") : t("characterChat.enableStreaming")}
+                          >
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              className="h-4 w-4"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              stroke="currentColor"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M13 10V3L4 14h7v7l9-11h-7z"
+                              />
+                            </svg>
+                          </button>
+                        )}
+                      </div>
+                      <div className="flex items-center">
                         <button
                           onClick={() => {
                             trackButtonClick("page", "跳转到此消息");
@@ -230,9 +276,18 @@ export default function CharacterChatPanel({
                       </div>
                     </div>
                     <ChatHtmlBubble
+                      key={message.id}
                       html={message.content}
                       isLoading={
                         isSending && index === messages.length - 1 && message.content.trim() === ""
+                      }
+                      enableStreaming={
+                        activeModes.streaming &&
+                        message.role === "assistant" &&
+                        index === streamingTarget
+                      }
+                      onContentChange={
+                        index === messages.length - 1 ? () => maybeScrollToBottom() : undefined
                       }
                     />
                   </div>

@@ -100,7 +100,6 @@ export default function CharacterPage() {
   });
 
   const switchToView = (targetView: "chat" | "worldbook" | "regex" | "preset") => {
-    console.log("switchToView", targetView);
     setActiveView(targetView);
   };
 

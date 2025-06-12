@@ -106,7 +106,6 @@ const AdvancedSettingsEditor: React.FC<AdvancedSettingsEditorProps> = ({ isOpen,
               {activeTab === "tagColors" && (
                 <TagColorEditor
                   onSave={(colors) => {
-                    console.log("Saved colors:", colors);
                   }}
                   onViewSwitch={onViewSwitch}
                 />
