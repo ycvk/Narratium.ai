@@ -92,7 +92,7 @@ function generatePalette(uniqueTags: string[]): Record<string, string> {
       const colorIndex = i % (unusedColors.length || availableColors.length);
       const selectedColor = unusedColors.length > 0 ? unusedColors[colorIndex] : availableColors[colorIndex];
       colours[lowerTag] = selectedColor;
-      addCustomTag(lowerTag);
+      addCustomTag(lowerTag, selectedColor);
     }
   });
 
