@@ -39,7 +39,7 @@ export const getTranslation = (language: Language, key: string, params?: Record<
     }
     
     // Replace parameters in the translation string
-    if (params && typeof result === 'string') {
+    if (params && typeof result === "string") {
       return result.replace(/\{(\w+)\}/g, (match, paramKey) => {
         return params[paramKey] !== undefined ? String(params[paramKey]) : match;
       });
