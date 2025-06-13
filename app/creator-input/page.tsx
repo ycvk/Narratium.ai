@@ -1,3 +1,25 @@
+/**
+ * Creator Input Page Component
+ * 
+ * This is an input form page that provides:
+ * - Text input area for user messages
+ * - Animated background effects
+ * - Form submission handling
+ * - Keyboard shortcuts (Enter to send)
+ * - Character count display
+ * - Loading state management
+ * - Responsive design
+ * 
+ * The page serves as an entry point for users to input their creative content
+ * before being redirected to the creator area.
+ * 
+ * Dependencies:
+ * - framer-motion: For animation effects
+ * - lucide-react: For icons (Send, Sparkles)
+ * - next/navigation: For routing
+ * - Background images: background_yellow.png, background_red.png
+ */
+
 "use client";
 
 import { useState, useEffect } from "react";
@@ -7,13 +29,17 @@ import { useRouter } from "next/navigation";
 import { useLanguage } from "../i18n";
 
 export default function CreatorInputPage() {
+  // Router and language utilities
   const router = useRouter();
-  const { t, fontClass,serifFontClass, titleFontClass } = useLanguage();
+  const { t, fontClass, serifFontClass, titleFontClass } = useLanguage();
+
+  // State management
   const [mounted, setMounted] = useState(false);
   const [imagesLoaded, setImagesLoaded] = useState(false);
   const [inputValue, setInputValue] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
+  // Preload background images and handle mounting state
   useEffect(() => {
     setMounted(true);
     const yellowImg = new Image();
@@ -30,6 +56,7 @@ export default function CreatorInputPage() {
     });
   }, []);
 
+  // Handle form submission
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!inputValue.trim() || isLoading) return;
@@ -42,6 +69,7 @@ export default function CreatorInputPage() {
     }, 1000);
   };
 
+  // Handle keyboard shortcuts
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
@@ -52,7 +80,8 @@ export default function CreatorInputPage() {
   if (!mounted) return null;
 
   return (
-    <div className="min-h-screen w-full overflow-auto login-fantasy-bg relative flex flex-col items-center justify-center">
+    <div className="min-h-screen w-full h-full overflow-auto login-fantasy-bg relative flex flex-col items-center justify-center">
+      {/* Yellow background layer with fade-in effect */}
       <div
         className={`absolute inset-0 z-0 opacity-35 transition-opacity duration-500 ${
           imagesLoaded ? "opacity-35" : "opacity-0"
@@ -65,6 +94,7 @@ export default function CreatorInputPage() {
         }}
       />
 
+      {/* Red background layer with multiply blend mode */}
       <div
         className={`absolute inset-0 z-1 opacity-45 transition-opacity duration-500 ${
           imagesLoaded ? "opacity-45" : "opacity-0"
@@ -78,7 +108,9 @@ export default function CreatorInputPage() {
         }}
       />
 
+      {/* Main content container */}
       <div className="flex flex-col items-center justify-center w-full max-w-4xl px-4 py-8 relative z-10">
+        {/* Header section with animated title */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -93,6 +125,7 @@ export default function CreatorInputPage() {
           </p>
         </motion.div>
 
+        {/* Input form section */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
@@ -100,6 +133,7 @@ export default function CreatorInputPage() {
           className="w-full max-w-2xl"
         >
           <form onSubmit={handleSubmit} className="relative">
+            {/* Text input area with styling */}
             <div className="relative bg-black/20 backdrop-blur-sm border border-amber-500/30 rounded-2xl p-1 shadow-[0_0_20px_rgba(251,146,60,0.3)] hover:shadow-[0_0_30px_rgba(251,146,60,0.4)] transition-all duration-300">
               <textarea
                 value={inputValue}
@@ -110,6 +144,7 @@ export default function CreatorInputPage() {
                 disabled={isLoading}
               />
               
+              {/* Submit button with loading state */}
               <button
                 type="submit"
                 disabled={!inputValue.trim() || isLoading}
@@ -123,6 +158,7 @@ export default function CreatorInputPage() {
               </button>
             </div>
 
+            {/* Helper text and character count */}
             <div className="flex justify-between items-center mt-3 px-2">
               <span className={`text-[#c0a480]/60 text-xs ${fontClass}`}>
                 {t("creatorInput.enterToSend")}
