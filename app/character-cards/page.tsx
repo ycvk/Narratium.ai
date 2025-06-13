@@ -151,7 +151,7 @@ export default function CharacterCards() {
   if (!mounted) return null;
 
   return (
-    <div className="min-h-screen w-full h-full overflow-auto login-fantasy-bg relative">
+    <div className="h-full w-full overflow-hidden login-fantasy-bg relative">
       <div
         className={`absolute inset-0 z-0 opacity-35 transition-opacity duration-500 ${
           imagesLoaded ? "opacity-35" : "opacity-0"
@@ -177,171 +177,173 @@ export default function CharacterCards() {
         }}
       />
       
-      <div className="flex flex-col items-center justify-start w-full py-8">
-        <div className="w-full max-w-4xl relative z-10 px-4">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            className="flex justify-between items-center mb-8"
-          >
-            <div className="flex items-center gap-3">
-              <h1 className={`text-2xl magical-login-text ${serifFontClass}`}>{t("sidebar.characterCards")}</h1>
-              <motion.button
-                className={`portal-button text-[#c0a480] hover:text-[#ffd475] p-2 border border-[#534741] rounded-lg cursor-pointer ${fontClass} translate-y-[1px]`}
-                whileHover={{ scale: 1.05 }}
-                transition={{ type: "spring", stiffness: 400, damping: 10 }}
-                onClick={() => {
-                  trackButtonClick("view_mode_btn", "切换视图模式");
-                  const newViewMode = viewMode === "grid" ? "carousel" : "grid";
-                  setViewMode(newViewMode);
-                  localStorage.setItem("characterCardsViewMode", newViewMode);
-                }}
-              >
-                {viewMode === "grid" ? (
-                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <rect x="3" y="3" width="7" height="7"></rect>
-                    <rect x="14" y="3" width="7" height="7"></rect>
-                    <rect x="14" y="14" width="7" height="7"></rect>
-                    <rect x="3" y="14" width="7" height="7"></rect>
-                  </svg>
-                ) : (
-                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <circle cx="12" cy="12" r="10"></circle>
-                    <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"></polygon>
-                  </svg>
-                )}
-              </motion.button>
-            </div>
-            <div className="flex gap-3">
-              <motion.div
-                className={`portal-button relative overflow-hidden px-4 py-2 rounded-lg cursor-pointer ${fontClass}
-                  bg-gradient-to-b from-[#2a231c] to-[#1a1510]
-                  border border-[#534741]
-                  shadow-[0_0_15px_rgba(192,164,128,0.1)]
-                  hover:shadow-[0_0_20px_rgba(192,164,128,0.2)]
-                  before:absolute before:inset-0 before:bg-gradient-to-r before:from-transparent before:via-[rgba(192,164,128,0.1)] before:to-transparent
-                  before:translate-x-[-100%] hover:before:translate-x-[100%] before:transition-transform before:duration-700
-                  group`}
-                whileHover={{ 
-                  scale: 1.01,
-                  boxShadow: "0 0 25px rgba(192,164,128,0.3)",
-                }}
-                whileTap={{ scale: 0.98 }}
-                transition={{ 
-                  type: "spring", 
-                  stiffness: 400, 
-                  damping: 10, 
-                }}
-                onClick={() => setIsImportModalOpen(true)}
-              >
-                <span className="relative z-10 text-[#c0a480] group-hover:text-[#ffd475] transition-colors duration-300">
-                  {t("characterCardsPage.importCharacter")}
-                </span>
-              </motion.div>
-              <motion.div
-                className={`portal-button relative overflow-hidden px-4 py-2 rounded-lg cursor-pointer ${fontClass}
-                  bg-gradient-to-b from-[#2a231c] to-[#1a1510]
-                  border border-[#534741]
-                  shadow-[0_0_15px_rgba(192,164,128,0.1)]
-                  hover:shadow-[0_0_20px_rgba(192,164,128,0.2)]
-                  before:absolute before:inset-0 before:bg-gradient-to-r before:from-transparent before:via-[rgba(192,164,128,0.1)] before:to-transparent
-                  before:translate-x-[-100%] hover:before:translate-x-[100%] before:transition-transform before:duration-700
-                  group`}
-                whileHover={{ 
-                  scale: 1.01,
-                  boxShadow: "0 0 25px rgba(192,164,128,0.3)",
-                }}
-                whileTap={{ scale: 0.98 }}
-                transition={{ 
-                  type: "spring", 
-                  stiffness: 400, 
-                  damping: 10, 
-                }}
-                onClick={() => setIsDownloadModalOpen(true)}
-              >
-                <span className="relative z-10 text-[#c0a480] group-hover:text-[#ffd475] transition-colors duration-300">
-                  {t("characterCardsPage.downloadCharacter")}
-                </span>
-              </motion.div>
-            </div>
-          </motion.div>
-
-          {isLoading ? (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="flex justify-center items-center h-64"
-            >
-              <div className="relative w-16 h-16">
-                <div className="absolute inset-0 rounded-full border-2 border-t-[#f9c86d] border-r-[#c0a480] border-b-[#a18d6f] border-l-transparent animate-spin"></div>
-                <div className="absolute inset-2 rounded-full border-2 border-t-[#a18d6f] border-r-[#f9c86d] border-b-[#c0a480] border-l-transparent animate-spin-slow"></div>
-                <div className={`absolute w-full text-center top-20 text-[#c0a480] ${fontClass}`}>{t("characterCardsPage.loading")}</div>
-              </div>
-            </motion.div>
-          ) : characters.length === 0 ? (
+      <div className="h-full w-full overflow-y-auto">
+        <div className="flex flex-col items-center justify-start w-full py-8">
+          <div className="w-full max-w-4xl relative z-10 px-4">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
-              className="session-card p-8 text-center"
+              className="flex justify-between items-center mb-8"
             >
-              <div className="mb-6 opacity-60">
-                <svg className="mx-auto" width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M32 0L38 20H60L42 32L48 52L32 40L16 52L22 32L4 20H26L32 0Z" fill="#f9c86d" fillOpacity="0.3" />
-                </svg>
+              <div className="flex items-center gap-3">
+                <h1 className={`text-2xl magical-login-text ${serifFontClass}`}>{t("sidebar.characterCards")}</h1>
+                <motion.button
+                  className={`portal-button text-[#c0a480] hover:text-[#ffd475] p-2 border border-[#534741] rounded-lg cursor-pointer ${fontClass} translate-y-[1px]`}
+                  whileHover={{ scale: 1.05 }}
+                  transition={{ type: "spring", stiffness: 400, damping: 10 }}
+                  onClick={() => {
+                    trackButtonClick("view_mode_btn", "切换视图模式");
+                    const newViewMode = viewMode === "grid" ? "carousel" : "grid";
+                    setViewMode(newViewMode);
+                    localStorage.setItem("characterCardsViewMode", newViewMode);
+                  }}
+                >
+                  {viewMode === "grid" ? (
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <rect x="3" y="3" width="7" height="7"></rect>
+                      <rect x="14" y="3" width="7" height="7"></rect>
+                      <rect x="14" y="14" width="7" height="7"></rect>
+                      <rect x="3" y="14" width="7" height="7"></rect>
+                    </svg>
+                  ) : (
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <circle cx="12" cy="12" r="10"></circle>
+                      <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"></polygon>
+                    </svg>
+                  )}
+                </motion.button>
               </div>
-              <p className={`text-[#eae6db] mb-6 ${serifFontClass}`}>{t("characterCardsPage.noCharacters")}</p>
-              <motion.div
-                className={`portal-button inline-block text-[#c0a480] hover:text-[#ffd475] px-5 py-2 border border-[#534741] rounded-lg cursor-pointer ${fontClass}`}
-                whileHover={{ scale: 1.05 }}
-                transition={{ type: "spring", stiffness: 400, damping: 10 }}
-                onClick={() => setIsImportModalOpen(true)}
-              >
-                {t("characterCardsPage.importFirstCharacter")}
-              </motion.div>
+              <div className="flex gap-3">
+                <motion.div
+                  className={`portal-button relative overflow-hidden px-4 py-2 rounded-lg cursor-pointer ${fontClass}
+                    bg-gradient-to-b from-[#2a231c] to-[#1a1510]
+                    border border-[#534741]
+                    shadow-[0_0_15px_rgba(192,164,128,0.1)]
+                    hover:shadow-[0_0_20px_rgba(192,164,128,0.2)]
+                    before:absolute before:inset-0 before:bg-gradient-to-r before:from-transparent before:via-[rgba(192,164,128,0.1)] before:to-transparent
+                    before:translate-x-[-100%] hover:before:translate-x-[100%] before:transition-transform before:duration-700
+                    group`}
+                  whileHover={{ 
+                    scale: 1.01,
+                    boxShadow: "0 0 25px rgba(192,164,128,0.3)",
+                  }}
+                  whileTap={{ scale: 0.98 }}
+                  transition={{ 
+                    type: "spring", 
+                    stiffness: 400, 
+                    damping: 10, 
+                  }}
+                  onClick={() => setIsImportModalOpen(true)}
+                >
+                  <span className="relative z-10 text-[#c0a480] group-hover:text-[#ffd475] transition-colors duration-300">
+                    {t("characterCardsPage.importCharacter")}
+                  </span>
+                </motion.div>
+                <motion.div
+                  className={`portal-button relative overflow-hidden px-4 py-2 rounded-lg cursor-pointer ${fontClass}
+                    bg-gradient-to-b from-[#2a231c] to-[#1a1510]
+                    border border-[#534741]
+                    shadow-[0_0_15px_rgba(192,164,128,0.1)]
+                    hover:shadow-[0_0_20px_rgba(192,164,128,0.2)]
+                    before:absolute before:inset-0 before:bg-gradient-to-r before:from-transparent before:via-[rgba(192,164,128,0.1)] before:to-transparent
+                    before:translate-x-[-100%] hover:before:translate-x-[100%] before:transition-transform before:duration-700
+                    group`}
+                  whileHover={{ 
+                    scale: 1.01,
+                    boxShadow: "0 0 25px rgba(192,164,128,0.3)",
+                  }}
+                  whileTap={{ scale: 0.98 }}
+                  transition={{ 
+                    type: "spring", 
+                    stiffness: 400, 
+                    damping: 10, 
+                  }}
+                  onClick={() => setIsDownloadModalOpen(true)}
+                >
+                  <span className="relative z-10 text-[#c0a480] group-hover:text-[#ffd475] transition-colors duration-300">
+                    {t("characterCardsPage.downloadCharacter")}
+                  </span>
+                </motion.div>
+              </div>
             </motion.div>
-          ) : viewMode === "grid" ? (
-            <CharacterCardGrid
-              characters={characters}
-              onEditClick={handleEditClick}
-              onDeleteClick={handleDeleteCharacter}
-            />
-          ) : (
-            <CharacterCardCarousel
-              characters={characters}
-              onEditClick={handleEditClick}
-              onDeleteClick={handleDeleteCharacter}
+
+            {isLoading ? (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="flex justify-center items-center h-64"
+              >
+                <div className="relative w-16 h-16">
+                  <div className="absolute inset-0 rounded-full border-2 border-t-[#f9c86d] border-r-[#c0a480] border-b-[#a18d6f] border-l-transparent animate-spin"></div>
+                  <div className="absolute inset-2 rounded-full border-2 border-t-[#a18d6f] border-r-[#f9c86d] border-b-[#c0a480] border-l-transparent animate-spin-slow"></div>
+                  <div className={`absolute w-full text-center top-20 text-[#c0a480] ${fontClass}`}>{t("characterCardsPage.loading")}</div>
+                </div>
+              </motion.div>
+            ) : characters.length === 0 ? (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5 }}
+                className="session-card p-8 text-center"
+              >
+                <div className="mb-6 opacity-60">
+                  <svg className="mx-auto" width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M32 0L38 20H60L42 32L48 52L32 40L16 52L22 32L4 20H26L32 0Z" fill="#f9c86d" fillOpacity="0.3" />
+                  </svg>
+                </div>
+                <p className={`text-[#eae6db] mb-6 ${serifFontClass}`}>{t("characterCardsPage.noCharacters")}</p>
+                <motion.div
+                  className={`portal-button inline-block text-[#c0a480] hover:text-[#ffd475] px-5 py-2 border border-[#534741] rounded-lg cursor-pointer ${fontClass}`}
+                  whileHover={{ scale: 1.05 }}
+                  transition={{ type: "spring", stiffness: 400, damping: 10 }}
+                  onClick={() => setIsImportModalOpen(true)}
+                >
+                  {t("characterCardsPage.importFirstCharacter")}
+                </motion.div>
+              </motion.div>
+            ) : viewMode === "grid" ? (
+              <CharacterCardGrid
+                characters={characters}
+                onEditClick={handleEditClick}
+                onDeleteClick={handleDeleteCharacter}
+              />
+            ) : (
+              <CharacterCardCarousel
+                characters={characters}
+                onEditClick={handleEditClick}
+                onDeleteClick={handleDeleteCharacter}
+              />
+            )}
+          </div>
+
+          <ImportCharacterModal
+            isOpen={isImportModalOpen}
+            onClose={() => setIsImportModalOpen(false)}
+            onImport={fetchCharacters}
+          />
+          <DownloadCharacterModal
+            isOpen={isDownloadModalOpen}
+            onClose={() => setIsDownloadModalOpen(false)}
+            onImport={fetchCharacters}
+          />
+          {currentCharacter && (
+            <EditCharacterModal
+              isOpen={isEditModalOpen}
+              onClose={() => setIsEditModalOpen(false)}
+              characterId={currentCharacter.id}
+              characterData={{
+                name: currentCharacter.name,
+                personality: currentCharacter.personality,
+                scenario: currentCharacter.scenario,
+                first_mes: currentCharacter.first_mes,
+                creatorcomment: currentCharacter.creatorcomment,
+                avatar_path: currentCharacter.avatar_path,
+              }}
+              onSave={handleEditSuccess}
             />
           )}
         </div>
-
-        <ImportCharacterModal
-          isOpen={isImportModalOpen}
-          onClose={() => setIsImportModalOpen(false)}
-          onImport={fetchCharacters}
-        />
-        <DownloadCharacterModal
-          isOpen={isDownloadModalOpen}
-          onClose={() => setIsDownloadModalOpen(false)}
-          onImport={fetchCharacters}
-        />
-        {currentCharacter && (
-          <EditCharacterModal
-            isOpen={isEditModalOpen}
-            onClose={() => setIsEditModalOpen(false)}
-            characterId={currentCharacter.id}
-            characterData={{
-              name: currentCharacter.name,
-              personality: currentCharacter.personality,
-              scenario: currentCharacter.scenario,
-              first_mes: currentCharacter.first_mes,
-              creatorcomment: currentCharacter.creatorcomment,
-              avatar_path: currentCharacter.avatar_path,
-            }}
-            onSave={handleEditSuccess}
-          />
-        )}
       </div>
     </div>
   );
