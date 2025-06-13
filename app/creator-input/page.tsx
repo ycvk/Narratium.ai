@@ -38,7 +38,7 @@ export default function CreatorInputPage() {
     console.log(t("creatorInput.sendMessage") + ":", inputValue);
     
     setTimeout(() => {
-      router.push('/creator-area');
+      router.push("/creator-area");
     }, 1000);
   };
 
@@ -85,7 +85,7 @@ export default function CreatorInputPage() {
           transition={{ duration: 0.8 }}
           className="text-center mb-12"
         >
-          <h1 className={`text-3xl md:text-5xl font-bold mb-4 font-cinzel bg-clip-text text-transparent bg-gradient-to-r from-amber-500 via-orange-400 to-yellow-300 drop-shadow-[0_0_10px_rgba(251,146,60,0.5)]`}>
+          <h1 className={"text-3xl md:text-5xl font-bold mb-4 font-cinzel bg-clip-text text-transparent bg-gradient-to-r from-amber-500 via-orange-400 to-yellow-300 drop-shadow-[0_0_10px_rgba(251,146,60,0.5)]"}>
             {t("creatorInput.title")}
           </h1>
           <p className={`text-[#c0a480] text-sm md:text-base ${titleFontClass}`}>
