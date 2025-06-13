@@ -62,7 +62,7 @@ function detectHtmlTags(str: string) {
 }
 
 function generatePalette(uniqueTags: string[]): Record<string, string> {
-  const { symbolColors, getColorForHtmlTag } = useSymbolColorStore.getState();
+  const { symbolColors, getColorForHtmlTag, addCustomTag } = useSymbolColorStore.getState();
   const colours: Record<string, string> = {};
   const usedColors = new Set<string>();
 
@@ -90,7 +90,9 @@ function generatePalette(uniqueTags: string[]): Record<string, string> {
     const lowerTag = tag.toLowerCase();
     if (!colours[lowerTag]) {
       const colorIndex = i % (unusedColors.length || availableColors.length);
-      colours[lowerTag] = unusedColors.length > 0 ? unusedColors[colorIndex] : availableColors[colorIndex];
+      const selectedColor = unusedColors.length > 0 ? unusedColors[colorIndex] : availableColors[colorIndex];
+      colours[lowerTag] = selectedColor;
+      addCustomTag(lowerTag);
     }
   });
 
