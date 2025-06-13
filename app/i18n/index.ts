@@ -24,7 +24,7 @@ export const useLanguage = () => {
   return context;
 };
 
-export const getTranslation = (language: Language, key: string, params?: Record<string, any>): string => {
+export const getTranslation = (language: Language, key: string): string => {
   try {
     const translations = require(`./locales/${language}.json`);
     
@@ -36,13 +36,6 @@ export const getTranslation = (language: Language, key: string, params?: Record<
         return key;
       }
       result = result[k];
-    }
-    
-    // Replace parameters in the translation string
-    if (params && typeof result === "string") {
-      return result.replace(/\{(\w+)\}/g, (match, paramKey) => {
-        return params[paramKey] !== undefined ? String(params[paramKey]) : match;
-      });
     }
     
     return result;
