@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, memo, useState, useCallback } from "react";
 import { useSymbolColorStore } from "@/contexts/SymbolColorStore";
+import { useLanguage } from "@/app/i18n";
 
 function convertMarkdown(str: string): string {
   const imagePlaceholders: string[] = [];
@@ -62,7 +63,6 @@ function detectHtmlTags(str: string) {
 
 function generatePalette(uniqueTags: string[]): Record<string, string> {
   const { symbolColors, getColorForHtmlTag } = useSymbolColorStore.getState();
-  
   const colours: Record<string, string> = {};
   const usedColors = new Set<string>();
 
@@ -258,6 +258,7 @@ export default memo(function ChatHtmlBubble({
     isLoading || rawHtml.trim() === "",
   );
   const frameRef = useRef<HTMLIFrameElement>(null);
+  const { serifFontClass } = useLanguage();
 
   useEffect(() => {
     setShowLoader(isLoading || rawHtml.trim() === "");
@@ -539,10 +540,25 @@ window.addEventListener('message', function(e) {
     return () => ro.disconnect();
   }, [onContentChange]);
 
+  useEffect(() => {
+    if (frameRef.current) {
+      const frame = frameRef.current;
+      const doc = frame.contentDocument;
+      if (doc) {
+        doc.body.innerHTML = "";
+        const contentDiv = doc.createElement("div");
+        contentDiv.innerHTML = processedHtml;
+        doc.body.appendChild(contentDiv);
+      }
+    }
+  }, [processedHtml]);
+
   if (showLoader) {
     return (
-      <div className="flex items-center justify-center py-4">
-        <div className="animate-spin w-6 h-6 border-2 border-t-transparent border-b-transparent rounded-full" />
+      <div className="flex flex-col items-center justify-center py-6 px-4">
+        <div className={`text-[15px] text-gray-400 font-medium leading-relaxed text-center ${serifFontClass}`}>
+          No response received. Please check your network connection or API configuration.
+        </div>
       </div>
     );
   }

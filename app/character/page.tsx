@@ -612,7 +612,6 @@ export default function CharacterPage() {
           />
         )}
       </div>
-
       <UserTour
         steps={currentTourSteps}
         isVisible={isTourVisible}
