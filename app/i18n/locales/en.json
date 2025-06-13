@@ -60,7 +60,8 @@
     "getModelList": "Get Model List",
     "getModelListSuccess": "Get Model List Success",
     "getModelListError": "Get Model List Error",
-    "configCreated": "Configuration created"
+    "configCreated": "Configuration created",
+    "doubleClickToEditName": "Double click to edit name"
   },
   "llmSettings": {
     "title": "Settings",

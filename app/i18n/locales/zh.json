@@ -60,7 +60,8 @@
     "createFirstConfig": "创建你的第一个配置",
     "getModelList": "获取模型列表",
     "getModelListSuccess": "获取模型列表成功",
-    "getModelListError": "获取模型列表失败"
+    "getModelListError": "获取模型列表失败",
+    "doubleClickToEditName": "双击可修改名称"
   },
   "llmSettings": {
     "title": "设置",
