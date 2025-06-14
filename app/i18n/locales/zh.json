@@ -65,7 +65,13 @@
     "getModelList": "获取模型列表",
     "getModelListSuccess": "获取模型列表成功",
     "getModelListError": "获取模型列表失败",
-    "doubleClickToEditName": "双击可修改名称"
+    "doubleClickToEditName": "双击可修改名称",
+    "testModel": "测试模型",
+    "testing": "测试中...",
+    "testSuccess": "模型测试成功",
+    "testError": "模型测试失败",
+    "apiTestFailed": "API 测试失败",
+    "modelTestFailed": "模型测试失败"
   },
   "llmSettings": {
     "title": "设置",

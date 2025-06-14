@@ -65,7 +65,13 @@
     "getModelListSuccess": "Get Model List Success",
     "getModelListError": "Get Model List Error",
     "configCreated": "Configuration created",
-    "doubleClickToEditName": "Double click to edit name"
+    "doubleClickToEditName": "Double click to edit name",
+    "testModel": "Test Model",
+    "testing": "Testing...",
+    "testSuccess": "Model test successful",
+    "testError": "Model test failed",
+    "apiTestFailed": "API test failed",
+    "modelTestFailed": "Model test failed"
   },
   "llmSettings": {
     "title": "Settings",
