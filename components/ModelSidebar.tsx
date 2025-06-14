@@ -31,6 +31,8 @@ import { useState, useEffect } from "react";
 import "@/app/styles/fantasy-ui.css";
 import { useLanguage } from "@/app/i18n";
 import { trackButtonClick } from "@/utils/google-analytics";
+import { ChatOpenAI } from "@langchain/openai";
+import { ChatOllama } from "@langchain/ollama";
 
 /**
  * Props interface for the ModelSidebar component
@@ -404,8 +406,9 @@ export default function ModelSidebar({ isOpen, toggleSidebar }: ModelSidebarProp
   };
 
   /**
-   * Tests the current model configuration
+   * Tests the current model configuration using LangChain
    * Sends a test request to verify the configuration works
+   * Uses a minimal test prompt to check model connectivity and response
    */
   const handleTestModel = async () => {
     if (!baseUrl || !model) return;
@@ -415,30 +418,38 @@ export default function ModelSidebar({ isOpen, toggleSidebar }: ModelSidebarProp
     setTestModelError(false);
     
     try {
-      // If API test passes, test model availability
-      const modelResponse = await fetch(`${baseUrl}/chat/completions`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          ...(llmType === "openai" && apiKey ? { "Authorization": `Bearer ${apiKey}` } : {}),
-        },
-        body: JSON.stringify({
+      // Initialize the appropriate LangChain client based on LLM type
+      const chatModel = llmType === "openai" 
+        ? new ChatOpenAI({
+          modelName: model,
+          openAIApiKey: apiKey,
+          configuration: {
+            baseURL: baseUrl,
+          },
+        })
+        : new ChatOllama({
+          baseUrl: baseUrl,
           model: model,
-          messages: [{ role: "user", content: "Hello" }],
-          max_tokens: 5,
-        }),
-      });
+        });
 
-      if (!modelResponse.ok) {
-        throw new Error(t("modelSettings.modelTestFailed") || "Model test failed");
-      }
+      // Send test message using LangChain
+      const response = await chatModel.invoke([
+        {
+          role: "system",
+          content: "You are a helpful AI assistant.",
+        },
+        {
+          role: "user",
+          content: "Hello, this is a test message. Please respond with 'Test successful' if you can read this.",
+        },
+      ]);
 
-      const data = await modelResponse.json();
-      if (data.choices && data.choices.length > 0) {
+      // Verify the response
+      if (response.content.toString().toLowerCase().includes("test successful")) {
         setTestModelSuccess(true);
         setTimeout(() => setTestModelSuccess(false), 2000);
       } else {
-        throw new Error("Invalid response format");
+        throw new Error("Invalid response content");
       }
     } catch (error) {
       console.error("Test failed:", error);
