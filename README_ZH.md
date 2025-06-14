@@ -184,13 +184,15 @@ Narratium 让讲故事变得简单又强大：
 
 [![Contributors](https://contrib.rocks/image?repo=Narratium/Narratium.ai)](https://github.com/Narratium/Narratium.ai/graphs/contributors)
 
-## 角色卡贡献者
+## 其他贡献者
 
 [![Contributors](https://contrib.rocks/image?repo=Narratium/Character-Card)](https://github.com/Narratium/Narratium.ai/graphs/contributors)
 
 ## 其他
 
 贝露喵预设（Belle Cat）：由 @beilusaiying 赞助
+
+官网测试 API 赞助商：[点击这里](https://e.tb.cn/h.hZBJY6FpW1YnBv1?tk=Kj2hVrXdYMv)
 
 ## Star Growth
 

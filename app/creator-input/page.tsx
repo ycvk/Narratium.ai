@@ -38,6 +38,8 @@ export default function CreatorInputPage() {
   const [imagesLoaded, setImagesLoaded] = useState(false);
   const [inputValue, setInputValue] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  // Mode: 'custom' or 'agent' for the new toggle
+  const [mode, setMode] = useState<"custom" | "agent">("custom");
 
   // Preload background images and handle mounting state
   useEffect(() => {
@@ -133,44 +135,84 @@ export default function CreatorInputPage() {
           className="w-full max-w-2xl"
         >
           <form onSubmit={handleSubmit} className="relative">
-            {/* Text input area with styling */}
-            <div className="relative bg-black/20 backdrop-blur-sm border border-amber-500/30 rounded-2xl p-1 shadow-[0_0_20px_rgba(251,146,60,0.3)] hover:shadow-[0_0_30px_rgba(251,146,60,0.4)] transition-all duration-300">
+            {/* Text input area with new structure */}
+            <div className="relative bg-black/20 backdrop-blur-sm border border-amber-500/30 rounded-2xl p-1 shadow-[0_0_20px_rgba(251,146,60,0.3)] hover:shadow-[0_0_30px_rgba(251,146,60,0.4)] transition-all duration-300 min-h-[180px]">
+              {/* Mode toggle button at top-right, single label, pill style */}
+              <div className="absolute right-4 top-3 z-20 flex">
+                <button
+                  type="button"
+                  className={`
+                    relative flex items-center justify-center
+                    w-[110px] h-8 rounded-full px-2
+                    border border-amber-400/30 
+                    backdrop-blur-md
+                    transition-all duration-300
+                    shadow-inner hover:shadow-[0_0_6px_rgba(251,146,60,0.3)]
+                    ${mode === "agent" ? "text-black bg-gradient-to-r from-amber-400/90 via-yellow-300/80 to-amber-500/90 animate-gradient-x" : "text-amber-300 bg-gradient-to-r from-purple-300/30 via-violet-200/20 to-purple-400/30 animate-gradient-x"}
+                  `}
+                  onClick={() => setMode(mode === "custom" ? "agent" : "custom")}
+                  disabled={isLoading}
+                  style={{ minWidth: 120 }}
+                >
+                  {/* Only show one label at a time, centered */}
+                  <span
+                    className={`relative z-10 flex-1 text-xs font-cinzel text-center transition-all duration-300 font-bold
+                      ${mode === "agent" ? "text-black" : "text-amber-400"}`}
+                    style={{ width: 120 }}
+                  >
+                    {mode === "agent" ? "AGENT MODE" : "CUSTOM MODE"}
+                  </span>
+                </button>
+              </div>
+
+              {/* Textarea for user input, with increased height */}
               <textarea
                 value={inputValue}
                 onChange={(e) => setInputValue(e.target.value)}
                 onKeyPress={handleKeyPress}
                 placeholder={t("creatorInput.placeholder")}
-                className={`w-full bg-transparent text-[#c0a480] placeholder-[#c0a480]/60 ${serifFontClass} resize-none border-0 outline-none p-4 pr-16 min-h-[60px] max-h-[200px] text-sm md:text-base`}
+                className={`w-full bg-transparent text-[#c0a480] placeholder-[#c0a480]/60 ${serifFontClass} resize-none border-0 outline-none p-4 pr-16 min-h-[120px] max-h-[320px] text-sm md:text-base`}
                 disabled={isLoading}
               />
-              
-              {/* Submit button with loading state */}
-              <button
-                type="submit"
-                disabled={!inputValue.trim() || isLoading}
-                className="absolute right-3 bottom-3 p-2 bg-gradient-to-r from-amber-500 to-orange-400 text-black rounded-xl hover:from-amber-400 hover:to-orange-300 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-[0_0_10px_rgba(251,146,60,0.5)] hover:shadow-[0_0_15px_rgba(251,146,60,0.7)]"
-              >
-                {isLoading ? (
-                  <Sparkles className="w-4 h-4 animate-spin" />
-                ) : (
-                  <Send className="w-4 h-4" />
-                )}
-              </button>
+
+              {/* Button group at bottom-right */}
+              <div className="absolute right-3 bottom-3 flex gap-2 z-10">
+                {/* Clear button */}
+                <button
+                  type="button"
+                  onClick={() => setInputValue("")}
+                  disabled={isLoading || !inputValue}
+                  className="p-2 bg-gradient-to-r from-amber-500 to-orange-400 text-black rounded-xl hover:from-amber-400 hover:to-orange-300 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-[0_0_10px_rgba(251,146,60,0.5)] hover:shadow-[0_0_15px_rgba(251,146,60,0.7)]"
+                  title="Clear"
+                >
+                  {/* Trash icon (Lucide) */}
+                  <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M3 6h18M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2m2 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6h14z" /></svg>
+                </button>
+                {/* Submit button with loading state */}
+                <button
+                  type="submit"
+                  disabled={!inputValue.trim() || isLoading}
+                  className="p-2 bg-gradient-to-r from-amber-500 to-orange-400 text-black rounded-xl hover:from-amber-400 hover:to-orange-300 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-[0_0_10px_rgba(251,146,60,0.5)] hover:shadow-[0_0_15px_rgba(251,146,60,0.7)]"
+                  title="Send"
+                >
+                  {isLoading ? (
+                    <Sparkles className="w-4 h-4 animate-spin" />
+                  ) : (
+                    <Send className="w-4 h-4" />
+                  )}
+                </button>
+              </div>
+
+              {/* Helper text and character count at bottom-left */}
+              <div className="absolute left-4 bottom-3 flex flex-col gap-1 z-10">
+                <span className={`text-[#c0a480]/60 text-xs ${fontClass}`}>{t("creatorInput.enterToSend")}</span>
+                <span className="text-[#c0a480]/60 text-xs font-cinzel">{inputValue.length}/1000</span>
+              </div>
             </div>
 
-            {/* Helper text and character count */}
+            {/* Example stories helper below input box */}
             <div className="flex justify-between items-center mt-3 px-2">
-              <span className={`text-[#c0a480]/60 text-xs ${fontClass}`}>
-                {t("creatorInput.enterToSend")}
-              </span>
-              <span className="text-[#c0a480]/60 text-xs font-cinzel">
-                {inputValue.length}/1000
-              </span>
-            </div>
-            <div className="flex justify-between items-center mt-3 px-2">
-              <span className={`text-[#c0a480]/60 text-xs ${fontClass}`}>
-                {t("creatorInput.exampleStories")}
-              </span>
+              <span className={`text-[#c0a480]/60 text-xs ${fontClass}`}>{t("creatorInput.exampleStories")}</span>
             </div>
           </form>
         </motion.div>

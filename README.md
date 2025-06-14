@@ -187,6 +187,8 @@ Special thanks to the SillyTavern community and countless character card contrib
 
 Belle Cat Preset: Sponsored by @beilusaiying
 
+Official Website Test API Sponsor: [Click Here](https://e.tb.cn/h.hZBJY6FpW1YnBv1?tk=Kj2hVrXdYMv)
+
 ## Star Growth
 
 [![Stargazers over time](https://starchart.cc/Narratium/Narratium.ai.svg?variant=adaptive)](https://starchart.cc/Narratium/Narratium.ai)
