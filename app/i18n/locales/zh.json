@@ -10,7 +10,11 @@
     "soundOn": "声音开启",
     "soundOff": "声音关闭",
     "saving": "保存中...",
-    "defaultAutoFillFileName": "默认：自动填写文件名"
+    "defaultAutoFillFileName": "默认：自动填写文件名",
+    "exportData": "导出数据",
+    "importData": "导入数据",
+    "exportFailed": "导出失败，请重试",
+    "importFailed": "导入失败，请重试"
   },
   "sidebar": {
     "home": "首页",

@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import { useLanguage } from "@/app/i18n";
 import { useSoundContext } from "@/contexts/SoundContext";
 import { useTour } from "@/hooks/useTour";
+import { exportDataToFile, importDataFromFile, generateExportFilename, downloadFile } from "@/function/data/export-import";
 
 interface SettingsDropdownProps {
   toggleModelSidebar: () => void;
@@ -38,6 +39,38 @@ export default function SettingsDropdown({ toggleModelSidebar }: SettingsDropdow
   const openModelSettings = () => {
     toggleModelSidebar();
     setIsOpen(false);
+  };
+
+  const handleExportData = async () => {
+    try {
+      const blob = await exportDataToFile();
+      const filename = generateExportFilename();
+      downloadFile(blob, filename);
+      setIsOpen(false);
+    } catch (error) {
+      console.error("Export failed:", error);
+      alert(t("common.exportFailed"));
+    }
+  };
+
+  const handleImportData = async () => {
+    try {
+      const input = document.createElement("input");
+      input.type = "file";
+      input.accept = ".json";
+      input.onchange = async (e) => {
+        const file = (e.target as HTMLInputElement).files?.[0];
+        if (file) {
+          await importDataFromFile(file);
+          setIsOpen(false);
+          window.location.reload();
+        }
+      };
+      input.click();
+    } catch (error) {
+      console.error("Import failed:", error);
+      alert(t("common.importFailed"));
+    }
   };
 
   return (
@@ -122,6 +155,32 @@ export default function SettingsDropdown({ toggleModelSidebar }: SettingsDropdow
                 <path d="M3 21v-5h5" />
               </svg>
               {t("tour.resetTour")}
+            </button>
+            
+            <div className="border-t border-[#333333] my-1"></div>
+            
+            <button
+              onClick={handleExportData}
+              className="flex items-center w-full px-4 py-2 text-sm text-[#f4e8c1] hover:bg-[#252525] transition-colors"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="7 10 12 15 17 10"></polyline>
+                <line x1="12" y1="15" x2="12" y2="3"></line>
+              </svg>
+              {t("common.exportData")}
+            </button>
+
+            <button
+              onClick={handleImportData}
+              className="flex items-center w-full px-4 py-2 text-sm text-[#f4e8c1] hover:bg-[#252525] transition-colors"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="17 8 12 3 7 8"></polyline>
+                <line x1="12" y1="3" x2="12" y2="15"></line>
+              </svg>
+              {t("common.importData")}
             </button>
           </div>
         </div>

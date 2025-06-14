@@ -10,7 +10,11 @@
     "soundOn": "Sound On",
     "soundOff": "Sound Off",
     "saving": "Saving...",
-    "defaultAutoFillFileName": "Default: Auto-fill from file name"
+    "defaultAutoFillFileName": "Default: Auto-fill from file name",
+    "exportData": "Export Data",
+    "importData": "Import Data",
+    "exportFailed": "Export failed, please try again",
+    "importFailed": "Import failed, please try again"
   },
   "sidebar": {
     "home": "Home",

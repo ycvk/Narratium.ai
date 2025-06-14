@@ -135,3 +135,104 @@ export async function deleteBlob(key: string): Promise<void> {
   });
 }
 
+export async function exportAllData(): Promise<Record<string, any>> {
+  const db = await openDB();
+  const exportData: Record<string, any> = {};
+  
+  // Handle regular data stores
+  const regularStores = [
+    CHARACTERS_RECORD_FILE,
+    CHARACTER_DIALOGUES_FILE,
+    WORLD_BOOK_FILE,
+    REGEX_SCRIPTS_FILE,
+  ];
+
+  for (const storeName of regularStores) {
+    const data = await readData(storeName);
+    exportData[storeName] = data;
+  }
+
+  // Handle image data separately
+  const imageData = await readData(CHARACTER_IMAGES_FILE);
+  const imageBlobs: Array<{key: string, data: string}> = [];
+  
+  // Get all keys from the image store
+  const tx = db.transaction(CHARACTER_IMAGES_FILE, "readonly");
+  const store = tx.objectStore(CHARACTER_IMAGES_FILE);
+  const keys = await new Promise<string[]>((resolve) => {
+    const request = store.getAllKeys();
+    request.onsuccess = () => resolve(request.result as string[]);
+  });
+
+  // Read each image blob and convert to base64
+  for (const key of keys) {
+    const blob = await getBlob(key);
+    if (blob && blob instanceof Blob) {
+      try {
+        const base64 = await blobToBase64(blob);
+        imageBlobs.push({ key, data: base64 });
+      } catch (error) {
+        console.error(`Failed to convert image ${key} to base64:`, error);
+      }
+    }
+  }
+  
+  exportData[CHARACTER_IMAGES_FILE] = imageBlobs;
+
+  return exportData;
+}
+
+export async function importAllData(data: Record<string, any>): Promise<void> {
+  const db = await openDB();
+  
+  // Handle regular data stores
+  const regularStores = [
+    CHARACTERS_RECORD_FILE,
+    CHARACTER_DIALOGUES_FILE,
+    WORLD_BOOK_FILE,
+    REGEX_SCRIPTS_FILE,
+  ];
+
+  for (const storeName of regularStores) {
+    if (data[storeName]) {
+      await writeData(storeName, data[storeName]);
+    }
+  }
+
+  // Handle image data separately
+  if (data[CHARACTER_IMAGES_FILE]) {
+    for (const item of data[CHARACTER_IMAGES_FILE]) {
+      if (typeof item.data === "string") {
+        const blob = await base64ToBlob(item.data);
+        await setBlob(item.key, blob);
+      }
+    }
+  }
+}
+
+// Helper function to convert Blob to base64
+async function blobToBase64(blob: Blob): Promise<string> {
+  if (!(blob instanceof Blob)) {
+    throw new Error("Input is not a valid Blob object");
+  }
+  
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      if (typeof reader.result === "string") {
+        resolve(reader.result);
+      } else {
+        reject(new Error("Failed to convert blob to base64"));
+      }
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(blob);
+  });
+}
+
+// Helper function to convert base64 to Blob
+async function base64ToBlob(base64: string): Promise<Blob> {
+  const response = await fetch(base64);
+  return response.blob();
+}
+
