@@ -10,7 +10,7 @@
     "lint": "next lint",
     "preview": "serve -s out",
     "test": "vitest",
-    "pake-mac": "pake out/index.html --name Narratium --use-local-file --icon ./public/icon.icns",
+    "pake-mac": "pake out/index.html --name Narratium --use-local-file --icon ./public/icon.icns --multi-arch",
     "pake-win": "pake out/index.html --name Narratium --use-local-file --icon ./public/icon.ico",
     "pake-linux": "pake out/index.html --name narratium --use-local-file --icon ./public/icon.png"
   },
