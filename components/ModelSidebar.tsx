@@ -1,3 +1,30 @@
+/**
+ * Model Sidebar Component
+ * 
+ * This component provides a comprehensive interface for managing LLM model configurations:
+ * - API configuration management (OpenAI and Ollama)
+ * - Model selection and testing
+ * - Configuration persistence
+ * - Real-time model testing
+ * - Model list fetching
+ * - Configuration naming and editing
+ * 
+ * The sidebar handles all model-related settings and provides a rich
+ * set of features for managing API configurations and model interactions.
+ * 
+ * Key Features:
+ * - Multiple API configuration support
+ * - Real-time model testing
+ * - Configuration persistence in localStorage
+ * - Dynamic model list fetching for OpenAI
+ * - Custom configuration naming
+ * - Configuration switching and management
+ * 
+ * Dependencies:
+ * - useLanguage: For internationalization
+ * - trackButtonClick: For analytics tracking
+ */
+
 "use client";
 
 import { useState, useEffect } from "react";
@@ -5,13 +32,30 @@ import "@/app/styles/fantasy-ui.css";
 import { useLanguage } from "@/app/i18n";
 import { trackButtonClick } from "@/utils/google-analytics";
 
+/**
+ * Props interface for the ModelSidebar component
+ * @property {boolean} isOpen - Controls the visibility of the sidebar
+ * @property {() => void} toggleSidebar - Function to toggle the sidebar state
+ */
 interface ModelSidebarProps {
   isOpen: boolean;
   toggleSidebar: () => void;
 }
 
+/**
+ * Supported LLM provider types
+ */
 type LLMType = "openai" | "ollama";
 
+/**
+ * Interface for API configuration
+ * @property {string} id - Unique identifier for the configuration
+ * @property {string} name - Display name for the configuration
+ * @property {LLMType} type - Type of LLM provider (openai/ollama)
+ * @property {string} baseUrl - Base URL for the API endpoint
+ * @property {string} model - Model name/identifier
+ * @property {string} [apiKey] - Optional API key (required for OpenAI)
+ */
 interface APIConfig {
   id: string;
   name: string;
@@ -45,14 +89,11 @@ export default function ModelSidebar({ isOpen, toggleSidebar }: ModelSidebarProp
   const [isTesting, setIsTesting] = useState(false);
 
   const [modelListEmpty, setModelListEmpty] = useState(false);
-  
-  const ollamaModelOptions = [
-    "llama3.3:8b",
-    "llama3.3:70b",
-    "qwen2.5:7b",
-    "mistral-nemo",
-  ];
 
+  /**
+   * Loads saved configurations from localStorage and initializes the component state
+   * Handles error cases and sets up initial active configuration
+   */
   useEffect(() => {
     if (typeof window === "undefined") return;
 
@@ -80,6 +121,10 @@ export default function ModelSidebar({ isOpen, toggleSidebar }: ModelSidebarProp
     }
   }, []);
 
+  /**
+   * Loads a configuration into the form fields
+   * @param {APIConfig} config - The configuration to load
+   */
   const loadConfigToForm = (config: APIConfig) => {
     setLlmType(config.type);
     setBaseUrl(config.baseUrl);
@@ -90,8 +135,16 @@ export default function ModelSidebar({ isOpen, toggleSidebar }: ModelSidebarProp
     }
   };
 
+  /**
+   * Generates a unique ID for new configurations
+   * @returns {string} A unique identifier
+   */
   const generateId = () => `api_${Date.now()}`;
 
+  /**
+   * Initiates the creation of a new configuration
+   * Resets form fields and shows the new configuration form
+   */
   const handleCreateConfig = () => {
     setLlmType("openai");
     setBaseUrl("");
@@ -101,6 +154,10 @@ export default function ModelSidebar({ isOpen, toggleSidebar }: ModelSidebarProp
     setActiveConfigId("");
   };
   
+  /**
+   * Cancels the creation of a new configuration
+   * Restores the previous state if available
+   */
   const handleCancelCreate = () => {
     setShowNewConfigForm(false);
     if (configs.length > 0 && activeConfigId) {
@@ -117,6 +174,11 @@ export default function ModelSidebar({ isOpen, toggleSidebar }: ModelSidebarProp
     }
   };
 
+  /**
+   * Saves the current configuration
+   * Handles both new configurations and updates to existing ones
+   * Persists changes to localStorage
+   */
   const handleSave = () => {
     if (showNewConfigForm) {
       const configName = generateConfigName(llmType, model);
@@ -187,6 +249,12 @@ export default function ModelSidebar({ isOpen, toggleSidebar }: ModelSidebarProp
     }
   };
 
+  /**
+   * Generates a unique name for a new configuration
+   * @param {LLMType} type - The type of LLM provider
+   * @param {string} model - The model name
+   * @returns {string} A formatted configuration name
+   */
   const generateConfigName = (type: LLMType, model: string): string => {
     const currentConfigs = Array.isArray(configs) ? configs : [];
 
@@ -221,6 +289,10 @@ export default function ModelSidebar({ isOpen, toggleSidebar }: ModelSidebarProp
     return `【${maxNumber + 1}】${modelName}`;
   };
 
+  /**
+   * Deletes a configuration
+   * @param {string} id - The ID of the configuration to delete
+   */
   const handleDeleteConfig = (id: string) => {
     const updatedConfigs = configs.filter(config => config.id !== id);
     setConfigs(updatedConfigs);
@@ -244,6 +316,10 @@ export default function ModelSidebar({ isOpen, toggleSidebar }: ModelSidebarProp
     }
   };
 
+  /**
+   * Switches to a different configuration
+   * @param {string} id - The ID of the configuration to switch to
+   */
   const handleSwitchConfig = (id: string) => {
     if (id === activeConfigId) return;
     
@@ -256,6 +332,11 @@ export default function ModelSidebar({ isOpen, toggleSidebar }: ModelSidebarProp
     }
   };
 
+  /**
+   * Fetches the list of available models from the OpenAI API
+   * @param {string} baseUrl - The base URL for the API
+   * @param {string} apiKey - The API key for authentication
+   */
   const handleGetModelList = async (baseUrl: string, apiKey: string) => {
     if (llmType === "ollama") return; // Skip for Ollama
     
@@ -280,6 +361,11 @@ export default function ModelSidebar({ isOpen, toggleSidebar }: ModelSidebarProp
     }
   };
 
+  /**
+   * Initiates the editing of a configuration name
+   * @param {APIConfig} config - The configuration being edited
+   * @param {React.MouseEvent} e - The mouse event
+   */
   const handleStartEditName = (config: APIConfig, e: React.MouseEvent) => {
     e.stopPropagation();
     setEditingConfigId(config.id);
@@ -287,6 +373,9 @@ export default function ModelSidebar({ isOpen, toggleSidebar }: ModelSidebarProp
     setShowEditHint(false);
   };
 
+  /**
+   * Saves the edited configuration name
+   */
   const handleSaveName = () => {
     if (!editingName.trim()) return;
 
@@ -302,6 +391,10 @@ export default function ModelSidebar({ isOpen, toggleSidebar }: ModelSidebarProp
     setEditingConfigId("");
   };
 
+  /**
+   * Handles keyboard events during name editing
+   * @param {React.KeyboardEvent} e - The keyboard event
+   */
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Enter") {
       handleSaveName();
@@ -310,6 +403,10 @@ export default function ModelSidebar({ isOpen, toggleSidebar }: ModelSidebarProp
     }
   };
 
+  /**
+   * Tests the current model configuration
+   * Sends a test request to verify the configuration works
+   */
   const handleTestModel = async () => {
     if (!baseUrl || !model) return;
     
@@ -318,19 +415,6 @@ export default function ModelSidebar({ isOpen, toggleSidebar }: ModelSidebarProp
     setTestModelError(false);
     
     try {
-      // Test API connection first
-      const testEndpoint = llmType === "openai" ? "/models" : "/api/tags";
-      const response = await fetch(`${baseUrl}${testEndpoint}`, {
-        method: "GET",
-        headers: {
-          ...(llmType === "openai" && apiKey ? { "Authorization": `Bearer ${apiKey}` } : {}),
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error(t("modelSettings.apiTestFailed"));
-      }
-
       // If API test passes, test model availability
       const modelResponse = await fetch(`${baseUrl}/chat/completions`, {
         method: "POST",
