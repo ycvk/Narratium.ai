@@ -5,13 +5,13 @@
     <br>
 </h1>
 
-<em>**The world is vast, let imagination lead**</em>
+> <em>**The world is vast, let imagination lead**</em>
 
 ![Narratium.ai](https://socialify.git.ci/Narratium/Narratium.ai/image?custom_description=Open+Source+Alternative+to+Character.AI%2C+MidReal+and+AI+Dungeon&description=1&font=Rokkitt&forks=1&language=1&logo=https%3A%2F%2Fraw.githubusercontent.com%2FNarratium%2FResource%2Fmain%2Flogo.svg&name=1&owner=0&pattern=Circuit+Board&stargazers=1&theme=Dark)
 
 <p align="center">
-  An open-source AI character platform to build, customize, and chat with virtual personas <br />
-  For writers, developers, and storytellers building interactive worlds
+  <em>An open-source AI character platform to build, customize, and chat with virtual personas</em><br />
+  <em>For writers, developers, and storytellers building interactive worlds</em>
 </p>
 
 <p align="center">

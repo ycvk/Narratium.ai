@@ -11,8 +11,8 @@
 ![Narratium.ai](https://socialify.git.ci/Narratium/Narratium.ai/image?custom_description=Character.AI%2C+MidReal和AI+Dungeon的开源替代品&description=1&font=Rokkitt&forks=1&language=1&logo=https%3A%2F%2Fraw.githubusercontent.com%2FNarratium%2FResource%2Fmain%2Flogo.svg&name=1&owner=0&pattern=Circuit+Board&stargazers=1&theme=Dark)
 
 <p align="center">
-  一个开源AI角色平台，用于构建、定制和与虚拟角色聊天<br />
-  为构建互动世界的作家、开发者和故事讲述者打造
+  <em>一个开源AI角色平台，用于构建、定制和与虚拟角色聊天</em><br />
+  <em>为构建互动世界的作家、开发者和故事讲述者打造</em>
 </p>
 
 <p align="center">
