@@ -1,5 +1,4 @@
 <div align="center">
-
 <h1 style="border-bottom: none">
     <b><a href=https://narratium.org/">Narratium.ai</a></b><br />
     Create, Play, and Roleplay with AI
@@ -50,9 +49,9 @@
 
 ## Features
 
-**Immersive Adventure Mode**: Create personalized worlds and make decisions that matter.
-**Visual Memory Management**: React Flow-powered session tracing and branching.
-**Character Cards & Lore**: Compatible with SillyTavern cards, manage everything in one place.
+- **Immersive Adventure Mode**: Create personalized worlds and make decisions that matter.
+- **Visual Memory Management**: React Flow-powered session tracing and branching.
+- **Character Cards & Lore**: Compatible with SillyTavern cards, manage everything in one place.
 
 For detailed installation and setup instructions, please refer to our [Getting Started Guide](./docs/GETTING_STARTED.md).
 
