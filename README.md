@@ -57,7 +57,9 @@ Narratium aims to deliver a lightweight storytelling engine combining context co
   </table>
 </div>
 
-## Getting started & staying tuned with us.
+## Getting started & staying tuned with us
+
+![user_star](https://github.com/user-attachments/assets/179db33d-926a-4268-a52f-da59862dc759)
 
 ## Features
 
