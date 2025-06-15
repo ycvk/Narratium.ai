@@ -57,6 +57,8 @@ Narratium aims to deliver a lightweight storytelling engine combining context co
   </table>
 </div>
 
+## Getting started & staying tuned with us.
+
 ## Features
 
 - 🎭 **Immersive Adventure Mode**: Create personalized worlds and make decisions that matter.
@@ -129,7 +131,7 @@ pnpm pake-linux
 
 For Windows, use the following command:
 
-```bash
+```bas
 pnpm pake-win
 ```
 
