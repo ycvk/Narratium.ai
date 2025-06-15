@@ -5,15 +5,7 @@ import DialogueTreeModal from "@/components/DialogueTreeModal";
 import { trackButtonClick } from "@/utils/google-analytics";
 import { CharacterAvatarBackground } from "@/components/CharacterAvatarBackground";
 import { getAvailableGithubPresets, isPresetDownloaded, downloadPresetFromGithub, doesPresetExist, getPresetDisplayName, getPresetDescription } from "@/function/preset/download";
-import { toast } from "react-hot-toast";
 import AdvancedSettingsEditor from "@/components/AdvancedSettingsEditor";
-
-export enum PromptType {
-  COMPANION = "companion",
-  NSFW = "nsfw",
-  EXPLICIT = "explicit",
-  CUSTOM = "custom"
-}
 
 interface CharacterSidebarProps {
   character: {
@@ -25,8 +17,6 @@ interface CharacterSidebarProps {
   };
   isCollapsed: boolean;
   toggleSidebar: () => void;
-  promptType?: PromptType;
-  onPromptTypeChange?: (type: PromptType) => void;
   responseLength?: number;
   onResponseLengthChange?: (length: number) => void;
   onDialogueEdit?: () => void;
@@ -37,13 +27,10 @@ const CharacterSidebar: React.FC<CharacterSidebarProps> = ({
   character,
   isCollapsed,
   toggleSidebar,
-  promptType = PromptType.COMPANION,
-  onPromptTypeChange,
   onDialogueEdit,
   onViewSwitch,
 }) => {
   const { t, fontClass, serifFontClass, language } = useLanguage();
-  const [currentPromptType, setCurrentPromptType] = useState<PromptType>(promptType);
   const [currentResponseLength, setCurrentResponseLength] = useState<number>(200);
   const [githubPresets, setGithubPresets] = useState<any[]>([]);
   const [showGithubPresetDropdown, setShowGithubPresetDropdown] = useState(false);
@@ -57,24 +44,11 @@ const CharacterSidebar: React.FC<CharacterSidebarProps> = ({
       if (savedLength) {
         setCurrentResponseLength(parseInt(savedLength, 10));
       }
-      const savedPromptType = localStorage.getItem("promptType") as PromptType;
-      if (savedPromptType && Object.values(PromptType).includes(savedPromptType)) {
-        setCurrentPromptType(savedPromptType);
-        if (onPromptTypeChange) {
-          onPromptTypeChange(savedPromptType);
-        }
-      }
     }
-  }, [onPromptTypeChange]);
+  }, []);
 
-  const [showPromptEditor, setShowPromptEditor] = useState(false);
   const [showDialogueTreeModal, setShowDialogueTreeModal] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
-  const [customPrompts, setCustomPrompts] = useState({
-    prefixPrompt: "",
-    chainOfThoughtPrompt: "",
-    suffixPrompt: "",
-  });
   
   const handleResponseLengthChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const length = parseInt(event.target.value);
@@ -104,21 +78,14 @@ const CharacterSidebar: React.FC<CharacterSidebarProps> = ({
       console.log(`Preset "${presetName}" download status: `, { isDownloaded, exists });
 
       if (isDownloaded && exists) {
-        const displayName = getPresetDisplayName(presetName, language as "zh" | "en");
-        toast.success(`预设 "${displayName}" 已下载`);
       } else {
         const result = await downloadPresetFromGithub(presetName, language as "zh" | "en");
         if (result.success) {
           setDownloadedPresets(prev => [...prev, presetName]);
-          const displayName = getPresetDisplayName(presetName, language as "zh" | "en");
-          toast.success(`预设 "${displayName}" 下载成功`);
-        } else {
-          toast.error(`下载预设失败: ${result.message || "未知错误"}`);
         }
       }
     } catch (error) {
       console.error("Error handling preset:", error);
-      toast.error("处理预设时出错");
     } finally {
       setIsDownloading(false);
     }
@@ -572,14 +539,14 @@ const CharacterSidebar: React.FC<CharacterSidebarProps> = ({
                   <div 
                     className="absolute left-0 top-0 h-full bg-gradient-to-r from-amber-500 to-amber-400 transition-all duration-200"
                     style={{ 
-                      width: `${((currentResponseLength - 100) / 900 * 100)}%`,
+                      width: `${((currentResponseLength - 100) / 2900 * 100)}%`,
                       clipPath: "polygon(0 100%, calc(100% - 5px) 100%, 100% 0, 5px 0, 0 100%)",
                     }}
                   />
                   <input
                     type="range"
                     min="100"
-                    max="1000"
+                    max="3000"
                     step="50"
                     value={currentResponseLength}
                     onChange={handleResponseLengthChange}
@@ -593,7 +560,7 @@ const CharacterSidebar: React.FC<CharacterSidebarProps> = ({
                   <span className="text-xs font-medium bg-gradient-to-r from-amber-400 to-amber-300 bg-clip-text text-transparent">
                     {currentResponseLength}
                   </span>
-                  <span className="text-xs font-medium text-[#9ca3af] ml-1">/ 1000</span>
+                  <span className="text-xs font-medium text-[#9ca3af] ml-1">/ 3000</span>
                 </div>
               </div>
             </div>

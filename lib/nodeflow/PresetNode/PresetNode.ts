@@ -23,9 +23,7 @@ export class PresetNode extends NodeBase {
     const language = input.language || "zh";
     const username = input.username;
     const charName = input.charName;
-    const chatHistory = input.chatHistory;
-    const currentUserInput = input.currentUserInput;
-    const contextWindow = input.contextWindow;
+    const number = input.number;
 
     if (!characterId) {
       throw new Error("Character ID is required for PresetNode");
@@ -37,22 +35,13 @@ export class PresetNode extends NodeBase {
       language,
       username,
       charName,
+      number,
     ) as { systemMessage: string; userMessage: string; presetId?: string };
-
-    console.log("preset-systemMessage", result.systemMessage);
-    console.log("preset-userMessage", result.userMessage);
 
     return {
       systemMessage: result.systemMessage,
       userMessage: result.userMessage,
       presetId: result.presetId,
-      characterId,
-      language,
-      username,
-      charName,
-      chatHistory,
-      currentUserInput,
-      contextWindow,
     };
   }
 } 

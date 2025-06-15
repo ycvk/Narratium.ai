@@ -79,7 +79,7 @@ export class DialogueWorkflow extends BaseWorkflow {
           category: NodeCategory.MIDDLE,
           next: ["context-1"],
           initParams: [],
-          inputFields: ["characterId", "language", "username"],
+          inputFields: ["characterId", "language", "username", "number"],
           outputFields: ["systemMessage", "userMessage", "presetId", "characterId", "language", "username"],
         },
         {

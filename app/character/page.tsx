@@ -545,7 +545,7 @@ export default function CharacterPage() {
 
   return (
     <div className="flex h-full relative fantasy-bg overflow-hidden " style={{ 
-      left: "var(--app-sidebar-width, 0)",
+      left: "var(--app-sidebar-width, 0)", 
     }}>
       <CharacterSidebar
         character={character}

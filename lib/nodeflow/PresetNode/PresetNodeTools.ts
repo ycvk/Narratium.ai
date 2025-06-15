@@ -36,6 +36,7 @@ export class PresetNodeTools extends NodeTool {
     language: "zh" | "en" = "zh",
     username?: string,
     charName?: string,
+    number?: number,
   ): Promise<{ systemMessage: string; userMessage: string; presetId?: string }> {
     try {
       const characterRecord = await LocalCharacterRecordOperations.getCharacterById(characterId);
@@ -60,7 +61,7 @@ export class PresetNodeTools extends NodeTool {
       const { systemMessage, userMessage } = PresetAssembler.assemblePrompts(
         enrichedPrompts,
         language,
-        { username, charName: charName || character.characterData.name },
+        { username, charName: charName || character.characterData.name, number },
       );
 
       return { 

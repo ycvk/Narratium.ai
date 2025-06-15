@@ -5,10 +5,10 @@ export class PresetAssembler {
   static assemblePrompts(
     prompts: PresetPrompt[],
     language: "zh" | "en" = "zh",
-    contextData: { username?: string; charName?: string } = {},
+    contextData: { username?: string; charName?: string; number?: number } = {},
   ): { systemMessage: string; userMessage: string } {
     if (prompts.length === 0) {
-      return PresetAssembler._getDefaultFramework();
+      return PresetAssembler._getDefaultFramework(language, contextData);
     }
 
     const orderedSystemIdentifiers = [
@@ -116,7 +116,7 @@ export class PresetAssembler {
     finalUserMessageParts.push("<outputFormat>");
     if (language === "zh") {
       finalUserMessageParts.push("【输出格式要求】");
-      finalUserMessageParts.push("请严格按照以下格式输出你的回应：");
+      finalUserMessageParts.push(`请严格按照以下格式输出回复，输出${contextData.number}个字符的回复内容，并使用中文输出。`);
       finalUserMessageParts.push("");
       finalUserMessageParts.push("<output>");
       finalUserMessageParts.push("在这里输出你的主要回应内容，包括角色的对话、行动、心理描述等。");
@@ -135,7 +135,7 @@ export class PresetAssembler {
       finalUserMessageParts.push("注意：必须严格遵循上述XML标签格式，所有内容都必须包含在output标签内。");
     } else {
       finalUserMessageParts.push("【Output Format Requirements】");
-      finalUserMessageParts.push("Please strictly follow the format below for your response:");
+      finalUserMessageParts.push(`Please strictly follow the format below for your response, and output a response of ${contextData.number} characters, and output in English.`);
       finalUserMessageParts.push("");
       finalUserMessageParts.push("<output>");
       finalUserMessageParts.push("Output your main response content here, including character dialogue, actions, psychological descriptions, etc.");
@@ -161,7 +161,7 @@ export class PresetAssembler {
     };
   }
 
-  private static _getDefaultFramework(): { systemMessage: string; userMessage: string } {
+  private static _getDefaultFramework(language: "zh" | "en" = "zh", contextData: { username?: string; charName?: string; number?: number } = {}): { systemMessage: string; userMessage: string } {
     const orderedSystemIdentifiers = [
       "main",
       "worldInfoBefore",
@@ -212,26 +212,37 @@ export class PresetAssembler {
   
     finalUserMessageParts.push("");
     finalUserMessageParts.push("<outputFormat>");
-    finalUserMessageParts.push("【Output Format Requirements】");
-    finalUserMessageParts.push("Please strictly follow the format below for your response:");
-    finalUserMessageParts.push("");
-    finalUserMessageParts.push("<output>");
-    finalUserMessageParts.push("Output your main response content here, including character dialogue, actions, psychological descriptions, etc.");
-    finalUserMessageParts.push("");
-    finalUserMessageParts.push("<next_prompts>");
-    finalUserMessageParts.push("- [Make a major decision based on the player\'s current state, triggering main plot advancement or side-quest initiation, third-person narrative, within 15 words]");
-    finalUserMessageParts.push("- [Guide into unknown or new areas, triggering the appearance of key items/characters/truths, third-person narrative, within 15 words]");
-    finalUserMessageParts.push("- [Express important emotional choices or changes in interpersonal relationships, influencing future direction, third-person narrative, within 15 words]");
-    finalUserMessageParts.push("</next_prompts>");
-    finalUserMessageParts.push("");
-    finalUserMessageParts.push("<events>");
-    finalUserMessageParts.push("[Core Event 1, concise statement] --> [Core Event 2, concise statement] --> [Core Event 3, concise statement] --> [Core Event 4, concise statement] --> [...]");
-    finalUserMessageParts.push("</events>");
-    finalUserMessageParts.push("</output>");
-    finalUserMessageParts.push("");
-    finalUserMessageParts.push("Note: You must strictly adhere to the XML tag format above. All content must be contained within the output tag.");
+    if (language === "zh") {
+      finalUserMessageParts.push("【输出格式要求】");
+      finalUserMessageParts.push(`请严格按照以下格式输出回复，输出${contextData.number}个字符的回复内容，并使用中文输出。`);
+      finalUserMessageParts.push("");
+      finalUserMessageParts.push("<output>");
+      finalUserMessageParts.push("在这里输出你的主要回应内容，包括角色的对话、行动、心理描述等。");
+      finalUserMessageParts.push("");
+      finalUserMessageParts.push("</output>");
+      finalUserMessageParts.push("");
+      finalUserMessageParts.push("注意：必须严格遵循上述XML标签格式，所有内容都必须包含在output标签内。");
+    } else {
+      finalUserMessageParts.push("【Output Format Requirements】");
+      finalUserMessageParts.push(`Please strictly follow the format below for your response, and output a response of ${contextData.number} characters, and output in English.`);
+      finalUserMessageParts.push("");
+      finalUserMessageParts.push("<output>");
+      finalUserMessageParts.push("Output your main response content here, including character dialogue, actions, psychological descriptions, etc.");
+      finalUserMessageParts.push("");
+      finalUserMessageParts.push("<next_prompts>");
+      finalUserMessageParts.push("- [Make a major decision based on the player\'s current state, triggering main plot advancement or side-quest initiation, third-person narrative, within 15 words]");
+      finalUserMessageParts.push("- [Guide into unknown or new areas, triggering the appearance of key items/characters/truths, third-person narrative, within 15 words]");
+      finalUserMessageParts.push("- [Express important emotional choices or changes in interpersonal relationships, influencing future direction, third-person narrative, within 15 words]");
+      finalUserMessageParts.push("</next_prompts>");
+      finalUserMessageParts.push("");
+      finalUserMessageParts.push("<events>");
+      finalUserMessageParts.push("[Core Event 1, concise statement] --> [Core Event 2, concise statement] --> [Core Event 3, concise statement] --> [Core Event 4, concise statement] --> [...]");
+      finalUserMessageParts.push("</events>");
+      finalUserMessageParts.push("</output>");
+      finalUserMessageParts.push("");
+      finalUserMessageParts.push("Note: You must strictly adhere to the XML tag format above. All content must be contained within the output tag.");
+    }
     finalUserMessageParts.push("</outputFormat>");
-  
     return {
       systemMessage: finalSystemMessageParts.filter(Boolean).join("\n\n"),
       userMessage: finalUserMessageParts.filter(Boolean).join("\n\n"),
@@ -241,7 +252,7 @@ export class PresetAssembler {
   private static _formatPromptContent(
     prompt: PresetPrompt,
     language: "zh" | "en",
-    contextData: { username?: string; charName?: string },
+    contextData: { username?: string; charName?: string; number?: number },
   ): string {
     let contentToAppend = "";
 
