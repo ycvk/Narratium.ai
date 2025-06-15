@@ -23,6 +23,3 @@ RUN pnpm add serve
 EXPOSE 3000
 
 CMD ["npx", "serve", "-s", "out", "-l", "3000"]
-
-
-    

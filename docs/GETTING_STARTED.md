@@ -42,6 +42,11 @@ npm install -g pake-cli
 
 2. Then, depending on your operating system, run one of the following commands:
 
+For Docker:
+```bash
+docker-compose up --build
+```
+
 For macOS:
 ```bash
 pnpm pake-mac
@@ -71,4 +76,4 @@ xattr -d com.apple.quarantine /Applications/Narratium.app
 
 - Check out our [documentation](https://deepwiki.com/Narratium/Narratium.ai/) for detailed guides
 - Join our community for support and updates
-- Star the repository to stay updated with new releases 
+- Star the repository to stay updated with new releases
