@@ -1,199 +1,146 @@
-# Narratium
+<div align="center">
 
-> **世界很大，幻想先行**
+<h1 style="border-bottom: none">
+    <b><a href=https://narratium.org/">Narratium.ai</a></b><br />
+    创建、游玩和与AI角色扮演
+    <br>
+</h1>
 
-![Narratium.ai](https://socialify.git.ci/Narratium/Narratium.ai/image?custom_description=Next+Vscode+in+AI+Role+Play&description=1&font=Rokkitt&forks=1&language=1&logo=https%3A%2F%2Fraw.githubusercontent.com%2FNarratium%2FResource%2Fmain%2Flogo.svg&name=1&owner=1&pattern=Circuit+Board&stargazers=1&theme=Dark)
+<em>**世界广阔无垠，让想象力引领前行**</em>
+
+![Narratium.ai](https://socialify.git.ci/Narratium/Narratium.ai/image?custom_description=Character.AI%2C+MidReal和AI+Dungeon的开源替代品&description=1&font=Rokkitt&forks=1&language=1&logo=https%3A%2F%2Fraw.githubusercontent.com%2FNarratium%2FResource%2Fmain%2Flogo.svg&name=1&owner=0&pattern=Circuit+Board&stargazers=1&theme=Dark)
+
+<p align="center">
+  一个开源AI角色平台，用于构建、定制和与虚拟角色聊天<br />
+  为构建互动世界的作家、开发者和故事讲述者打造
+</p>
+
+<p align="center">
+  <a href="https://narratium.org">🔗 在线演示</a> &nbsp;|&nbsp;
+  <a href="https://deepwiki.com/Narratium/Narratium.ai/">📖 DeepWiki文档</a> &nbsp;|&nbsp;
+  <a href="https://github.com/Narratium/Narratium.ai/stargazers">⭐ 给我们星标</a> &nbsp;|&nbsp;
+  <a href="https://github.com/Narratium/Narratium.ai/releases">💾 下载</a> &nbsp;|&nbsp;
+  <a href="./README_ZH.md">🇨🇳 中文文档</a>
+</p>
 
 ![GitHub stars](https://img.shields.io/github/stars/Narratium/Narratium.ai?style=social)
 ![GitHub commits](https://img.shields.io/github/commit-activity/m/Narratium/Narratium.ai)
 ![GitHub Downloads](https://img.shields.io/github/downloads/Narratium/Narratium.ai/total)
 
-## Quick Access
-
-- 🔗 [Live Demo](https://narratium.org)
-- 📖 [DeepWiki Documentation](https://deepwiki.com/Narratium/Narratium.ai/)
-- ⭐ [Give us a Star!](https://github.com/Narratium/Narratium.ai/stargazers)
-- 💾 [Download](https://github.com/Narratium/Narratium.ai/releases)
-
-**Narratium** 是一个自由创造和冒险的故事宇宙，致力打造 AI Role Play 领域的 vscode；在这里，你的想象力将创造出前所未有的个人化冒险。无论是突破次元的情感共鸣、极地世界的生存挑战还是历史王朝的风起云涌，Narratium.ai 都将随你的每一个选择而演变，编织出独一无二的传奇故事 
-
-## 产品概述
-
-Narratium 目标打造一套轻量化故事引擎，结合上下文压缩、记忆系统、图结构知识检索（Graph-RAG），支持在长篇故事中保持角色一致性和世界逻辑连续性，显著提升 AI 生成故事的沉浸感和连贯性。
-
-## 页面预览
+<div align="center">
+<em><strong>角色、世界和对话 — 在Narratium中完美统一</strong></em>
+</div>
+</br>
 
 <div align="center">
-  <table>
-    <tr>
-      <td align="center" style="padding: 10px;">
-        <img src="public/show_1.png" width="300" alt="screenshot 1" style="border: 2px solid #ddd; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);"/>
-        <br/><em>主界面</em>
-      </td>
-      <td align="center" style="padding: 10px;">
-        <img src="public/show_2.png" width="300" alt="screenshot 2" style="border: 2px solid #ddd; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);"/>
-        <br/><em>角色卡</em>
-      </td>
-      <td align="center" style="padding: 10px;">
-        <img src="public/show_3.png" width="300" alt="screenshot 3" style="border: 2px solid #ddd; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);"/>
-        <br/><em>对话界面</em>
-      </td>
-    </tr>
-    <tr>
-      <td align="center" style="padding: 10px;">
-        <img src="public/show_4.png" width="300" alt="screenshot 4" style="border: 2px solid #ddd; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);"/>
-        <br/><em>世界书编辑</em>
-      </td>
-      <td align="center" style="padding: 10px;">
-        <img src="public/show_5.png" width="300" alt="screenshot 5" style="border: 2px solid #ddd; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);"/>
-        <br/><em>剧情分支</em>
-      </td>
-      <td align="center" style="padding: 10px;">
-        <img src="public/show_6.png" width="300" alt="screenshot 5" style="border: 2px solid #ddd; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);"/>
-        <br/><em>正则化编辑</em>
-      </td>
-    </tr>
-  </table>
+<img src="./assets/demo_show.gif" style="width: 80%"/>
 </div>
 
-## 当前功能
+</div>
 
-- 🎭 **沉浸式冒险模式**: 创建个性化世界，做出重要决策。
-- 🧠 **可视化记忆管理**: 基于 React Flow 的会话追踪和分支管理。
-- 🧾 **角色卡与世界观**: 兼容 SillyTavern 角色卡，一站式管理所有内容。
+## 开始使用与关注我们
 
-## 目标规划
+<em>**给我们星标，你将第一时间收到GitHub的所有发布通知！**</em>
 
-Narratium 正处于快速迭代阶段，当前已实现以下功能：
+<img src="./assets/welcome_star.gif" style="width: 100%"/>
 
-* ✅ 支持 SillyTavern 角色卡导入与兼容
-* ✅ 角色卡中心化管理、角色状态上下文整合
-* ✅ 世界书 + 正则化表达兼容
-* ✅ 多模型支持（OpenAI / Ollama）
-* ✅ 高效记忆管理（React Flow 流程图式 Session）
+## 什么是Narratium
 
-下一步规划
+[Narratium.ai](https://narratium.org/) 是一个用于创建AI角色、沉浸式世界和动态对话的开源平台。它是你构建个性化角色扮演冒险的创意工作室 — 从情感之旅到史诗传奇。
 
-* 🚧 **自动化角色卡生成器**
+## 功能特点
 
-  计划构建角色卡智能生成器，基于用户输入的世界观、角色描述，自动生成符合 SillyTavern 格式的角色卡，降低创作门槛。
+**沉浸式冒险模式**：创建个性化世界，做出重要的决定。
+**可视化记忆管理**：基于React Flow的会话追踪和分支。
+**角色卡片与背景故事**：兼容SillyTavern卡片，一站式管理所有内容。
 
-* 🚧 **基于 IndexedDB 的本地数据自动化管理**
+详细的安装和设置说明，请参考我们的[入门指南](./docs/GETTING_STARTED.md)。
 
-  支持自动化 RAG（基于上下文知识检索增强）功能，提升 AI 叙事的知识连续性。
+<h2>Narratium与其他AI角色扮演平台对比</h2>
 
-* 🚧 **宏大叙事支持**
+<table style="width: 100%;">
+  <tr>
+    <th align="center">功能</th>
+    <th align="center">Narratium.ai</th>
+    <th align="center">SillyTavern</th>
+    <th align="center">AI Dungeon</th>
+  </tr>
+  <tr>
+    <td><strong>开源</strong></td>
+    <td align="center">✅</td>
+    <td align="center">✅</td>
+    <td align="center">❌</td>
+  </tr>
+  <tr>
+    <td><strong>新手友好</strong></td>
+    <td align="center">✅</td>
+    <td align="center">❌ (复杂设置)</td>
+    <td align="center">✅ (但流程有限)</td>
+  </tr>
+  <tr>
+    <td><strong>角色记忆与追踪</strong></td>
+    <td align="center">✅</td>
+    <td align="center">⚠️ (基于插件)</td>
+    <td align="center">❌</td>
+  </tr>
+  <tr>
+    <td><strong>世界书支持</strong></td>
+    <td align="center">✅</td>
+    <td align="center">⚠️ (通过扩展)</td>
+    <td align="center">❌</td>
+  </tr>
+  <tr>
+    <td><strong>长期对话支持</strong></td>
+    <td align="center">✅</td>
+    <td align="center">✅</td>
+    <td align="center">❌ (上下文有限)</td>
+  </tr>
+  <tr>
+    <td><strong>离线/本地部署</strong></td>
+    <td align="center">✅</td>
+    <td align="center">✅</td>
+    <td align="center">❌</td>
+  </tr>
+  <tr>
+    <td><strong>视觉界面/UI优化</strong></td>
+    <td align="center">✅</td>
+    <td align="center">❌ (极简)</td>
+    <td align="center">✅</td>
+  </tr>
+  <tr>
+    <td><strong>无限分支剧情</strong></td>
+    <td align="center">✅</td>
+    <td align="center">⚠️ (需手动)</td>
+    <td align="center">✅ (但不稳定)</td>
+  </tr>
+</table>
 
-  支持宏大叙事，构建如《巫师》、《龙族》等世界关故事，让玩家拥有绝对真实的故事体验。
+## 许可证概述
 
-* 🚧 **开放角色/故事分享社区**
+本项目包含两个具有独立许可证的部分：
 
-  支持用户上传、分享、讨论角色卡与故事剧本，构建开放的内容创作与分享社区。
+- ✅ 代码：MIT许可证 — 开放用于商业和非商业用途，需注明出处。
+- 🔒 内容：CC BY-NC-SA 4.0 — 仅限非商业用途，需注明出处并采用相同许可证分享。
 
-## 快速开始
+> 完整的许可证详情，请参阅[LICENSE.txt](./LICENSE.txt)。
 
-### 克隆项目
-
-```bash
-git clone https://github.com/Narratium/Narratium.ai.git
-cd Narratium
-```
-
-### 安装依赖
-
-```bash
-pnpm install
-```
-
-### 运行项目
-
-```bash
-pnpm run dev
-```
-
-访问：[http://localhost:3000](http://localhost:3000)
-
-### 自己打包
-
-```bash
-npm install -g pake-cli
-```
-
-对于 macOS 使用以下命令：
-
-```bash
-pnpm pake-mac
-```
-对于 Linux 使用以下命令：
-
-```bash
-pnpm pake-linux
-```
-
-对于 Windows 使用以下命令：
-
-```bash
-pnpm pake-win
-```
-mac 安装后显示损坏解决方案：打开命令行，输入：
-
-```bash
-xattr -d com.apple.quarantine /Applications/Narratium.app
-```
-
-## 为什么选择 Narratium
-
-在 AI 驱动的互动叙事领域，许多用户会遇到以下难题：
-
-### SillyTavern
-
-功能强大，却对新手不友好。复杂的设置、难懂的角色卡格式、混乱的生态，让很多玩家在开始冒险前就被劝退。它更像是高级玩家的实验室，而非每个人都能轻松享受的冒险平台。
-
-### AI Dungeon
-
-曾经开启无限故事的先驱，如今却逐渐筑起高墙。上下文受限、模型封闭、难以自定义世界，让玩家无法真正拥有自己的冒险。它给了世界，却不给钥匙。
-
-### Narratium 想要改变这一切。
-
-我们希望改变这一切。
-Narratium 让讲故事变得简单又强大：
-
-新手友好：即开即玩，界面直观，冒险、角色、记忆一目了然。
-
-自由开放：开源接入任意 LLM，自由扩展角色、世界、记忆。
-
-持续沉浸：专注连贯故事、世界逻辑、角色一致性，让每一次冒险都是有温度、可回溯的个人传奇。
-
-## 许可概览
-
-本项目包含两个部分，分别适用独立的许可协议：
-
-- ✅ 代码：MIT 许可 — 允许商业和非商业使用，需保留署名。
-- 🔒 内容：CC BY-NC-SA 4.0 — 仅限非商业使用，需署名并采用相同许可协议分发。
-
-> 详细许可条款请参见 [LICENSE.txt](./LICENSE.txt)。
-
-## 📬 联系与支持
+## 联系与支持
 
 * GitHub Issues
-* QQ 和 Discord 社区（筹建中）
+* QQ和Discord社区（即将推出）
 
-感谢 SillyTavern 社区和无数角色卡贡献值，在演示版本中，Narratium 使用了 SillyTavern 的角色卡数据，请联系我加入贡献者行列：\[[qianzhang.happyfox@gmail.com](mailto:qianzhang.happyfox@gmail.com)]
+特别感谢SillyTavern社区和无数角色卡片贡献者。如果你想加入贡献者名单，请联系：[qianzhang.happyfox@gmail.com](mailto:qianzhang.happyfox@gmail.com)
 
 ## 代码贡献者
 
 [![Contributors](https://contrib.rocks/image?repo=Narratium/Narratium.ai)](https://github.com/Narratium/Narratium.ai/graphs/contributors)
 
-## 其他贡献者
-
-[![Contributors](https://contrib.rocks/image?repo=Narratium/Character-Card)](https://github.com/Narratium/Narratium.ai/graphs/contributors)
-
 ## 其他
 
-贝露喵预设（Belle Cat）：由 @beilusaiying 赞助
+Belle Cat预设：由@beilusaiying赞助
 
-官网测试 API 赞助商：[点击这里](https://e.tb.cn/h.hZBJY6FpW1YnBv1?tk=Kj2hVrXdYMv)
+官方网站测试API赞助商：[点击这里](https://e.tb.cn/h.hZBJY6FpW1YnBv1?tk=Kj2hVrXdYMv)
 
-## Star Growth
+## 星标增长
 
 [![Stargazers over time](https://starchart.cc/Narratium/Narratium.ai.svg?variant=adaptive)](https://starchart.cc/Narratium/Narratium.ai)

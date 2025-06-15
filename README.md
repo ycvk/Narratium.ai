@@ -1,168 +1,119 @@
-# Narratium
+<div align="center">
 
-> **The world is vast, let imagination lead**
+<h1 style="border-bottom: none">
+    <b><a href=https://narratium.org/">Narratium.ai</a></b><br />
+    Create, Play, and Roleplay with AI
+    <br>
+</h1>
 
-![Narratium.ai](https://socialify.git.ci/Narratium/Narratium.ai/image?custom_description=Next+Vscode+in+AI+Role+Play&description=1&font=Rokkitt&forks=1&language=1&logo=https%3A%2F%2Fraw.githubusercontent.com%2FNarratium%2FResource%2Fmain%2Flogo.svg&name=1&owner=1&pattern=Circuit+Board&stargazers=1&theme=Dark)
+<em>**The world is vast, let imagination lead**</em>
+
+![Narratium.ai](https://socialify.git.ci/Narratium/Narratium.ai/image?custom_description=Open+Source+Alternative+to+Character.AI%2C+MidReal+and+AI+Dungeon&description=1&font=Rokkitt&forks=1&language=1&logo=https%3A%2F%2Fraw.githubusercontent.com%2FNarratium%2FResource%2Fmain%2Flogo.svg&name=1&owner=0&pattern=Circuit+Board&stargazers=1&theme=Dark)
+
+<p align="center">
+  An open-source AI character platform to build, customize, and chat with virtual personas <br />
+  For writers, developers, and storytellers building interactive worlds
+</p>
+
+<p align="center">
+  <a href="https://narratium.org">🔗 Live Demo</a> &nbsp;|&nbsp;
+  <a href="https://deepwiki.com/Narratium/Narratium.ai/">📖 DeepWiki Docs</a> &nbsp;|&nbsp;
+  <a href="https://github.com/Narratium/Narratium.ai/stargazers">⭐ Star Us</a> &nbsp;|&nbsp;
+  <a href="https://github.com/Narratium/Narratium.ai/releases">💾 Download</a> &nbsp;|&nbsp;
+  <a href="./README_ZH.md">🇨🇳 中文文档</a>
+</p>
 
 ![GitHub stars](https://img.shields.io/github/stars/Narratium/Narratium.ai?style=social)
 ![GitHub commits](https://img.shields.io/github/commit-activity/m/Narratium/Narratium.ai)
 ![GitHub Downloads](https://img.shields.io/github/downloads/Narratium/Narratium.ai/total)
 
-## Quick Access
-
-- 🔗 [Live Demo](https://narratium.org)
-- 📖 [DeepWiki Documentation](https://deepwiki.com/Narratium/Narratium.ai/)
-- 🇨🇳  [中文文档](./README_ZH.md)
-- ⭐ [Give us a Star!](https://github.com/Narratium/Narratium.ai/stargazers)
-- 💾 [Download](https://github.com/Narratium/Narratium.ai/releases)
-
-**Narratium** is a universe of free creation and adventure, dedicated to building the "VSCode" of AI Role Play. Here, your imagination will create unprecedented personalized adventures. Whether it's cross-dimensional emotional resonance, polar survival challenges, or the rise and fall of historical dynasties, Narratium.ai will evolve with your every choice, weaving unique legendary stories.
-
-## Product Overview
-
-Narratium aims to deliver a lightweight storytelling engine combining context compression, memory systems, and graph-based knowledge retrieval (Graph-RAG) to ensure character consistency and world coherence in long-form stories, significantly enhancing the immersion and continuity of AI-generated narratives.
-
-## Page Preview
+<div align="center">
+<em><strong>Characters, worlds, and conversations — beautifully unified in Narratium</strong></em>
+</div>
+</br>
 
 <div align="center">
-  <table>
-    <tr>
-      <td align="center" style="padding: 10px;">
-        <img src="public/show_1.png" width="300" alt="screenshot 1"/>
-        <br/><em>Main Interface</em>
-      </td>
-      <td align="center" style="padding: 10px;">
-        <img src="public/show_2.png" width="300" alt="screenshot 2"/>
-        <br/><em>Character Card</em>
-      </td>
-      <td align="center" style="padding: 10px;">
-        <img src="public/show_3.png" width="300" alt="screenshot 3"/>
-        <br/><em>Dialogue Interface</em>
-      </td>
-    </tr>
-    <tr>
-      <td align="center" style="padding: 10px;">
-        <img src="public/show_4.png" width="300" alt="screenshot 4"/>
-        <br/><em>Worldbook Editor</em>
-      </td>
-      <td align="center" style="padding: 10px;">
-        <img src="public/show_5.png" width="300" alt="screenshot 5"/>
-        <br/><em>Story Branch</em>
-      </td>
-      <td align="center" style="padding: 10px;">
-        <img src="public/show_6.png" width="300" alt="screenshot 6"/>
-        <br/><em>Regex Editor</em>
-      </td>
-    </tr>
-  </table>
+<img src="./assets/demo_show.gif" style="width: 80%"/>
+</div>
+
 </div>
 
 ## Getting started & staying tuned with us
 
-Star us, and you will receive all release notifications from GitHub without any delay!
-<img src="https://github.com/user-attachments/assets/89d2ca6a-deed-471e-81d4-1c39a067d371" style="width: 100%"/>
+<em>**Star us, and you will receive all release notifications from GitHub without any delay!**</em>
+
+<img src="./assets/welcome_star.gif" style="width: 100%"/>
+
+## What is Narratium
+
+[Narratium.ai](https://narratium.org/) is an open-source platform for creating AI characters, immersive worlds, and dynamic conversations.It's your creative studio for building personalized roleplay adventures — from emotional journeys to epic sagas.
 
 ## Features
 
-- 🎭 **Immersive Adventure Mode**: Create personalized worlds and make decisions that matter.
-- 🧠 **Visual Memory Management**: React Flow-powered session tracing and branching.
-- 🧾 **Character Cards & Lore**: Compatible with SillyTavern cards, manage everything in one place.
+**Immersive Adventure Mode**: Create personalized worlds and make decisions that matter.
+**Visual Memory Management**: React Flow-powered session tracing and branching.
+**Character Cards & Lore**: Compatible with SillyTavern cards, manage everything in one place.
 
-## Roadmap
+For detailed installation and setup instructions, please refer to our [Getting Started Guide](./docs/GETTING_STARTED.md).
 
-Current features include:
+<h2>Narratium vs. Other AI Roleplay Platforms</h2>
 
-* ✅ Import and compatibility with SillyTavern character cards.
-* ✅ Centralized character management and state integration.
-* ✅ World Book + Regular Expression compatibility.
-* ✅ Multi-model support (OpenAI / Ollama).
-* ✅ Visual session memory management (React Flow integration).
-
-Planned features:
-
-* 🚧 **Automated Character Card Generator**
-  Build an intelligent generator that creates SillyTavern-compatible character cards based on user-provided world and character descriptions.
-
-* 🚧 **Local Data Management via IndexedDB**
-  Support automatic RAG (Retrieval Augmented Generation) for enhancing narrative knowledge continuity.
-
-* 🚧 **Epic Narrative Support**
-  Enable creation of grand narratives similar to *The Witcher* or *Inheritance Cycle*, providing deeply immersive story experiences.
-
-* 🚧 **Open Community for Sharing Characters & Stories**
-  Allow users to upload, share, and discuss character cards and story scripts, fostering an open creative community.
-
-## Getting Started
-
-### Clone the project
-
-```bash
-git clone https://github.com/Narratium/Narratium.ai.git
-cd Narratium
-```
-
-### Install dependencies
-
-```bash
-pnpm install
-```
-
-### Run the project
-
-```bash
-pnpm run dev
-```
-
-Visit: [http://localhost:3000](http://localhost:3000)
-
-### Self-packaging
-
-```bash
-npm install -g pake-cli
-```
-
-For macOS, use the following command:
-
-```bash
-pnpm pake-mac
-```
-For Linux, use the following command:
-
-```bash
-pnpm pake-linux
-```
-
-For Windows, use the following command:
-
-```bas
-pnpm pake-win
-```
-
-Solution for "damaged" display after macOS installation: Open the terminal and enter:
-
-```bash
-xattr -d com.apple.quarantine /Applications/Narratium.app
-```
-
-## Why Narratium?
-
-In the world of AI-powered interactive storytelling, common pain points include:
-
-### SillyTavern
-
-Powerful but overwhelming for beginners. Its complex setups, difficult card formats, and chaotic ecosystem can discourage new players before the adventure begins.
-
-### AI Dungeon
-
-Once a pioneer of infinite storytelling, it now erects walled gardens. Limited contexts, closed models, and lack of world customization restrict true ownership of adventures.
-
-### Narratium changes everything.
-
-We aim to make storytelling both simple and powerful:
-
-* **Beginner-friendly**: Ready to play, intuitive interface, clear adventure, characters, and memory tracking.
-* **Open & Extensible**: Open-source with support for any LLM, expandable characters, worlds, and memories.
-* **Immersive & Consistent**: Focused on coherent storytelling, world logic, and character consistency, making every adventure a warm, personal, and traceable epic.
+<table style="width: 100%;">
+  <tr>
+    <th align="center">Feature</th>
+    <th align="center">Narratium.ai</th>
+    <th align="center">SillyTavern</th>
+    <th align="center">AI Dungeon</th>
+  </tr>
+  <tr>
+    <td><strong>Open Source</strong></td>
+    <td align="center">✅</td>
+    <td align="center">✅</td>
+    <td align="center">❌</td>
+  </tr>
+  <tr>
+    <td><strong>Beginner Friendly</strong></td>
+    <td align="center">✅</td>
+    <td align="center">❌ (complex setup)</td>
+    <td align="center">✅ (but limited flow)</td>
+  </tr>
+  <tr>
+    <td><strong>Character Memory &amp; Tracking</strong></td>
+    <td align="center">✅</td>
+    <td align="center">⚠️ (plugin-based)</td>
+    <td align="center">❌</td>
+  </tr>
+  <tr>
+    <td><strong>Worldbook Support</strong></td>
+    <td align="center">✅</td>
+    <td align="center">⚠️ (via extensions)</td>
+    <td align="center">❌</td>
+  </tr>
+  <tr>
+    <td><strong>Long-term Conversation Support</strong></td>
+    <td align="center">✅</td>
+    <td align="center">✅</td>
+    <td align="center">❌ (limited context)</td>
+  </tr>
+  <tr>
+    <td><strong>Offline / Local Deployment</strong></td>
+    <td align="center">✅</td>
+    <td align="center">✅</td>
+    <td align="center">❌</td>
+  </tr>
+  <tr>
+    <td><strong>Visual Interface / UI Polish</strong></td>
+    <td align="center">✅</td>
+    <td align="center">❌ (minimal)</td>
+    <td align="center">✅</td>
+  </tr>
+  <tr>
+    <td><strong>Infinite Branching Storylines</strong></td>
+    <td align="center">✅</td>
+    <td align="center">⚠️ (manual effort)</td>
+    <td align="center">✅ (but unstable)</td>
+  </tr>
+</table>
 
 ## License Overview
 
@@ -183,10 +134,6 @@ Special thanks to the SillyTavern community and countless character card contrib
 ## Code Contributer
 
 [![Contributors](https://contrib.rocks/image?repo=Narratium/Narratium.ai)](https://github.com/Narratium/Narratium.ai/graphs/contributors)
-
-## Cards Contributer
-
-[![Contributors](https://contrib.rocks/image?repo=Narratium/Character-Card)](https://github.com/Narratium/Narratium.ai/graphs/contributors)
 
 ## Others
 
