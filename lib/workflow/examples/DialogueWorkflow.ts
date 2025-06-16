@@ -30,6 +30,7 @@ export interface DialogueWorkflowParams {
   repeatPenalty?: number;
   streaming?: boolean;
   streamUsage?: boolean;
+  fastModel?: boolean;
 }
 
 export class DialogueWorkflow extends BaseWorkflow {
@@ -69,9 +70,9 @@ export class DialogueWorkflow extends BaseWorkflow {
           name: "userInput",
           category: NodeCategory.ENTRY,
           next: ["preset-1"],
-          initParams: ["characterId", "userInput", "number", "promptType", "language", "username", "modelName", "apiKey", "baseUrl", "llmType", "temperature"],
+          initParams: ["characterId", "userInput", "number", "promptType", "language", "username", "modelName", "apiKey", "baseUrl", "llmType", "temperature", "fastModel"],
           inputFields: [],
-          outputFields: ["characterId", "userInput", "number", "promptType", "language", "username", "modelName", "apiKey", "baseUrl", "llmType", "temperature"],
+          outputFields: ["characterId", "userInput", "number", "promptType", "language", "username", "modelName", "apiKey", "baseUrl", "llmType", "temperature", "fastModel"],
         },
         {
           id: "preset-1",
@@ -79,7 +80,7 @@ export class DialogueWorkflow extends BaseWorkflow {
           category: NodeCategory.MIDDLE,
           next: ["context-1"],
           initParams: [],
-          inputFields: ["characterId", "language", "username", "number"],
+          inputFields: ["characterId", "language", "username", "number", "fastModel"],
           outputFields: ["systemMessage", "userMessage", "presetId", "characterId", "language", "username"],
         },
         {

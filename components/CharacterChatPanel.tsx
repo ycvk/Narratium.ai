@@ -136,6 +136,14 @@ export default function CharacterChatPanel({
     const id = setTimeout(() => scrollToBottom(), 300);
     return () => clearTimeout(id);
   }, [messages]);
+
+  useEffect(() => {
+    // On mount, restore fastModel state from localStorage
+    const fastModelEnabled = localStorage.getItem("fastModelEnabled");
+    if (fastModelEnabled !== null) {
+      setActiveModes(prev => ({ ...prev, fastModel: fastModelEnabled === "true" }));
+    }
+  }, []);
   
   return (
     <div className="flex flex-col h-full max-h-screen">
@@ -209,42 +217,80 @@ export default function CharacterChatPanel({
                           {character.name}
                         </span>
                         {message.role === "assistant" && shouldShowRegenerateButton(message, index) && (
-                          <button
-                            onClick={() => {
-                              setActiveModes(prev => {
-                                const newStreaming = !prev.streaming;
-                                return { ...prev, streaming: newStreaming };
-                              });
-                              const newStreaming = !activeModes.streaming;
-                              setStreamingTarget(newStreaming ? messages.length: -1);
-                              localStorage.setItem("streamingEnabled", String(newStreaming));
-                              trackButtonClick("toggle_streaming", "流式输出切换");
-                            }}
-                            className={`ml-2 p-1 rounded-md transition-all duration-300 group relative ${
-                              activeModes.streaming 
-                                ? "text-amber-400 hover:text-amber-300" 
-                                : "text-[#8a8a8a] hover:text-[#a8a8a8]"
-                            }`}
-                            data-tooltip={activeModes.streaming ? t("characterChat.disableStreaming") : t("characterChat.enableStreaming")}
-                          >
-                            <div className="absolute -top-8 left-1/2 -translate-x-1/2 px-2 py-1 bg-[#2a261f] text-[#f4e8c1] text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap border border-[#534741]">
-                              {activeModes.streaming ? t("characterChat.disableStreaming") : t("characterChat.enableStreaming")}
-                            </div>
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              className="h-4 w-4"
-                              fill="none"
-                              viewBox="0 0 24 24"
-                              stroke="currentColor"
+                          <>
+                            <button
+                              onClick={() => {
+                                setActiveModes(prev => {
+                                  const newStreaming = !prev.streaming;
+                                  return { ...prev, streaming: newStreaming };
+                                });
+                                const newStreaming = !activeModes.streaming;
+                                setStreamingTarget(newStreaming ? messages.length : -1);
+                                localStorage.setItem("streamingEnabled", String(newStreaming));
+                                trackButtonClick("toggle_streaming", "流式输出切换");
+                              }}
+                              className={`mx-1 p-1 rounded-md transition-all duration-300 group relative ${
+                                activeModes.streaming
+                                  ? "text-amber-400 hover:text-amber-300"
+                                  : "text-[#8a8a8a] hover:text-[#a8a8a8]"
+                              }`}
+                              data-tooltip={activeModes.streaming ? t("characterChat.disableStreaming") : t("characterChat.enableStreaming")}
                             >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
+                              <div className="absolute -top-8 left-1/2 -translate-x-1/2 px-2 py-1 bg-[#2a261f] text-[#f4e8c1] text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap border border-[#534741]">
+                                {activeModes.streaming ? t("characterChat.disableStreaming") : t("characterChat.enableStreaming")}
+                              </div>
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                className="h-4 w-4"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
                                 strokeWidth={2}
-                                d="M13 10V3L4 14h7v7l9-11h-7z"
-                              />
-                            </svg>
-                          </button>
+                              >
+                                <path
+                                  d="M13 2L3 14h7v8l8-12h-7z"
+                                  fill={activeModes.streaming ? "#FFC107" : "none"}
+                                  stroke={activeModes.streaming ? "#FFC107" : "#8a8a8a"}
+                                />
+                              </svg>
+                            </button>
+                            <button
+                              onClick={() => {
+                                setActiveModes(prev => {
+                                  const newFastModel = !prev.fastModel;
+                                  // Store fastModel state in localStorage
+                                  localStorage.setItem("fastModelEnabled", String(newFastModel));
+                                  return { ...prev, fastModel: newFastModel };
+                                });
+                                trackButtonClick("toggle_fastmodel", "快速模式切换");
+                              }}
+                              className={`mx-1 p-1 rounded-md transition-all duration-300 group relative ${
+                                activeModes.fastModel
+                                  ? "text-blue-500 hover:text-blue-400"
+                                  : "text-[#8a8a8a] hover:text-[#a8a8a8]"
+                              }`}
+                              data-tooltip={activeModes.fastModel ? t("characterChat.disableFastModel") : t("characterChat.enableFastModel")}
+                            >
+                              <div className="absolute -top-8 left-1/2 -translate-x-1/2 px-2 py-1 bg-[#2a261f] text-[#f4e8c1] text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap border border-[#534741]">
+                                {activeModes.fastModel ? t("characterChat.disableFastModel") : t("characterChat.enableFastModel")}
+                              </div>
+                              {/* Lightning bolt SVG for fastmodel, blue when active */}
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                className="h-4 w-4"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
+                                strokeWidth={2}
+                              >
+                                <path
+                                  d="M7 2L17 14h-7v8l-8-12h7z"
+                                  fill={activeModes.fastModel ? "#3B82F6" : "none"}
+                                  stroke={activeModes.fastModel ? "#3B82F6" : "#8a8a8a"}
+                                />
+                              </svg>
+                            </button>
+                          </>
                         )}
                       </div>
                       <div className="flex items-center">

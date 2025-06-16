@@ -16,6 +16,7 @@ export async function handleCharacterChatRequest(payload: {
   promptType?: PromptType;
   number?: number;
   nodeId: string;
+  fastModel: boolean;
 }): Promise<Response> {
   try {
     const {
@@ -30,6 +31,7 @@ export async function handleCharacterChatRequest(payload: {
       promptType = PromptType.EXPLICIT || PromptType.CUSTOM || PromptType.COMPANION,
       number = 200,
       nodeId,
+      fastModel = false,
     } = payload;
 
     if (!characterId || !message) {
@@ -37,7 +39,7 @@ export async function handleCharacterChatRequest(payload: {
     }
 
     try {
-      const workflow = new DialogueWorkflow();;
+      const workflow = new DialogueWorkflow();
       const workflowParams: DialogueWorkflowParams = {
         characterId,
         userInput: message,
@@ -51,6 +53,7 @@ export async function handleCharacterChatRequest(payload: {
         streaming: false,
         number,
         promptType,
+        fastModel,  
       };
       const workflowResult = await workflow.execute(workflowParams);
       

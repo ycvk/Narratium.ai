@@ -350,7 +350,9 @@
     "enableStreaming": "启用流式输出",
     "disableStreaming": "禁用流式输出",
     "jumpToMessage": "跳转到此消息",
-    "regenerateMessage": "重新生成消息"
+    "regenerateMessage": "重新生成消息",
+    "enableFastModel": "开启快速模式",
+    "disableFastModel": "关闭快速模式"
   },
   "preset": {
     "title": "预设编辑器",

@@ -350,7 +350,9 @@
     "enableStreaming": "Enable Streaming",
     "disableStreaming": "Disable Streaming",
     "jumpToMessage": "Jump to Message",
-    "regenerateMessage": "Regenerate Message"
+    "regenerateMessage": "Regenerate Message",
+    "enableFastModel": "Enable Fast Mode",
+    "disableFastModel": "Disable Fast Mode"
   },
   "preset": {
     "title": "Preset Manager",

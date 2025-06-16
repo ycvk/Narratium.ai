@@ -1,13 +1,16 @@
 import { PresetPrompt } from "@/lib/models/preset-model";
 import { adaptText } from "@/lib/adapter/tagReplacer";
+import { MULTI_MODE_PROMPT, MULTI_MODE_CHAIN_OF_THOUGHT, OUTPUT_STRUCTURE_SOFT_GUIDE } from "@/lib/prompts/preset-prompts";
 
 export class PresetAssembler {
   static assemblePrompts(
     prompts: PresetPrompt[],
     language: "zh" | "en" = "zh",
+    fastModel:boolean,
     contextData: { username?: string; charName?: string; number?: number } = {},
   ): { systemMessage: string; userMessage: string } {
-    if (prompts.length === 0) {
+    if (prompts.length === 0 || fastModel) {
+      console.group("PresetAssembler", prompts.length, fastModel);
       return PresetAssembler._getDefaultFramework(language, contextData);
     }
 
@@ -111,7 +114,7 @@ export class PresetAssembler {
       finalUserMessageParts.push("{{userInput}}");
       finalUserMessageParts.push("</userInput>");
     }
-
+    finalUserMessageParts.push(OUTPUT_STRUCTURE_SOFT_GUIDE);
     finalUserMessageParts.push("");
     finalUserMessageParts.push("<outputFormat>");
     if (language === "zh") {
@@ -183,7 +186,9 @@ export class PresetAssembler {
     for (const id of orderedSystemIdentifiers) {
       finalSystemMessageParts.push(`<${id}>`);
 
-      if (id === "worldInfoBefore" || id === "worldInfoAfter") {
+      if (id === "main") {
+        finalSystemMessageParts.push(MULTI_MODE_PROMPT);
+      } else if (id === "worldInfoBefore" || id === "worldInfoAfter") {
         finalSystemMessageParts.push(`{{${id}}}`);
       }
   
@@ -195,7 +200,12 @@ export class PresetAssembler {
   
     for (const id of orderedUserIdentifiers) {
       finalUserMessageParts.push(`<${id}>`);
-      if (id === "chatHistory" || id === "userInput") {
+      
+      if (id === "enhanceDefinitions") {
+        finalUserMessageParts.push(MULTI_MODE_CHAIN_OF_THOUGHT);
+        finalUserMessageParts.push("\n\n");
+        finalUserMessageParts.push(OUTPUT_STRUCTURE_SOFT_GUIDE);
+      } else if (id === "chatHistory" || id === "userInput") {
         finalUserMessageParts.push(`{{${id}}}`);
         if (id === "userInput") {
           hasUserInputSection = true;

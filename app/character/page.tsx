@@ -371,6 +371,7 @@ export default function CharacterPage() {
       const username = localStorage.getItem("username") || "";
       const responseLength = storedNumber ? parseInt(storedNumber) : 200;
       const nodeId = uuidv4();
+      const fastModel = localStorage.getItem("fastModelEnabled") === "true";
       const response = await handleCharacterChatRequest({
         username,
         characterId: character.id,
@@ -384,6 +385,7 @@ export default function CharacterPage() {
         promptType: promptType as PromptType,
         number: responseLength,
         nodeId,
+        fastModel: fastModel,
       });
 
       if (!response.ok) {

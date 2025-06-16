@@ -24,6 +24,7 @@ export class PresetNode extends NodeBase {
     const username = input.username;
     const charName = input.charName;
     const number = input.number;
+    const fastModel = input.fastModel;
 
     if (!characterId) {
       throw new Error("Character ID is required for PresetNode");
@@ -36,6 +37,7 @@ export class PresetNode extends NodeBase {
       username,
       charName,
       number,
+      fastModel,
     ) as { systemMessage: string; userMessage: string; presetId?: string };
 
     return {

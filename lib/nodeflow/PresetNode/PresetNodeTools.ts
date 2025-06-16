@@ -37,6 +37,7 @@ export class PresetNodeTools extends NodeTool {
     username?: string,
     charName?: string,
     number?: number,
+    fastModel: boolean = false,
   ): Promise<{ systemMessage: string; userMessage: string; presetId?: string }> {
     try {
       const characterRecord = await LocalCharacterRecordOperations.getCharacterById(characterId);
@@ -51,7 +52,6 @@ export class PresetNodeTools extends NodeTool {
       if (enabledPreset && enabledPreset.id) {
         orderedPrompts = await PresetOperations.getOrderedPrompts(enabledPreset.id);
         presetId = enabledPreset.id;
-        console.log(`Applied preset ${enabledPreset.name} with ${orderedPrompts.length} prompts to character ${characterId}`);
       } else {
         console.log(`No enabled preset found, using default framework for character ${characterId}`);
       }
@@ -61,6 +61,7 @@ export class PresetNodeTools extends NodeTool {
       const { systemMessage, userMessage } = PresetAssembler.assemblePrompts(
         enrichedPrompts,
         language,
+        fastModel,
         { username, charName: charName || character.characterData.name, number },
       );
 
