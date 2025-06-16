@@ -6,7 +6,7 @@
 </h1>
 
 > <em>**The world is vast, let imagination lead, but human hearts remain forever inscrutable**</em> </br>
-> <em>**世界广阔无垠，让想象力引领前行，但人心永远深不可直视**</em>
+> <em>**世界广阔无垠，让想象力引领前行，但人心永远不可直视**</em>
 
 ![Narratium.ai](https://socialify.git.ci/Narratium/Narratium.ai/image?custom_description=Open+Source+Alternative+to+Character.AI%2C+MidReal+and+AI+Dungeon&description=1&font=Rokkitt&forks=1&language=1&logo=https%3A%2F%2Fraw.githubusercontent.com%2FNarratium%2FResource%2Fmain%2Flogo.svg&name=1&owner=0&pattern=Circuit+Board&stargazers=1&theme=Dark)
 
