@@ -17,12 +17,13 @@
 </p>
 
 <p align="center">
-  <a href="https://narratium.org">🔗 在线演示</a> &nbsp;|&nbsp;
-  <a href="https://deepwiki.com/Narratium/Narratium.ai/">📖 DeepWiki文档</a> &nbsp;|&nbsp;
-  <a href="https://github.com/Narratium/Narratium.ai/stargazers">⭐ 给我们星标</a> &nbsp;|&nbsp;
-  <a href="https://github.com/Narratium/Narratium.ai/releases">💾 下载</a> &nbsp;|&nbsp;
-  <a href="./README_ZH.md">🇨🇳 中文文档</a>
+  <a href="https://narratium.org">🔗 Live Demo</a> &nbsp;|&nbsp;
+  <a href="https://deepwiki.com/Narratium/Narratium.ai/">📖 DeepWiki Docs</a> &nbsp;|&nbsp;
+  <a href="https://github.com/Narratium/Narratium.ai/stargazers">⭐ Star Us</a> &nbsp;|&nbsp;
+  <a href="https://discord.gg/PP7EpSzDfU">💬 Discord Community</a> &nbsp;|&nbsp;
+  <a href="https://github.com/Narratium/Narratium.ai/releases">💾 Download</a>
 </p>
+
 
 ![GitHub stars](https://img.shields.io/github/stars/Narratium/Narratium.ai?style=social)
 ![GitHub commits](https://img.shields.io/github/commit-activity/m/Narratium/Narratium.ai)
@@ -127,8 +128,9 @@
 
 ## 联系与支持
 
-* GitHub Issues
-* QQ和Discord社区（即将推出）
+* 如果你喜欢这个项目，我们非常欢迎你加入
+* If you like this project, we warmly welcome you to join us
+* Discord 社区：https://discord.gg/PP7EpSzDfU
 
 特别感谢SillyTavern社区和无数角色卡片贡献者。如果你想加入贡献者名单，请联系：[qianzhang.happyfox@gmail.com](mailto:qianzhang.happyfox@gmail.com)
 
@@ -137,8 +139,6 @@
 [![Contributors](https://contrib.rocks/image?repo=Narratium/Narratium.ai)](https://github.com/Narratium/Narratium.ai/graphs/contributors)
 
 ## 其他
-
-Belle Cat预设：由@beilusaiying赞助
 
 感谢官方网站测试API赞助商
 

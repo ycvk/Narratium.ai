@@ -19,6 +19,7 @@
   <a href="https://narratium.org">🔗 Live Demo</a> &nbsp;|&nbsp;
   <a href="https://deepwiki.com/Narratium/Narratium.ai/">📖 DeepWiki Docs</a> &nbsp;|&nbsp;
   <a href="https://github.com/Narratium/Narratium.ai/stargazers">⭐ Star Us</a> &nbsp;|&nbsp;
+  <a href="https://discord.gg/PP7EpSzDfU">💬 Discord Community</a> &nbsp;|&nbsp;
   <a href="https://github.com/Narratium/Narratium.ai/releases">💾 Download</a> &nbsp;|&nbsp;
   <a href="./README_ZH.md">🇨🇳 中文文档</a>
 </p>
@@ -126,8 +127,9 @@ This project consists of two distinct parts with independent licenses:
 
 ## Contact & Support
 
-* GitHub Issues
-* QQ & Discord community (coming soon)
+* 如果你喜欢这个项目，我们非常欢迎你加入
+* If you like this project, we warmly welcome you to join us
+* Discord community:https://discord.gg/PP7EpSzDfU
 
 Special thanks to the SillyTavern community and countless character card contributors.If you'd like to join the contributor list, please contact: [qianzhang.happyfox@gmail.com](mailto:qianzhang.happyfox@gmail.com)
 
@@ -136,8 +138,6 @@ Special thanks to the SillyTavern community and countless character card contrib
 [![Contributors](https://contrib.rocks/image?repo=Narratium/Narratium.ai)](https://github.com/Narratium/Narratium.ai/graphs/contributors)
 
 ## Others
-
-Belle Cat Preset: Sponsored by @beilusaiying
 
 Thanks all Official Website Test API Sponsor
 
