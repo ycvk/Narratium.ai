@@ -106,6 +106,8 @@ function replaceTags(html: string) {
   const { getColorForHtmlTag } = useSymbolColorStore.getState();
 
   function processHtml(htmlStr: string): string {
+    htmlStr = htmlStr.replace(/>\s*\n\s*</g, "><");
+    
     const tagRegex = /<([a-zA-Z][a-zA-Z0-9]*)\b([^>]*)>([\s\S]*?)<\/\1>/g;
     
     return htmlStr.replace(tagRegex, (match, tagName: string, attributes: string, innerContent: string) => {
