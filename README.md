@@ -138,7 +138,7 @@ Special thanks to the SillyTavern community and countless character card contrib
 
 Belle Cat Preset: Sponsored by @beilusaiying
 
-Official Website Test API Sponsor: [Click Here](https://e.tb.cn/h.hZBJY6FpW1YnBv1?tk=Kj2hVrXdYMv)
+Thanks all Official Website Test API Sponsor
 
 ## Star Growth
 

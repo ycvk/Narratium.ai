@@ -139,7 +139,7 @@
 
 Belle Cat预设：由@beilusaiying赞助
 
-官方网站测试API赞助商：[点击这里](https://e.tb.cn/h.hZBJY6FpW1YnBv1?tk=Kj2hVrXdYMv)
+感谢官方网站测试API赞助商
 
 ## 星标增长
 
