@@ -36,10 +36,21 @@ import { handleCharacterChatRequest } from "@/function/dialogue/chat";
 import { switchDialogueBranch } from "@/function/dialogue/truncate";
 import { deleteDialogueNode } from "@/function/dialogue/delete";
 import CharacterChatPanel from "@/components/CharacterChatPanel";
-import WorldBookEditor from "@/components/WorldBookEditor";
-import RegexScriptEditor from "@/components/RegexScriptEditor";
-import PresetEditor from "@/components/PresetEditor";
 import CharacterChatHeader from "@/components/CharacterChatHeader";
+import dynamic from "next/dynamic";
+
+// Lazy load heavy components with loading states
+const WorldBookEditor = dynamic(() => import("@/components/WorldBookEditor"), {
+  loading: () => <div className="flex justify-center items-center h-64 fantasy-bg"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#f9c86d]"></div></div>,
+});
+
+const RegexScriptEditor = dynamic(() => import("@/components/RegexScriptEditor"), {
+  loading: () => <div className="flex justify-center items-center h-64 fantasy-bg"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#f9c86d]"></div></div>,
+});
+
+const PresetEditor = dynamic(() => import("@/components/PresetEditor"), {
+  loading: () => <div className="flex justify-center items-center h-64 fantasy-bg"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#f9c86d]"></div></div>,
+});
 import UserTour from "@/components/UserTour";
 import { useTour } from "@/hooks/useTour";
 

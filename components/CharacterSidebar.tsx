@@ -1,8 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { useLanguage } from "@/app/i18n";
 import Link from "next/link";
-import DialogueTreeModal from "@/components/DialogueTreeModal";
+import dynamic from "next/dynamic";
 import { trackButtonClick } from "@/utils/google-analytics";
+
+// Lazy load DialogueTreeModal as it's a large component
+const DialogueTreeModal = dynamic(() => import("@/components/DialogueTreeModal"), {
+  loading: () => <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#f9c86d]"></div></div>,
+});
 import { CharacterAvatarBackground } from "@/components/CharacterAvatarBackground";
 import { getAvailableGithubPresets, isPresetDownloaded, downloadPresetFromGithub, doesPresetExist, getPresetDisplayName, getPresetDescription } from "@/function/preset/download";
 import AdvancedSettingsEditor from "@/components/AdvancedSettingsEditor";

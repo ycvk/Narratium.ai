@@ -26,10 +26,21 @@
 import React, { useState, useEffect } from "react";
 import { useLanguage } from "@/app/i18n";
 import { motion } from "framer-motion";
-import ImportCharacterModal from "@/components/ImportCharacterModal";
-import EditCharacterModal from "@/components/EditCharacterModal";
-import DownloadCharacterModal from "@/components/DownloadCharacterModal";
+import dynamic from "next/dynamic";
 import CharacterCardGrid from "@/components/CharacterCardGrid";
+
+// Lazy load modal components
+const ImportCharacterModal = dynamic(() => import("@/components/ImportCharacterModal"), {
+  loading: () => <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#f9c86d]"></div></div>,
+});
+
+const EditCharacterModal = dynamic(() => import("@/components/EditCharacterModal"), {
+  loading: () => <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#f9c86d]"></div></div>,
+});
+
+const DownloadCharacterModal = dynamic(() => import("@/components/DownloadCharacterModal"), {
+  loading: () => <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#f9c86d]"></div></div>,
+});
 import CharacterCardCarousel from "@/components/CharacterCardCarousel";
 import { getAllCharacters } from "@/function/character/list";
 import { deleteCharacter } from "@/function/character/delete";
