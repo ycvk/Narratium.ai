@@ -20,7 +20,7 @@
 
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, memo, useMemo, useCallback } from "react";
 import ChatHtmlBubble from "@/components/ChatHtmlBubble";
 import { CharacterAvatarBackground } from "@/components/CharacterAvatarBackground";
 import { trackButtonClick, trackFormSubmit } from "@/utils/google-analytics";
@@ -67,7 +67,7 @@ interface Props {
  * @param {Props} props - Component properties including character data, messages, and callbacks
  * @returns {JSX.Element} The complete chat interface with message history and input controls
  */
-export default function CharacterChatPanel({
+export default memo(function CharacterChatPanel({
   character,
   messages,
   userInput,
@@ -124,13 +124,13 @@ export default function CharacterChatPanel({
 
   const [suggestionsCollapsed, setSuggestionsCollapsed] = useState(false);
 
-  const shouldShowRegenerateButton = (message: Message, index: number) => {
+  const shouldShowRegenerateButton = useCallback((message: Message, index: number) => {
     if (isSending) return false;
     if (message.role !== "assistant") return false;
     if (index !== messages.length - 1) return false;
     
     return true;
-  };
+  }, [isSending, messages.length]);
 
   useEffect(() => {
     const id = setTimeout(() => scrollToBottom(), 300);
@@ -618,4 +618,4 @@ export default function CharacterChatPanel({
       </div>
     </div>
   );
-}
+});

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, memo, useState, useCallback } from "react";
+import { useEffect, useRef, memo, useState, useCallback, useMemo } from "react";
 import { useSymbolColorStore } from "@/contexts/SymbolColorStore";
 import { useLanguage } from "@/app/i18n";
 
@@ -302,11 +302,11 @@ export default memo(function ChatHtmlBubble({
       />
     );
   }
-  const processedHtml = (() => {
+  const processedHtml = useMemo(() => {
     const md = convertMarkdown(rawHtml);
     const tagged = replaceTags(md);
     return tagged.replace(/^[\s\r\n]+|[\s\r\n]+$/g, "");
-  })();
+  }, [rawHtml]);
 
   const streamingScript = enableStreaming
     ? `<script>
